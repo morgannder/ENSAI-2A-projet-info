@@ -11,7 +11,7 @@ actor "Joueur"           as joueur
 
 rectangle {
   usecase "S'inscrire"        as inscription
-  usecase "S'authentifier"    as authentification
+  usecase "S'authentifierr"    as authentification
   usecase "Quitter"           as quitter
   usecase "Lister joueurs"    as lister_joueurs
 }
