@@ -1,99 +1,42 @@
 @startuml
+
 ' à coller ici pour visualiser : https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa70000
 ' doc : https://plantuml.com/fr/use-case-diagram
 
-
 left to right direction
 
-actor "Utilisateur"      as user
-actor "Administrateur"   as admin
-actor "Joueur"           as joueur
+actor "Visiteur" as Visiteur
 
-rectangle {
-  usecase "S'inscrire"        as inscription
-  usecase "S'authentifierr"    as authentification
-  usecase "Quitter"           as quitter
-  usecase "Lister joueurs"    as lister_joueurs
-}
+actor "Utilisateur" as Utilisateur
 
-joueur --> quitter
+rectangle "Système " {
 
-user --> inscription
-user --> authentification
-user --> quitter
-
-admin --> quitter
-admin --> lister_joueurs
-
-@enduml
-
-
-
-
-proposition Morgann diagramme uml :
-
-@startuml
-' à coller ici pour visualiser : https://www.plantuml.com/plantuml/png/VL9DZzCm4BtxLrYvxAbRFf2Gze0MiO1GEMq51owLvKnJBuwTZiSKXFQ_S0J-HlyOCo6r74GtKgBu-Rqty-ovJcIGSk_LXJx-q3Pw3wYTTNg86VKNbxBnBZ5sfNT4GxfQBW-7m-NWJH3PfOtzyhHOohl-jdspkdk2AthwAgx2w_UtZz_5PvzkujeyVyGF5sgZhUncLbjSvWGBQ_ZJEjEXwPLI7hQaAMfqtOvqwn0ikHYKCfOYwkO3EMxI46HizFYOfDa7JuIFBhcoEn4ad59YPKBdGNzNMZHIMZVh2nUIHQxKL8g_s22rPsJGDeR0Je3DH3MPTZNd1aRALvOAfJBTPqSid1dcOK3N0x9lFn0q8x45lp7MglkpNT_2FXz_4snu7uXr8aFOoxhclOKa6VIQeltCvaBh6DiaKW_OlxoBcMGyGeV7Nws3G2oUyhRjXl4pCMQA4cRatvyFOtU0_EewJGB3c0GQEtr0B9Bn_Fpn9q5fT4H4_p_wO90SU0-dQnH0o6CjkLEzMBmeHrg0SdZJZu3bI6PWoQru_0IfXwfWTSgfs3zu3PSkQx0AgbHLG_OaE2ebNrcMoIg012khCg7N4DhS-py0
-' doc : https://plantuml.com/fr/use-case-diagram
-
-
-left to right direction
-
-actor "Utilisateur"      as user
-actor "Visiteur"         as vis
-
-rectangle {
-  usecase "S'inscrire"        as inscription
-  usecase "Se connecter"    as auth
-  usecase "Deconnexion"           as quitter
-  usecase "Supprimer compte"  as del_acc
-}
-
-rectangle {
-  usecase "Requête_recette" as req_rec
-  usecase "Gestion Stock"   as gest_st
+  usecase "Créer un compte" as CreerCompte
+  usecase "S’authentifier" as Authentification
+  usecase "Se déconnecté" as Deconnexion
+  usecase "Supprimer mon compte" as SupprimerCompte
+  usecase "Consulter une recette" as ConsulterRecette
+  usecase "Chercher une recette" as ChercherRecette
+  usecase "Afficher les recettes réalisables" as RecetteComplete
+  usecase "Afficher les recettes avec ingrédients manquants " as RecettePartielle
+  usecase "Gérer le stock d’ingrédients" as GererStockIngredients
+  usecase "Ajouter un ingrédient" as AjouterIngredient
+  usecase "Retirer un ingrédient" as SupprimerIngredient
 
 }
 
-rectangle {
-  usecase "Ajouter ingrédient"     as add_ingr
-  usecase "Supprimer ingrédient"   as del_ingr
-}
-rectangle {
-  usecase "Recherche recette" as search_rec
-
-}
-
-
-rectangle {
-  usecase "Recette complète"     as compl_rec
-  usecase "Recette partielle"    as part_rec
-}
-
-
-auth --> req_rec
-auth --> gest_st
-
-gest_st --> add_ingr
-gest_st --> del_ingr
-
-vis --> inscription
-vis --> search_rec
-
-req_rec --> search_rec
-req_rec --> part_rec
-req_rec --> compl_rec
-
-
-inscription --> user
-
-user --> del_acc
-user --> auth
-user --> quitter
-
-
-
-
-
+Visiteur --> CreerCompte
+Visiteur --> ChercherRecette
+CreerCompte --> Utilisateur
+Utilisateur --> Authentification
+Utilisateur --> Deconnexion
+Utilisateur --> SupprimerCompte
+Authentification --> ConsulterRecette
+Authentification --> GererStockIngredients
+GererStockIngredients --> AjouterIngredient
+GererStockIngredients --> SupprimerIngredient
+ConsulterRecette --> ChercherRecette
+ConsulterRecette --> RecettePartielle
+ConsulterRecette --> RecetteComplete
 
 @enduml
