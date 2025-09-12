@@ -13,7 +13,10 @@
 # Menu princpal Utilisateur (personne connectée)
     - Rechercher une recette réalisable:                        -> #Recherche réalisable
     - Rechercher un cocktail:                                   -> #Recherche cocktail
+    - Afficher l'inventaire                                     -> #Inventaire
     - Supprimer mon compte:                                     -> #Suppression de compte
+    - Changer pseudo: -> nouveau pseudo                         -> /Booléen validation
+    - Changer mdp: -> ancien mdp -> nouveau mdp                 -> /Booléen validation
     - Se déconnecter:                                           -> #Menu principal visiteur
     - Quitter l'application                                     -> exit
 
@@ -28,8 +31,13 @@
     - Annuler:                                                  -> #Menu principal visiteur
 
 # Recherche cocktail
-    - Veuillez entrer le nom du cocktail:                       -> #Affichage Cocktail
+    - Veuillez entrer le nom du cocktail:                       -> /Affichage Cocktail
 
 # Recherche réalisable
-    - Cocktails réalisables dès maintenant:                     -> #Affichage Cocktail
-    - Cocktails presque réalisables: -> nb ingrédients manquant -> #Affichage Cocktail
+    - Cocktails réalisables dès maintenant:                     -> /Affichage Cocktail
+    - Cocktails presque réalisables: -> nb ingrédients manquant:-> /Affichage Cocktail
+
+# Inventaire
+    - Voir inventaire:                                          -> /Affichage inventaire
+    - Ajouter stock: -> Ingrédient                              -> /Booléen validation
+    - Supprimer stock: -> Ingrédient                            -> /Booléen validation
