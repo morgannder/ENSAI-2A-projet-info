@@ -25,9 +25,10 @@ classDiagram
     class Utilisateur {
         +id_user: int
         +age: int
-        +mot_de_passe: String
+        -mot_de_passe: String
         +nom: String
         +langue: String
+        +adresse_mail: String
     }
 
 
@@ -51,6 +52,7 @@ classDiagram
         +categorie: String
         +alcoolise: Boolean
         +instruction: String
+        +type_verre : String
     }
 
 

@@ -43,10 +43,13 @@ classDiagram
   
     class UtilisateurService {
         +creercompte(str...) :Utilisateur
-        +deconnecter() : Bool
+        -deconnecter() : Bool
         +se_connecter(str,str) : Utilisateur
-        +changer_mdp(str,str) : Utilisateur
-        +changer_pseudo(str,str) : Utilisateur
+        +changer_mdp*(str,str) : Utilisateur
+        +changer_pseudo*(str,str) : Utilisateur
+        -supprimer_compte*()
+        +choisir_langue_instruction*(str): str
+        +est_majeur*(int):Bool
     }
 
     class InventaireService {
@@ -60,16 +63,18 @@ classDiagram
         +cocktail_complet() : list[Cocktail]
         +cocktail_partiel(int<3) : list[Cocktail]
     }
-
     
     %% DAO (Business Layer)
  
     class UtilisateurDAO {
         +creercompte(Utilisateur) :Utilisateur
-        +deconnecter()
+        -deconnecter()
         +se_connecter(str,str) : Utilisateur
-        +changer_mdp(str,str) : Utilisateur
-        +changer_pseudo(str,str) : Utilisateur
+        +changer_mdp*(str,str) : Utilisateur
+        +changer_pseudo*(str,str) : Utilisateur
+        -supprimer_compte*()
+        +choisir_langue_instruction*(str): str
+        +est_majeur*(int):Bool
     }
 
     class CocktailDAO {
@@ -99,6 +104,5 @@ classDiagram
 
     UtilisateurService ..> InventaireService : utilise pour gérer l'inventaire de l'utilisateur
     CocktailService ..> InventaireService : consulte pour déterminer recette complète ou partielle lors de la recherche
-
 
 ```
