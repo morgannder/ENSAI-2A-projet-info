@@ -7,9 +7,16 @@
 # Essentielles
     - âge
     - Langue
+    - Donner un cocktail au hasard
+    - Onglet Favoris
+
 
 # Optionnelles
     - Traduction complète de l'interface selon la langue sélectionnée
     - Langue interchangeable pour un visiteur via menu principal
+    - Commentaires sur le cocktail
+    - Nombre de visite des cocktails
+    - Historique
+
 
 # Peu probables
