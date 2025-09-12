@@ -16,7 +16,9 @@
     - Langue interchangeable pour un visiteur via menu principal
     - Commentaires sur le cocktail
     - Nombre de visite des cocktails
+    - Nombre de personnes qui ont ce cocktail pour favoris
     - Historique
 
 
 # Peu probables
+    - Notation des cocktails
