@@ -1,0 +1,67 @@
+
+
+@startuml
+' https://www.plantuml.com/plantuml/uml/
+' Diagramme de cas d'utilisation fidèle au modèle de base avec fonctionnalités supplémentaires colorées
+
+left to right direction
+
+actor "Visiteur" as Visiteur
+actor "Utilisateur" as Utilisateur
+
+
+
+rectangle "Système" {
+
+  ' Fonctionnalités principales à developper
+
+
+  usecase "Créer un compte" as CreerCompte
+  usecase "S’authentifier" as Authentification
+  usecase "Se déconnecter" as Deconnexion
+  usecase "Supprimer mon compte" as SupprimerCompte
+  usecase "Consulter une recette" as ConsulterRecette
+  usecase "Chercher une recette" as ChercherRecette
+  usecase "Afficher les recettes réalisables" as RecetteComplete
+  usecase "Afficher les recettes avec ingrédients manquants" as RecettePartielle
+  usecase "Gérer le stock d’ingrédients" as GererStockIngredients
+  usecase "Ajouter un ingrédient" as AjouterIngredient
+  usecase "Retirer un ingrédient" as SupprimerIngredient
+    
+
+  ' Fonctionnalités supplémentaires 
+
+  usecase " Consulter l’historique*" as Historique #LightYellow
+  usecase "<18 ans, Afficher que les cocktails non alcoolisés * " as VerificationAge #LightYellow
+  usecase " Commenter et noter un cocktail * " as Commentaire #LightYellow
+  usecase "Modifier pseudo/mot de passe * " as ModifierProfil #LightYellow
+  usecase "Modifier la langue *" as ModifierLangue #LightYellow
+}
+
+
+Visiteur --> CreerCompte
+Visiteur --> ChercherRecette
+  
+CreerCompte --> Utilisateur
+  
+Utilisateur -->  Authentification
+Utilisateur --> Deconnexion
+Utilisateur -->   SupprimerCompte
+  
+Authentification --> ConsulterRecette
+Authentification -->  GererStockIngredients
+  
+GererStockIngredients --> AjouterIngredient
+GererStockIngredients -->SupprimerIngredient
+  
+ConsulterRecette --> ChercherRecette
+ConsulterRecette -->RecettePartielle
+ConsulterRecette -->RecetteComplete
+
+Utilisateur --> Historique
+Utilisateur --> VerificationAge
+Utilisateur -->  Commentaire
+Utilisateur --> ModifierProfil
+Utilisateur -->ModifierLangue
+
+@enduml
