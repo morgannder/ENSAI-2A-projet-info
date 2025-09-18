@@ -58,10 +58,10 @@ ConsulterRecette --> ChercherRecette
 ConsulterRecette -->RecettePartielle
 ConsulterRecette -->RecetteComplete
 
-Utilisateur --> Historique
-Utilisateur --> VerificationAge
-Utilisateur -->  Commentaire
-Utilisateur --> ModifierProfil
-Utilisateur -->ModifierLangue
+Authentification --> Historique
+Authentification --> VerificationAge
+Authentification -->  Commentaire
+Authentification --> ModifierProfil
+Authentification -->ModifierLangue
 
 @enduml
