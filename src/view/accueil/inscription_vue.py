@@ -5,7 +5,7 @@ from InquirerPy import inquirer
 from InquirerPy.validator import EmptyInputValidator, PasswordValidator
 from prompt_toolkit.validation import ValidationError, Validator
 
-from service.joueur_service import JoueurService
+from service.utilisateur_service import UtilisateurService
 from view.vue_abstraite import VueAbstraite
 
 

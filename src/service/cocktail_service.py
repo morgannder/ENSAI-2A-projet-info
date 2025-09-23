@@ -3,11 +3,11 @@ from tabulate import tabulate
 from utils.log_decorator import log
 from utils.securite import hash_password
 
-from business_object.joueur import Joueur
-from dao.joueur_dao import JoueurDao
+from business_object.cocktail import Cocktail
+from dao.cocktail_dao import CocktailDAO
 
 
-class JoueurService:
+class CocktailService:
     """Classe contenant les méthodes de service des Joueurs"""
 
     @log

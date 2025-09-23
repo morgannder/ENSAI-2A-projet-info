@@ -5,10 +5,10 @@ from utils.log_decorator import log
 
 from dao.db_connection import DBConnection
 
-from business_object.joueur import Joueur
+from business_object.cocktail import Cocktail
 
 
-class JoueurDao(metaclass=Singleton):
+class CocktailDao(metaclass=Singleton):
     """Classe contenant les méthodes pour accéder aux Joueurs de la base de données"""
 
     @log

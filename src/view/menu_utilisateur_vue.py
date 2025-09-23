@@ -3,10 +3,10 @@ from InquirerPy import inquirer
 from view.vue_abstraite import VueAbstraite
 from view.session import Session
 
-from service.joueur_service import JoueurService
+from service.utilisateur_service import UtilisateurService
 
 
-class MenuJoueurVue(VueAbstraite):
+class MenuUtilisateurVue(VueAbstraite):
     """Vue du menu du joueur
 
     Attributes
