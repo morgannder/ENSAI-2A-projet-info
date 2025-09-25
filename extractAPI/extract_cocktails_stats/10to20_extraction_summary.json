@@ -1,0 +1,72 @@
+{
+  "extraction_info": {
+    "date": "2025-09-25 10:19:05",
+    "id_range_searched": "10000-20000",
+    "total_ids_tested": 10001
+  },
+  "statistics": {
+    "total_requests": 10001,
+    "successful_requests": 573,
+    "cocktails_found": 573,
+    "success_rate": "5.73%",
+    "coverage_rate": "5.73%"
+  },
+  "cocktails_summary": {
+    "total_unique": 573,
+    "categories": [
+      "Ordinary Drink",
+      "Punch / Party Drink",
+      "Cocoa",
+      "Beer",
+      "Other / Unknown",
+      "Cocktail",
+      "Homemade Liqueur",
+      "Shake",
+      "Soft Drink",
+      "Coffee / Tea",
+      "Shot"
+    ],
+    "glasses": [
+      "Pitcher",
+      "Whiskey sour glass",
+      "Old-Fashioned glass",
+      "Beer Glass",
+      "Balloon Glass",
+      "Highball Glass",
+      "Coupe Glass",
+      "Jar",
+      "Margarita/Coupette glass",
+      "Champagne Flute",
+      "Collins Glass",
+      "Coffee Mug",
+      "Pint glass",
+      "Punch Bowl",
+      "Pousse cafe glass",
+      "Cocktail Glass",
+      "Whiskey Glass",
+      "Martini Glass",
+      "Brandy snifter",
+      "Old-fashioned glass",
+      "Champagne flute",
+      "Wine Glass",
+      "Cocktail glass",
+      "Copper Mug",
+      "Margarita glass",
+      "Punch bowl",
+      "Mason jar",
+      "Collins glass",
+      "Shot glass",
+      "Cordial glass",
+      "Shot Glass",
+      "Coffee mug",
+      "Beer mug",
+      "Irish coffee cup",
+      "Beer pilsner",
+      "Nick and Nora Glass",
+      "Highball glass",
+      "Parfait glass",
+      "Hurricane glass",
+      "White wine glass"
+    ]
+  }
+}
