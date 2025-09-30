@@ -1,21 +1,19 @@
 class Utilisateur:
     """
-    Classe représentant un Joueur
+    Classe représentant un Utilisateur
 
     Attributs
     ----------
-    id_joueur : int
-        identifiant
+    id_utilisateur : int
+        identifiant de l'utilisateur
     pseudo : str
-        pseudo du joueur
+        pseudo de l'utilisateur
     mdp : str
-        le mot de passe du joueur
+        le mot de passe de l'utilisateur
     age : int
-        age du joueur
-    mail : str
-        mail du joueur
-    fan_pokemon : bool
-        indique si le joueur est un fan de Pokemon
+        age de l'utilisateur
+    langue : str
+        langue souhaité par l'utilisateur pour les recettes de cocktail
     """
 
     def __init__(self, id_utilisateur, pseudo, mdp, age, langue):

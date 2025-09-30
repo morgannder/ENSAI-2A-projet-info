@@ -1,21 +1,21 @@
 class Cocktail:
     """
-    Classe représentant un Joueur
+    Classe représentant un Cocktail
 
     Attributs
     ----------
-    id_joueur : int
-        identifiant
-    pseudo : str
-        pseudo du joueur
-    mdp : str
-        le mot de passe du joueur
-    age : int
-        age du joueur
-    mail : str
-        mail du joueur
-    fan_pokemon : bool
-        indique si le joueur est un fan de Pokemon
+    id_cocktail : int
+        identifiant du cocktail
+    nom_cocktail : str
+        nom du cocktail
+    categ_cocktail : str
+        categorie du cocktail
+    image_cocktail : str
+        chemin de l'image du cocktail
+    alcoolise_cocktail : bool
+        indiqque si le cocktail est alcoolisé ou non
+    instruc_cocktail : str
+        instruction pour la réalisation du cocktail
     """
 
     def __init__(self, id_cocktail, nom_cocktail, categ_cocktail, image_cocktail, alcoolise_cocktail,
