@@ -21,7 +21,7 @@ def extraction_ingredient_par_id():
     """
     # Fourchettes des ID que l'on cherche
     id_depart = 0
-    id_fin = 10
+    id_fin = 1000
 
     # Configuration de l'arborescence
     chemin_de_sortie = Path("extractAPI/extract_ingredients")
