@@ -1,95 +1,197 @@
-from tabulate import tabulate
-
+from business_object.utilisateur import Utilisateur
+from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
 from utils.securite import hash_password
 
-from business_object.utilisateur import Utilisateur
-from dao.utilisateur_dao import UtilisateurDAO
-
 
 class UtilisateurService:
-    """Classe contenant les méthodes de service des Joueurs"""
+    """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer(self, pseudo, mdp, age, mail, fan_pokemon) -> Joueur:
-        """Création d'un joueur à partir de ses attributs"""
+    def creer_utilisateur(self, pseudo, mdp, age, langue) -> Utilisateur:
+        """
+        Créer un utilisateur et l'ajouter dans la base de données.
 
-        nouveau_joueur = Joueur(
-            pseudo=pseudo,
-            mdp=hash_password(mdp, pseudo),
-            age=age,
-            mail=mail,
-            fan_pokemon=fan_pokemon,
+        Parameters
+        ----------
+        pseudo : str
+            Pseudo choisi pour l'utilisateur.
+        mdp : str
+            Mot de passe en clair.
+        age : int
+            Âge de l'utilisateur.
+        langue : str
+            Langue de l'utilisateur ("FR", "EN", 'ES").
+
+        Returns
+        -------
+        Utilisateur
+            L'utilisateur créé si succès
+            sinon None
+        """
+        utilisateur = Utilisateur(
+            pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue
         )
 
-        return nouveau_joueur if JoueurDao().creer(nouveau_joueur) else None
+        if UtilisateurDao().creer_compte(utilisateur):
+            print("Utilisateur créé avec succès.")
+            return utilisateur
+        else:
+            print("Impossible de créer l'utilisateur.")
+            return None
 
     @log
-    def lister_tous(self, inclure_mdp=False) -> list[Joueur]:
-        """Lister tous les joueurs
-        Si inclure_mdp=True, les mots de passe seront inclus
-        Par défaut, tous les mdp des joueurs sont à None
+    def se_connecter(self, pseudo, mdp) -> Utilisateur:
         """
-        joueurs = JoueurDao().lister_tous()
-        if not inclure_mdp:
-            for j in joueurs:
-                j.mdp = None
-        return joueurs
+        Se connecter avec un pseudo et un mot de passe.
 
-    @log
-    def trouver_par_id(self, id_joueur) -> Joueur:
-        """Trouver un joueur à partir de son id"""
-        return JoueurDao().trouver_par_id(id_joueur)
+        Parameters
+        ----------
+        pseudo : str
+            Pseudo de l'utilisateur.
+        mdp : str
+            Mot de passe en clair.
 
-    @log
-    def modifier(self, joueur) -> Joueur:
-        """Modification d'un joueur"""
-
-        joueur.mdp = hash_password(joueur.mdp, joueur.pseudo)
-        return joueur if JoueurDao().modifier(joueur) else None
-
-    @log
-    def supprimer(self, joueur) -> bool:
-        """Supprimer le compte d'un joueur"""
-        return JoueurDao().supprimer(joueur)
-
-    @log
-    def afficher_tous(self) -> str:
-        """Afficher tous les joueurs
-        Sortie : Une chaine de caractères mise sous forme de tableau
+        Returns
+        -------
+        Utilisateur
+            L'utilisateur trouvé si succès
+            sinon None
         """
-        entetes = ["pseudo", "age", "mail", "est fan de Pokemon"]
-
-        joueurs = JoueurDao().lister_tous()
-
-        for j in joueurs:
-            if j.pseudo == "admin":
-                joueurs.remove(j)
-
-        joueurs_as_list = [j.as_list() for j in joueurs]
-
-        str_joueurs = "-" * 100
-        str_joueurs += "\nListe des joueurs \n"
-        str_joueurs += "-" * 100
-        str_joueurs += "\n"
-        str_joueurs += tabulate(
-            tabular_data=joueurs_as_list,
-            headers=entetes,
-            tablefmt="psql",
-            floatfmt=".2f",
-        )
-        str_joueurs += "\n"
-
-        return str_joueurs
+        pass
 
     @log
-    def se_connecter(self, pseudo, mdp) -> Joueur:
-        """Se connecter à partir de pseudo et mdp"""
-        return JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+    def deconnecter(self, utilisateur) -> bool:
+        """
+        Déconnecter un utilisateur de l'app.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+            Utilisateur souhaitant se déconnecter.
+
+        Returns
+        -------
+        bool
+            True si la déconnexion a réussi
+            False sinon
+        """
+        # TODO: Implémenter la déconnexion
 
     @log
-    def pseudo_deja_utilise(self, pseudo) -> bool:
-        """Vérifie si le pseudo est déjà utilisé
-        Retourne True si le pseudo existe déjà en BDD"""
-        joueurs = JoueurDao().lister_tous()
-        return pseudo in [j.pseudo for j in joueurs]
+    def supprimer_utilisateur(self, utilisateur) -> bool:
+        """
+        Supprimer le compte d'un utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+            Utilisateur a supprimer.
+
+
+        Returns
+        -------
+        bool
+            True si la suppression a réussie
+            False sinon
+        """
+        # TODO: Implémenter la suppression
+
+        pass
+
+    @log
+    def pseudo_deja_utilise(self, pseudo: str) -> bool:
+        """
+        Vérifie si le pseudo est déjà utilisé dans la base de données.
+
+        Parameters
+        ----------
+        pseudo : str
+            Pseudo à vérifier.
+
+        Returns
+        -------
+        bool
+            True si le pseudo existe déjà en BDD, False sinon.
+        """
+        # TODO: Appeler UtilisateurDao pour lister tous les utilisateurs
+        # TODO: Afficher un message à l'utilisateur indiquant si le pseudo est disponible ou non
+        utilisateurs = UtilisateurDao().lister_tous()  # méthode a implememter dans le DAO
+        return pseudo in [u.pseudo for u in utilisateurs]
+
+    # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
+
+    @log
+    def changer_mdp(self, utilisateur, nouveau_mdp) -> bool:
+        """
+        Changer le mot de passe d'un utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+        nouveau_mdp : str
+
+        Returns
+        -------
+        bool
+            True si la suppression a réussie
+            False sinon
+        """
+        # TODO: Implémenter le changement de mot de passe
+        pass
+
+    @log
+    def choisir_langue(self, utilisateur, langue) -> str:
+        """
+        Choisir la langue des instructions pour un utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+        langue : str
+
+        Returns
+        -------
+        str
+            Message indiquant le succès ou l'échec.
+        """
+        # TODO: Implémenter le choix de langue
+        pass
+
+    @log
+    def est_majeur(self, utilisateur) -> bool:
+        """
+        Vérifier si l'utilisateur est majeur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        est_majeur : bool
+            True si majeur
+            sinon False
+        """
+        # TODO: Implémenter la vérification de l'âge
+
+        pass
+
+    @log
+    def changer_pseudo(self, utilisateur, nouveau_pseudo) -> bool:
+        """
+        Changer le pseudo d'un utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+        nouveau_pseudo : str
+
+        Returns
+        -------
+        bool
+            True si succés
+            sinon False
+        """
+        # TODO: Implémenter le changement de pseudo
+        pass

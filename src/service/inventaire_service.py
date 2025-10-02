@@ -1,95 +1,65 @@
-from tabulate import tabulate
-
+from business_object.ingredient import Ingredient
 from utils.log_decorator import log
-from utils.securite import hash_password
-
-from business_object.inventaire import Inventaire
-from dao.inventaire_dao import inventaireDAO
 
 
 class InventaireService:
-    """Classe contenant les méthodes de service des Joueurs"""
+    """Classe contenant les méthodes de service pour l'inventaire"""
 
     @log
-    def creer(self, pseudo, mdp, age, mail, fan_pokemon) -> Joueur:
-        """Création d'un joueur à partir de ses attributs"""
-
-        nouveau_joueur = Joueur(
-            pseudo=pseudo,
-            mdp=hash_password(mdp, pseudo),
-            age=age,
-            mail=mail,
-            fan_pokemon=fan_pokemon,
-        )
-
-        return nouveau_joueur if JoueurDao().creer(nouveau_joueur) else None
-
-    @log
-    def lister_tous(self, inclure_mdp=False) -> list[Joueur]:
-        """Lister tous les joueurs
-        Si inclure_mdp=True, les mots de passe seront inclus
-        Par défaut, tous les mdp des joueurs sont à None
+    def ajouter_ingredient(self, ingredient) -> Ingredient:
         """
-        joueurs = JoueurDao().lister_tous()
-        if not inclure_mdp:
-            for j in joueurs:
-                j.mdp = None
-        return joueurs
+        Créer un ingrédient dans l'inventaire.
 
-    @log
-    def trouver_par_id(self, id_joueur) -> Joueur:
-        """Trouver un joueur à partir de son id"""
-        return JoueurDao().trouver_par_id(id_joueur)
+        Parameters
+        ----------
+        ingredient : Ingredient
+            L'ingrédient à ajouter dans l'inventaire.
 
-    @log
-    def modifier(self, joueur) -> Joueur:
-        """Modification d'un joueur"""
-
-        joueur.mdp = hash_password(joueur.mdp, joueur.pseudo)
-        return joueur if JoueurDao().modifier(joueur) else None
-
-    @log
-    def supprimer(self, joueur) -> bool:
-        """Supprimer le compte d'un joueur"""
-        return JoueurDao().supprimer(joueur)
-
-    @log
-    def afficher_tous(self) -> str:
-        """Afficher tous les joueurs
-        Sortie : Une chaine de caractères mise sous forme de tableau
+        Returns
+        -------
+        Ingredient
+            L'ingrédient créé si succès
+            sinon None
         """
-        entetes = ["pseudo", "age", "mail", "est fan de Pokemon"]
+        # TODO: Appeler InventaireDao().creer_ingredient et retourner l'objet si succès
+        # TODO: afficher à l'utilisateur (succès ou échec)
 
-        joueurs = JoueurDao().lister_tous()
-
-        for j in joueurs:
-            if j.pseudo == "admin":
-                joueurs.remove(j)
-
-        joueurs_as_list = [j.as_list() for j in joueurs]
-
-        str_joueurs = "-" * 100
-        str_joueurs += "\nListe des joueurs \n"
-        str_joueurs += "-" * 100
-        str_joueurs += "\n"
-        str_joueurs += tabulate(
-            tabular_data=joueurs_as_list,
-            headers=entetes,
-            tablefmt="psql",
-            floatfmt=".2f",
-        )
-        str_joueurs += "\n"
-
-        return str_joueurs
+        pass
 
     @log
-    def se_connecter(self, pseudo, mdp) -> Joueur:
-        """Se connecter à partir de pseudo et mdp"""
-        return JoueurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+    def supprimer_ingredient(self, id_ingredient) -> bool:
+        """
+        Supprimer un ingrédient de l'inventaire.
+
+        Parameters
+        ----------
+        id_ingredient : int
+            L'identifiant de l'ingrédient à supprimer.
+
+        Returns
+        -------
+        bool
+            True si la suppression a réussi
+            False sinon
+        """
+        # TODO: Appeler InventaireDao().supprimer_ingredient et retourner True/False
+        # TODO: afficher à l'utilisateur (succès ou échec)
+
+        pass
 
     @log
-    def pseudo_deja_utilise(self, pseudo) -> bool:
-        """Vérifie si le pseudo est déjà utilisé
-        Retourne True si le pseudo existe déjà en BDD"""
-        joueurs = JoueurDao().lister_tous()
-        return pseudo in [j.pseudo for j in joueurs]
+    def consulter_inventaire(self) -> list[Ingredient]:
+        """
+        Consulter tous les ingrédients de l'inventaire.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        list[Ingredient]
+            Liste de tous les ingrédients présents dans l'inventaire.
+        """
+        # TODO: Appeler InventaireDao().consulter_inventaire et retourner la liste
+        pass
