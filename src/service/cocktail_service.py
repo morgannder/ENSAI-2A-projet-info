@@ -7,7 +7,8 @@ class CocktailService:
     """Classe contenant les méthodes de service pour les cocktails."""
 
     @log
-    def rechercher_par_nom(self, nom_cocktail) -> list[Cocktail]:
+    def rechercher_par_filtre(self, nom_cocktail=None, categ=None, alcool=None,
+                              ingredient=None) -> list[Cocktail]:
         """
         Recherche les cocktails dont le nom contient la chaîne donnée.
 
@@ -25,7 +26,7 @@ class CocktailService:
         return CocktailDao().rechercher_cocktail_par_mon(nom_cocktail)
 
     @log
-    def lister_cocktails_complets(self) -> list[Cocktail]:
+    def lister_cocktails_complets(self, id_utilisateur) -> list[Cocktail]:
         """
         Liste tous les cocktails que l'utilisateur peut préparer
         avec tous les ingrédients disponibles dans son inventaire.
@@ -39,7 +40,7 @@ class CocktailService:
         pass
 
     @log
-    def lister_cocktails_partiels(self, nb_manquants) -> list[Cocktail]:
+    def lister_cocktails_partiels(self, id_utilisateur, nb_manquants) -> list[Cocktail]:
         """
         Liste tous les cocktails que l'utilisateur peut préparer avec au plus un certain nombre d'ingrédients manquants.
 

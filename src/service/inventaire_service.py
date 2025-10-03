@@ -6,25 +6,51 @@ class InventaireService:
     """Classe contenant les méthodes de service pour l'inventaire"""
 
     @log
-    def ajouter_ingredient(self, ingredient) -> Ingredient:
+    def lister_suggestion_ingredient(self, id_utilisateur) -> List[Ingredient]:
         """
         Créer un ingrédient dans l'inventaire.
 
         Parameters
         ----------
-        ingredient : Ingredient
+        nom_ingredient : str
             L'ingrédient à ajouter dans l'inventaire.
 
         Returns
         -------
-        Ingredient
-            L'ingrédient créé si succès
-            sinon None
+        bool
+            True si succès
+            sinon False
         """
         # TODO: Appeler InventaireDao().creer_ingredient et retourner l'objet si succès
         # TODO: afficher à l'utilisateur (succès ou échec)
 
         pass
+
+    @log
+    def ajouter_ingredient(self, nom_ingredient=None, id_ingredient=None) -> bool:
+        """
+        Créer un ingrédient dans l'inventaire.
+
+        Parameters
+        ----------
+        nom_ingredient : str
+            L'ingrédient à ajouter dans l'inventaire.
+
+        id_ingredient : str
+            L'ingrédient à ajouter dans l'inventaire dans le cas où il rentre l'id à partir des
+            suggestions faites par lister_suggestion_ingredient.
+
+        Returns
+        -------
+        bool
+            True si succès
+            sinon False
+        """
+        # TODO: Appeler InventaireDao().creer_ingredient et retourner l'objet si succès
+        # TODO: afficher à l'utilisateur (succès ou échec)
+
+        pass
+
 
     @log
     def supprimer_ingredient(self, id_ingredient) -> bool:
@@ -48,7 +74,7 @@ class InventaireService:
         pass
 
     @log
-    def consulter_inventaire(self) -> list[Ingredient]:
+    def consulter_inventaire(self, id_utilisateur) -> list[Ingredient]:
         """
         Consulter tous les ingrédients de l'inventaire.
 

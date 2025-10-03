@@ -12,8 +12,8 @@ class Cocktail:
         categorie du cocktail
     image_cocktail : str
         chemin de l'image du cocktail
-    alcoolise_cocktail : bool
-        indiqque si le cocktail est alcoolisé ou non
+    alcoolise_cocktail : str
+        indiqque si le cocktail est alcoolisé ou non ou optionnel
     instruc_cocktail : str
         instruction pour la réalisation du cocktail
     """

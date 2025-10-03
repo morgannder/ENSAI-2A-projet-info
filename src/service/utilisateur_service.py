@@ -8,7 +8,7 @@ class UtilisateurService:
     """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer_utilisateur(self, pseudo, mdp, age, langue) -> Utilisateur:
+    def creer_utilisateur(self, pseudo, mdp, age, langue, est_majeur) -> Utilisateur:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 
@@ -29,8 +29,12 @@ class UtilisateurService:
             L'utilisateur créé si succès
             sinon None
         """
+        if(age>=18):
+            est_majeur = True
+
         utilisateur = Utilisateur(
-            pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue
+            pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue,
+            est_majeur=est_majeur
         )
 
         if UtilisateurDao().creer_compte(utilisateur):
@@ -158,24 +162,6 @@ class UtilisateurService:
         # TODO: Implémenter le choix de langue
         pass
 
-    @log
-    def est_majeur(self, utilisateur) -> bool:
-        """
-        Vérifier si l'utilisateur est majeur.
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-
-        Returns
-        -------
-        est_majeur : bool
-            True si majeur
-            sinon False
-        """
-        # TODO: Implémenter la vérification de l'âge
-
-        pass
 
     @log
     def changer_pseudo(self, utilisateur, nouveau_pseudo) -> bool:
