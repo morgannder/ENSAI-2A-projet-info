@@ -21,7 +21,7 @@ def ajoutcle():
 # ajoutcle()
 
 
-def reindicage():
+def reindicage_cocktail():
     with open("extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
@@ -31,7 +31,21 @@ def reindicage():
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-# reindicage()
+# reindicage_cocktail()
+
+
+def reindicage_ingredient():
+    with open("extractAPI/all_ingredients_consolidated.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+        for j in range(0, 489):
+            data["drinks"][j]["idIngredient"] = j
+        del data["drinks"][j]["idIngredients"]
+    with open("extractAPI/all_ingredients_consolidated.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+# reindicage_ingredient()
 
 
 def suppressioncleinutiles():
