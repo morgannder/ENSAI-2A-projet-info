@@ -54,7 +54,7 @@ CREATE TABLE cocktail (
 -----------------------------------------------------
 -- Cocktail_ingredient
 -----------------------------------------------------
-CREATE TABLE inventaire_ingredient (
+CREATE TABLE cocktail_ingredient (
     id_cocktail  INT NOT NULL,
     id_ingredient   INT NOT NULL,
     quantite VARCHAR(50),
