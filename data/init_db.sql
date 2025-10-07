@@ -17,25 +17,6 @@ CREATE TABLE utilisateur(
     est_majeur  BOOLEAN
 );
 
------------------------------------------------------
--- Inventaire_ingredient
------------------------------------------------------
-CREATE TABLE inventaire_ingredient (
-    id_utilisateur  INT NOT NULL,
-    id_ingredient   INT NOT NULL,
-    PRIMARY KEY (id_utilisateur, id_ingredient),
-    CONSTRAINT fk_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
-    CONSTRAINT fk_ingredient FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
-);
-
------------------------------------------------------
--- Ingredient
------------------------------------------------------
-CREATE TABLE ingredient (
-    id_ingredient   SERIAL PRIMARY KEY,
-    nom_ingredient       VARCHAR(30),
-    desc_ingredient         TEXT
-);
 
 -----------------------------------------------------
 -- Cocktail
@@ -49,6 +30,26 @@ CREATE TABLE cocktail (
     verre VARCHAR(100)
 );
 
+-----------------------------------------------------
+-- Ingredient
+-----------------------------------------------------
+CREATE TABLE ingredient (
+    id_ingredient   SERIAL PRIMARY KEY,
+    nom_ingredient       VARCHAR(30),
+    desc_ingredient         TEXT
+);
+
+
+-----------------------------------------------------
+-- Inventaire_ingredient
+-----------------------------------------------------
+CREATE TABLE inventaire_ingredient (
+    id_utilisateur  INT NOT NULL,
+    id_ingredient   INT NOT NULL,
+    PRIMARY KEY (id_utilisateur, id_ingredient),
+    CONSTRAINT fk_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    CONSTRAINT fk_ingredient FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
+);
 
 
 -----------------------------------------------------
