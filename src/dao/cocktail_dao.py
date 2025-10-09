@@ -29,7 +29,7 @@ class CocktailDao(metaclass=Singleton):
                     cursor.execute(
                         "SELECT *                           "
                         "  FROM cocktail                    "
-                        " WHERE nom LIKE %(nom_cocktail)s;  ",
+                        " WHERE nom_cocktail LIKE %(nom_cocktail)s;  ",
                         {"nom_cocktail": f"%{nom_cocktail}%"},
                     )
                     res = cursor.fetchall()
@@ -54,87 +54,207 @@ class CocktailDao(metaclass=Singleton):
         return liste_cocktails
 
     @log
-    def cocktail_complet(self) -> list[Cocktail]:
-        """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire
+    def cocktail_complet(self, id_utilisateur: int) -> list[Cocktail]:
+        """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire.
 
         Parameters
         ----------
-        None
+        id_utilisateur : int
+            Identifiant de l'utilisateur dont on veut vérifier l'inventaire.
 
         Returns
         -------
         liste_cocktails : list[Cocktail]
-            Renvoie la liste de tous les cocktails que l'utilisateur peut préparer avec son inventaire
+            Renvoie la liste de tous les cocktails que l'utilisateur peut préparer
+            avec son inventaire complet d'ingrédients.
         """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
 
-        # try:
-        #     with DBConnection().connection as connection:
-        #         with connection.cursor() as cursor:
-        #             cursor.execute(
-        #                 # "SELECT *                              "
-        #                 # "  FROM joueur;                        "
-        #             )
-        #             res = cursor.fetchall()
-        # except Exception as e:
-        #     logging.info(e)
-        #     raise
+                    #On recupére tous les cocktails de la bd
 
-        # liste_cocktails = []
+                    cursor.execute("""SELECT * FROM cocktail;""")
+                    cocktails = cursor.fetchall()
 
-        # if res:
-        #     for row in res:
-        #         joueur = Joueur(
-        #             id_joueur=row["id_joueur"],
-        #             pseudo=row["pseudo"],
-        #             mdp=row["mdp"],
-        #             age=row["age"],
-        #             mail=row["mail"],
-        #             fan_pokemon=row["fan_pokemon"],
-        #         )
+                    #les ingrédients de l'utilisateur qui sont dans son inventaire
 
-        #         liste_cocktails.append(joueur)
+                    cursor.execute(
+                        """SELECT id_ingredient FROM inventaire_ingredient WHERE id_utilisateur = %(id_utilisateur)s;""",
+                        {"id_utilisateur": id_utilisateur}
+                    )
 
-        # return liste_cocktails
+                    inventaire = []
+
+                    for i in cursor.fetchall():
+                        inventaire.append(i["id_ingredient"])
+
+                    liste_cocktails = []
+                    for c in cocktails:
+                        cursor.execute(
+                            """SELECT id_ingredient FROM cocktail_ingredient WHERE id_cocktail = %(id_cocktail)s;""",
+                            {"id_cocktail": c["id_cocktail"]}
+                        )
+
+                        ingredients_cocktail = []
+                        for row in cursor.fetchall():
+                            ingredients_cocktail.append(row["id_ingredient"])
+
+                        # Vérifier que l'utilisateur a tous les ingrédients
+                        if set(ingredients_cocktail).issubset(set(inventaire)):
+                            liste_cocktails.append(
+                                Cocktail(
+                                    id_cocktail=c["id_cocktail"],
+                                    nom_cocktail=c["nom_cocktail"],
+                                    categ_cocktail=c["categorie"],
+                                    image_cocktail=c["image_url"],
+                                    alcoolise_cocktail=c["alcool"],
+                                    instruc_cocktail=c["instructions"],
+                                )
+                            )
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        return liste_cocktails
+
 
     @log
-    def cocktail_partiel(self, nb_manquants) -> list[Cocktail]:
-        """Lister tous les cocktails que l'utilisateur peut préparer avec au plus n ingrédients manquants dans son inventaire
+    def cocktail_partiel(self, id_utilisateur: int, nb_manquants: int) -> list[Cocktail]:
+        """Lister tous les cocktails que l'utilisateur peut préparer avec au plus n ingrédients manquants.
 
         Parameters
         ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur dont on veut vérifier l'inventaire.
         nb_manquants : int
             Nombre maximal d'ingrédients manquants autorisés pour préparer un cocktail.
 
         Returns
         -------
-        list[Cocktail]
-            Liste des cocktails que l'utilisateur peut préparer avec au plus nb_manquants ingrédients manquants.
+        liste_cocktails : list[Cocktail]
+            Renvoie la liste des cocktails que l'utilisateur peut préparer
+            en ayant au plus nb_manquants ingrédients manquants.
         """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
 
-    #     res = None
+                    #On recupére tous les cocktails de la bd
 
-    #     try:
-    #         with DBConnection().connection as connection:
-    #             with connection.cursor() as cursor:
-    #                 cursor.execute(
-    #                     "UPDATE joueur                                      "
-    #                     "   SET pseudo      = %(pseudo)s,                   "
-    #                     "       mdp         = %(mdp)s,                      "
-    #                     "       age         = %(age)s,                      "
-    #                     "       mail        = %(mail)s,                     "
-    #                     "       fan_pokemon = %(fan_pokemon)s               "
-    #                     " WHERE id_joueur = %(id_joueur)s;                  ",
-    #                     {
-    #                         "pseudo": joueur.pseudo,
-    #                         "mdp": joueur.mdp,
-    #                         "age": joueur.age,
-    #                         "mail": joueur.mail,
-    #                         "fan_pokemon": joueur.fan_pokemon,
-    #                         "id_joueur": joueur.id_joueur,
-    #                     },
-    #                 )
-    #                 res = cursor.rowcount
-    #     except Exception as e:
-    #         logging.info(e)
+                    cursor.execute("""SELECT * FROM cocktail;""")
+                    cocktails = cursor.fetchall()
 
-    #     return res == 1
+                    #On recupére les ingrédients de l'utilisateur qui sont dans son inventaire
+
+                    cursor.execute(
+                        """SELECT id_ingredient FROM inventaire_ingredient WHERE id_utilisateur = %(id_utilisateur)s;""",
+                        {"id_utilisateur": id_utilisateur}
+                    )
+
+                    inventaire = []
+                    for i in cursor.fetchall():
+                        inventaire.append(i["id_ingredient"])
+
+                    liste_cocktails = []
+                    for c in cocktails:
+
+                        #Les ingrédients nécessaires pour ce cocktail
+
+                        cursor.execute(
+                            """SELECT id_ingredient FROM cocktail_ingredient WHERE id_cocktail = %(id_cocktail)s;""",
+                            {"id_cocktail": c["id_cocktail"]}
+                        )
+
+                        ingredients_cocktail = []
+                        for row in cursor.fetchall():
+                            ingredients_cocktail.append(row["id_ingredient"])
+
+                        #Vérifier combien d'ingrédients manquent
+                        manquants = set(ingredients_cocktail) - set(inventaire)
+
+                        # Si le nombre d'ingrédients manquants est inférieur ou égal à nb_manquants, on garde le cocktail
+
+                        if len(manquants) <= nb_manquants:
+                            liste_cocktails.append(
+                                Cocktail(
+                                    id_cocktail=c["id_cocktail"],
+                                    nom_cocktail=c["nom_cocktail"],
+                                    categ_cocktail=c["categorie"],
+                                    image_cocktail=c["image_url"],
+                                    alcoolise_cocktail=c["alcool"],
+                                    instruc_cocktail=c["instructions"],
+                                )
+                            )
+
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        return liste_cocktails
+
+
+    @log
+    def rechercher_cocktails(self,nom_cocktail =None, categorie =None, verre =None) -> list[Cocktail]:
+        """Recherche de cocktails avec plusieurs filtres optionnels.
+
+        Parameters
+        ----------
+        nom_cocktail : str, optional
+            Nom du cocktail à rechercher (partie du nom).
+        categorie : str, optional
+            Filtrer par catégorie.
+        verre : str, optional
+            Filtrer par type de verre.
+
+        Returns
+        -------
+        liste_cocktails : list[Cocktail]
+            Liste des cocktails correspondant aux filtres donnés.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+
+                    # On commence par sélectionner tous les cocktails
+                    query = """SELECT * FROM cocktail WHERE 1=1"""
+                    params = {}
+
+                    # -----------------Filtrage par nom ---------------
+                    if nom_cocktail is not None:
+                        query += " AND nom_cocktail ILIKE %(nom_cocktail)s"
+                        params["nom_cocktail"] = f"%{nom_cocktail}%"
+
+                    # -----------------Filtrage par catégorie ---------
+                    if categorie is not None:
+                        query += " AND categorie = %(categorie)s"
+                        params["categorie"] = categorie
+
+                    # ------------------Filtrage par type de verre-----
+                    if verre is not None:
+                        query += " AND verre = %(verre)s"
+                        params["verre"] = verre
+
+                    #Execution de la requête
+                    cursor.execute(query, params)
+                    cocktails = cursor.fetchall()
+
+                    #liste finale des objets Cocktail
+                    liste_cocktails = []
+                    for c in cocktails:
+                        liste_cocktails.append(
+                            Cocktail(
+                                id_cocktail=c["id_cocktail"],
+                                nom_cocktail=c["nom_cocktail"],
+                                categ_cocktail=c["categorie"],
+                                image_cocktail=c["image_url"],
+                                alcoolise_cocktail=c["alcool"],
+                                instruc_cocktail=c["instructions"],
+                            )
+                        )
+
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        return liste_cocktails
