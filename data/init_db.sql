@@ -23,11 +23,16 @@ CREATE TABLE utilisateur(
 -----------------------------------------------------
 CREATE TABLE cocktail (
     id_cocktail  SERIAL PRIMARY KEY,
-    nom_ingredient       VARCHAR(100),
+    nom_cocktail       VARCHAR(100),
     categorie        VARCHAR(100),
     alcool VARCHAR(100),
-    image_cocktail VARCHAR(100),
-    verre VARCHAR(100)
+    image_url VARCHAR(256),
+    verre VARCHAR(100),
+    instructions TEXT,
+    instructions_de TEXT,
+    instructions_es TEXT,
+    instructions_fr TEXT,
+    instructions_it TEXT
 );
 
 -----------------------------------------------------
