@@ -30,14 +30,15 @@ class UtilisateurDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO utilisateur(pseudo, mdp, age, langue) VALUES        "
-                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s)                    "
+                        "INSERT INTO utilisateur(pseudo, mdp, age, langue, est_majeur) VALUES        "
+                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s, %(est_majeur)s)                    "
                         "  RETURNING id_utilisateur;                                                ",
                         {
                             "pseudo": utilisateur.pseudo,
                             "mdp": utilisateur.mdp,
                             "age": utilisateur.age,
                             "langue": utilisateur.langue,
+                            "est_majeur": utilisateur.est_majeur,
                         },
                     )
                     res = cursor.fetchone()
@@ -46,13 +47,13 @@ class UtilisateurDao(metaclass=Singleton):
 
         created = False
         if res:
-            utilisateur.id_utilisateur = res["id_utilisateur"]
+            utilisateur.id_utilisateur = res["id_utilisateur"]  # affecter l'id de la base à l'user
             created = True
 
         return created
 
     @log
-    def se_connecter(self, pseudo, mdp) -> bool:
+    def se_connecter(self, pseudo, mdp) -> Utilisateur:
         """
         Se connecter avec un pseudo et un mot de passe.
 
@@ -61,36 +62,43 @@ class UtilisateurDao(metaclass=Singleton):
         pseudo : str
             Pseudo de l'utilisateur.
         mdp : str
-            Mot de passe en clair.
+            Mot de passe hashé.
 
         Returns
         -------
-        bool
-            True si la connexion a réussi, False sinon.
+        Utilisateur
+            Renvoie l'utilisateur que l'on souhaite chercher
         """
-        # TODO: Appeler utilisateur = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo)) pour récupérer l'utilisateur
-        # TODO: Afficher un message à l'utilisateur selon le résultat
-        pass
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT *                           "
+                        "  FROM utilisateur                      "
+                        " WHERE pseudo = %(pseudo)s         "
+                        "   AND mdp = %(mdp)s;              ",
+                        {"pseudo": pseudo, "mdp": mdp},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
 
-    @log
-    def deconnecter(self, utilisateur) -> bool:
-        """
-        Déconnecter un utilisateur de l'app.
+        utilisateur = None
 
-        Parameters
-        ----------
-        utilisateur : Utilisateur
+        if res:
+            utilisateur = Utilisateur(
+                id_utilisateur=res["id_utilisateur"],
+                pseudo=res["pseudo"],
+                mdp=res["mdp"],
+                age=res["age"],
+                langue=res["langue"],
+                est_majeur=res["est_majeur"],
 
-        Returns
-        -------
-        bool
-            True si la déconnexion a réussi
-            False sinon
-        """
+            )
 
-        # TODO: Afficher un message à l'utilisateur
+        return utilisateur
 
-        pass
 
     @log
     def supprimer_utilisateur(self, utilisateur: Utilisateur) -> bool:
@@ -107,10 +115,158 @@ class UtilisateurDao(metaclass=Singleton):
             True si la suppression a réussi
             False sinon
         """
-        # TODO: Appeler UtilisateurDao().supprimer_compte()
-        # TODO: Afficher un message à l'utilisateur
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # Supprimer le compte d'un utilisateur
+                    cursor.execute(
+                        "DELETE FROM utilisateur                  "
+                        " WHERE id_utilisateur=%(id_utilisateur)s      ",
+                        {"id_utilisateur": utilisateur.id_utilisateur},
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+            raise
 
-        pass
+        return res > 0
+
+
+    @log
+    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
+        """trouver un utilisateur grace à son id
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            numéro id de l'utilisateur que l'on souhaite trouver
+
+        Returns
+        -------
+        utilisateur : Utilisateur
+            renvoie l'utilisateur que l'on cherche par id
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT *                           "
+                        "  FROM utilisateur                      "
+                        " WHERE id_utilisateur = %(id_utilisateur)s;  ",
+                        {"id_utilisateur": id_utilisateur},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        utilisateur = None
+        if res:
+            utilisateur = Utilisateur(
+                pseudo=res["pseudo"],
+                mdp=res["mdp"],
+                age=res["age"],
+                langue=res["langue"],
+                est_majeur=res["est_majeur"],
+                id_utilisateur=res["id_utilisateur"],
+            )
+
+        return utilisateur
+
+    @log
+    def lister_tous(self) -> list[Utilisateur]:
+        """lister tous les utilisateurs
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        liste_utilisateurs : list[Joueur]
+            renvoie la liste de tous les utilisateurs dans la base de données
+        """
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT *                              "
+                        "  FROM utilisateur;                        "
+                    )
+                    res = cursor.fetchall()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        liste_utilisateurs = []
+
+        if res:
+            for row in res:
+                utilisateur = Utilisateur(
+                    pseudo=row["pseudo"],
+                    mdp=row["mdp"],
+                    age=row["age"],
+                    langue=row["langue"],
+                    est_majeur=row["est_majeur"],
+                    id_utilisateur=row["id_utilisateur"],
+                )
+
+                liste_utilisateurs.append(utilisateur)
+
+        return liste_utilisateurs
+
+
+# ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
+
+    ## fonction commune pour la mmodif des elements
+    @log
+    def modifier(self, utilisateur) -> bool:
+        """
+        Modification d'un utilisateur dans la base de données
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        bool
+            True si la modification est un succès
+            False sinon
+        """
+
+        res = None
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        UPDATE utilisateur
+                        SET pseudo = %(pseudo)s,
+                            mdp = %(mdp)s,
+                            age = %(age)s,
+                            langue = %(langue)s,
+                            est_majeur = %(est_majeur)s
+                        WHERE id_utilisateur = %(id_utilisateur)s;
+                        """,
+                        {
+                            "pseudo": utilisateur.pseudo,
+                            "mdp": utilisateur.mdp,
+                            "age": utilisateur.age,
+                            "langue": utilisateur.langue,
+                            "est_majeur": utilisateur.est_majeur,
+                            "id_utilisateur": utilisateur.id_utilisateur,
+                        },
+                    )
+                    res = cursor.rowcount  # renvoie le nombre de lignes affectées
+        except Exception as e:
+            logging.info(e)
+
+        return res == 1
+
+    ## fonctions séparées pour la mmodif des elements
 
     @log
     def changer_mdp(self, utilisateur, nouveau_mdp) -> bool:
@@ -128,12 +284,25 @@ class UtilisateurDao(metaclass=Singleton):
             True si le changement a réussi
             False sinon.
         """
-        # TODO: Afficher un message à l'utilisateur
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE utilisateur SET mdp = %(mdp)s WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {
+                            "mdp": nouveau_mdp,
+                            "id_utilisateur": utilisateur.id_utilisateur
+                        }
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+        return res == 1
 
-        pass
 
     @log
-    def choisir_langue(self, utilisateur, langue) -> str:
+    def choisir_langue(self, utilisateur, langue) -> bool:
         """
         Choisir la langue des instructions pour un utilisateur.
 
@@ -145,13 +314,24 @@ class UtilisateurDao(metaclass=Singleton):
 
         Returns
         -------
-        str
-            Langue choisie si succès
-            message d'erreur sinon
+        bool
+            True si le changement a réussi, False sinon.
         """
-        # TODO: Afficher un message à l'utilisateur
-
-        pass
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE utilisateur SET langue = %(langue)s WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {
+                            "langue": nouvelle_langue,
+                            "id_utilisateur": utilisateur.id_utilisateur
+                        }
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+        return res == 1
 
     @log
     def changer_pseudo(self, utilisateur: Utilisateur, nouveau_pseudo: str) -> bool:
@@ -168,6 +348,18 @@ class UtilisateurDao(metaclass=Singleton):
         bool
             True si le changement a réussi, False sinon.
         """
-        # TODO: Appeler UtilisateurDao pour changer le pseudo (DAO-Utilisateur)
-        # TODO: Afficher un message à l'utilisateur
-        return False
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE utilisateur SET pseudo = %(pseudo)s WHERE id_utilisateur = %(id_utilisateur)s;",
+                        {
+                            "pseudo": nouveau_pseudo,
+                            "id_utilisateur": utilisateur.id_utilisateur
+                        }
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+        return res == 1

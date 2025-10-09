@@ -31,17 +31,15 @@ class UtilisateurService:
         """
         if(age>=18):
             est_majeur = True
-
+        # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
             pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue,
             est_majeur=est_majeur
         )
 
         if UtilisateurDao().creer_compte(utilisateur):
-            print("Utilisateur créé avec succès.")
             return utilisateur
         else:
-            print("Impossible de créer l'utilisateur.")
             return None
 
     @log
@@ -62,7 +60,7 @@ class UtilisateurService:
             L'utilisateur trouvé si succès
             sinon None
         """
-        pass
+        return UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
 
     @log
     def deconnecter(self, utilisateur) -> bool:
@@ -99,9 +97,7 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        # TODO: Implémenter la suppression
-
-        pass
+        return UtilisateurDao().supprimer(utilisateur)
 
     @log
     def pseudo_deja_utilise(self, pseudo: str) -> bool:
@@ -118,10 +114,13 @@ class UtilisateurService:
         bool
             True si le pseudo existe déjà en BDD, False sinon.
         """
-        # TODO: Appeler UtilisateurDao pour lister tous les utilisateurs
-        # TODO: Afficher un message à l'utilisateur indiquant si le pseudo est disponible ou non
-        utilisateurs = UtilisateurDao().lister_tous()  # méthode a implememter dans le DAO
+        utilisateurs = UtilisateurDao().lister_tous()
         return pseudo in [u.pseudo for u in utilisateurs]
+
+    @log
+    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
+        """Trouver un utilisateur à partir de son id"""
+        return UtilisateurDao().trouver_par_id(id_Utilisateur)
 
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
 
@@ -141,11 +140,11 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        # TODO: Implémenter le changement de mot de passe
-        pass
+        utilisateur.mdp = hash_password(nouveau_mdp, utilisateur.pseudo)
+        return UtilisateurDao().modifier(utilisateur)
 
     @log
-    def choisir_langue(self, utilisateur, langue) -> str:
+    def choisir_langue(self, utilisateur, langue) -> bool:
         """
         Choisir la langue des instructions pour un utilisateur.
 
@@ -156,11 +155,12 @@ class UtilisateurService:
 
         Returns
         -------
-        str
-            Message indiquant le succès ou l'échec.
+        bool
+            True si succés
+            sinon False
         """
-        # TODO: Implémenter le choix de langue
-        pass
+        utilisateur.langue = langue
+        return UtilisateurDao().modifier(utilisateur)
 
 
     @log
@@ -179,5 +179,7 @@ class UtilisateurService:
             True si succés
             sinon False
         """
-        # TODO: Implémenter le changement de pseudo
-        pass
+        utilisateur.pseudo = nouveau_pseudo
+        return UtilisateurDao().modifier(utilisateur)
+
+        # ou alors avec les ofncitons specifiques
