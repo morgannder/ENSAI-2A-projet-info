@@ -60,6 +60,8 @@ CREATE TABLE cocktail_ingredient (
     id_ingredient   INT NOT NULL,
     quantite VARCHAR(50),
     PRIMARY KEY (id_cocktail, id_ingredient),
-    CONSTRAINT fk_cocktail FOREIGN KEY (id_cocktail) REFERENCES cocktail(id_cocktail),
-    CONSTRAINT fk_ingredient FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
+    CONSTRAINT fk_cocktail 
+        FOREIGN KEY (id_cocktail) REFERENCES cocktail(id_cocktail),
+    CONSTRAINT fk_ingredient 
+        FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
 );
