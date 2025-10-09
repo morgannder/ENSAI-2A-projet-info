@@ -4399,6 +4399,15 @@
       "strType": "Seasoning",
       "strAlcohol": "No",
       "strABV": "0"
+    },
+        {
+      "idIngredient": 489,
+      "strIngredient": "Carrot",
+      "strDescription": null,
+      "strType": "Fruit",
+      "strAlcohol": "No",
+      "strABV": null,
+      "idIngredients": 489
     }
   ]
 }
