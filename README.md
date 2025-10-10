@@ -35,6 +35,21 @@ This very simple application includes a few elements that may help with the info
   - *ENSAI-2A-projet-info-template* should be the root of your Explorer
   - :warning: if not the application will not launch. Retry open folder
 
+### Connexion DB
+- [ ] Ouvrir VS_Code avec port 5432 ouvert (via network access)
+- [ ] Installer les packages nécessaires : pip install -r "requirements.txt"
+- [ ] Ouvrir un POSTGRES via onyxia
+- [ ] Créer et remplir un fichier .env de la sorte avec les données fournies par POSTGRES:
+        POSTGRES_HOST=
+        POSTGRES_PORT=5432
+        POSTGRES_USER=
+        POSTGRES_DATABASE=defaultdb
+        POSTGRES_PASSWORD=
+        POSTGRES_SCHEMA=public
+- [ ] Lancer le fichier reset_database.py
+- [ ] Ouvrir CloudBeaver 
+
+
 
 ## Repository Files Overview
 
