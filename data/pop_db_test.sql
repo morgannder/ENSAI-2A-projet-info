@@ -48,3 +48,25 @@ INSERT INTO cocktail_ingredient (id_cocktail, id_ingredient, quantite) VALUES
 (2, 240, 'Juice of 1/2'),
 (2, 105, '1 splash')
 ;
+
+INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES
+(3, 244),
+(3, 251),
+(3, 379),
+(3, 273),
+(3,361),
+(3, 65),
+(3, 18),
+(3, 379),
+(5, 244),
+(5, 251),
+(6, 244),
+(6, 251),
+(6, 379),
+(6, 273),
+(6, 65),
+(6, 18),
+(6, 379),
+
+
+();
