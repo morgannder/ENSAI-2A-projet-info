@@ -1,14 +1,13 @@
-import os
 import logging
-import dotenv
-
+import os
 from unittest import mock
 
+import dotenv
+
+from dao.db_connection import DBConnection
+from service.utilisateur_service import UtilisateurService
 from utils.log_decorator import log
 from utils.singleton import Singleton
-from dao.db_connection import DBConnection
-
-from service.utilisateur_service import UtilisateurService
 
 
 class ResetDatabase(metaclass=Singleton):
@@ -51,13 +50,13 @@ class ResetDatabase(metaclass=Singleton):
             raise
 
         # Appliquer le hashage des mots de passe à chaque joueur
-        joueur_service = UtilisateurService()
-        #for j in joueur_service.lister_tous(inclure_mdp=True):
-            #joueur_service.modifier(j)
+        utilisateur_service = UtilisateurService()
+        # for j in joueur_service.lister_tous(inclure_mdp=True):
+        # joueur_service.modifier(j)
 
         return True
 
 
 if __name__ == "__main__":
     ResetDatabase().lancer()
-    #ResetDatabase().lancer(True)
+    # ResetDatabase().lancer(True)

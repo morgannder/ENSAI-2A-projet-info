@@ -66,7 +66,5 @@ INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES
 (6, 273),
 (6, 65),
 (6, 18),
-(6, 379),
-
-
-();
+(6, 379)
+;
