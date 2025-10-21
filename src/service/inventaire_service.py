@@ -1,5 +1,6 @@
 from business_object.ingredient import Ingredient
 from utils.log_decorator import log
+from
 
 
 class InventaireService:
