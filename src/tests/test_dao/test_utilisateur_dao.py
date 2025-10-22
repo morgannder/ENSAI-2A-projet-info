@@ -19,155 +19,144 @@ def setup_test_environment():
         yield
 
 
+# --- TESTS DE LECTURE ----------------------------------------------------
+
 def test_trouver_par_id_existant():
     """Recherche par id d'un utilisateur existant"""
-
     # GIVEN
-    id_utilisateur = 998
+    id_utilisateur = 4  # 'batricia' dans le pop_db_test
 
     # WHEN
     utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur)
 
     # THEN
     assert utilisateur is not None
+    assert isinstance(utilisateur, Utilisateur)
+    assert utilisateur.pseudo == "batricia"
 
 
 def test_trouver_par_id_non_existant():
     """Recherche par id d'un utilisateur n'existant pas"""
-
-    # GIVEN
-    id_utilisateur = 9999999999999
-
-    # WHEN
-    utilisateur = UtilisateurDao().trouver_par_id(id_utilisateur)
-
-    # THEN
+    utilisateur = UtilisateurDao().trouver_par_id(9999)
     assert utilisateur is None
 
 
 def test_lister_tous():
-    """Vérifie que la méthode renvoie une liste de Utilisateur
-    de taille supérieure ou égale à 2
-    """
-
-    # GIVEN
-
-    # WHEN
+    """Liste complète des utilisateurs"""
     utilisateurs = UtilisateurDao().lister_tous()
-
-    # THEN
     assert isinstance(utilisateurs, list)
-    for j in utilisateurs:
-        assert isinstance(j, Utilisateur)
-    assert len(utilisateurs) >= 2
+    assert all(isinstance(u, Utilisateur) for u in utilisateurs)
+    assert len(utilisateurs) >= 8
 
 
-def test_creer_ok():
-    """Création de Utilisateur réussie"""
+# --- TESTS DE CREATION ----------------------------------------------------
 
-    # GIVEN
-    utilisateur = Utilisateur(pseudo="gg", age=44, mail="test@test.io")
-
-    # WHEN
-    creation_ok = UtilisateurDao().creer(utilisateur)
-
-    # THEN
+def test_creer_compte_ok():
+    """Création de compte réussie"""
+    utilisateur = Utilisateur(
+        pseudo="gg",
+        mdp="motdepasse",
+        age=30,
+        langue="Français",
+        est_majeur=True
+    )
+    creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert creation_ok
     assert utilisateur.id_utilisateur
 
 
-def test_creer_ko():
-    """Création de Utilisateur échouée (age et mail incorrects)"""
-
-    # GIVEN
-    utilisateur = Utilisateur(pseudo="gg", age="chaine de caractere", mail=12)
-
-    # WHEN
-    creation_ok = UtilisateurDao().creer(utilisateur)
-
-    # THEN
+def test_creer_compte_ko():
+    """Création de compte échouée (valeurs invalides)"""
+    utilisateur = Utilisateur(
+        pseudo=None,
+        mdp=None,
+        age="texte",
+        langue=123,
+        est_majeur="oui"
+    )
+    creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert not creation_ok
 
 
+# --- TESTS DE MODIFICATION ------------------------------------------------
+
 def test_modifier_ok():
-    """Modification de Utilisateur réussie"""
-
-    # GIVEN
-    new_mail = "maurice@mail.com"
-    utilisateur = Utilisateur(id_utilisateur=997, pseudo="maurice", age=20, mail=new_mail)
-
-    # WHEN
+    """Modification réussie"""
+    utilisateur = Utilisateur(
+        id_utilisateur=5,  # Gilbert existe
+        pseudo="Gilbert_modif",
+        mdp="abcd",
+        age=24,
+        langue="Deutsch",
+        est_majeur=True
+    )
     modification_ok = UtilisateurDao().modifier(utilisateur)
-
-    # THEN
     assert modification_ok
 
 
 def test_modifier_ko():
-    """Modification de Utilisateur échouée (id inconnu)"""
-
-    # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="id inconnu", age=1, mail="no@mail.com")
-
-    # WHEN
+    """Modification échouée (id inconnu)"""
+    utilisateur = Utilisateur(
+        id_utilisateur=9999,
+        pseudo="id_inconnu",
+        mdp="xxx",
+        age=99,
+        langue="Deutsch",
+        est_majeur=True
+    )
     modification_ok = UtilisateurDao().modifier(utilisateur)
-
-    # THEN
     assert not modification_ok
 
 
-def test_supprimer_ok():
-    """Suppression de Utilisateur réussie"""
+# --- TESTS DE SUPPRESSION -------------------------------------------------
 
-    # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=995, pseudo="miguel", age=1, mail="miguel@projet.fr")
-
-    # WHEN
-    suppression_ok = UtilisateurDao().supprimer(utilisateur)
-
-    # THEN
+def test_supprimer_utilisateur_ok():
+    """Suppression d'un utilisateur existant"""
+    utilisateur = Utilisateur(
+        pseudo="test_supp",
+        mdp="motdepasse",
+        age=30,
+        langue="Français",
+        est_majeur=True
+    )
+    UtilisateurDao().creer_compte(utilisateur)
+    suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
     assert suppression_ok
 
 
-def test_supprimer_ko():
-    """Suppression de Utilisateur échouée (id inconnu)"""
-
-    # GIVEN
-    utilisateur = Utilisateur(id_utilisateur=8888, pseudo="id inconnu", age=1, mail="no@z.fr")
-
-    # WHEN
-    suppression_ok = UtilisateurDao().supprimer(utilisateur)
-
-    # THEN
+def test_supprimer_utilisateur_ko():
+    """Suppression échouée (id inconnu)"""
+    utilisateur = Utilisateur(
+        pseudo="inconnu",
+        mdp="xxx",
+        age=10,
+        langue="Français",
+        est_majeur=False,
+        id_utilisateur=9999
+    )
+    suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
     assert not suppression_ok
 
 
+# --- TESTS DE CONNEXION --------------------------------------------------
+
 def test_se_connecter_ok():
-    """Connexion de Utilisateur réussie"""
-
-    # GIVEN
+    """Connexion réussie"""
     pseudo = "batricia"
-    mdp = "9876"
+    mdp = "9876"  # non hashé dans la base
 
-    # WHEN
-    utilisateur = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
+    utilisateur = UtilisateurDao().se_connecter(pseudo, mdp)
     assert isinstance(utilisateur, Utilisateur)
+    assert utilisateur.pseudo == pseudo
 
 
 def test_se_connecter_ko():
-    """Connexion de Utilisateur échouée (pseudo ou mdp incorrect)"""
+    """Connexion échouée"""
+    pseudo = "batricia"
+    mdp = "mauvaismdp"
 
-    # GIVEN
-    pseudo = "toto"
-    mdp = "poiuytreza"
-
-    # WHEN
-    utilisateur = UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
-    assert not utilisateur
+    utilisateur = UtilisateurDao().se_connecter(pseudo, mdp)
+    assert utilisateur is None
 
 
 if __name__ == "__main__":

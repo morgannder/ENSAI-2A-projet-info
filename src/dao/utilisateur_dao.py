@@ -47,7 +47,7 @@ class UtilisateurDao(metaclass=Singleton):
 
         created = False
         if res:
-            utilisateur.id_utilisateur = res["id_utilisateur"]  # affecter l'id de la base à l'user
+            utilisateur.id_utilisateur = res["id_utilisateur"]
             created = True
 
         return created
@@ -88,13 +88,12 @@ class UtilisateurDao(metaclass=Singleton):
 
         if res:
             utilisateur = Utilisateur(
-                id_utilisateur=res["id_utilisateur"],
                 pseudo=res["pseudo"],
                 mdp=res["mdp"],
                 age=res["age"],
                 langue=res["langue"],
                 est_majeur=res["est_majeur"],
-
+                id_utilisateur=res["id_utilisateur"]
             )
 
         return utilisateur
@@ -118,7 +117,6 @@ class UtilisateurDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    # Supprimer le compte d'un utilisateur
                     cursor.execute(
                         "DELETE FROM utilisateur                  "
                         " WHERE id_utilisateur=%(id_utilisateur)s      ",
@@ -126,7 +124,7 @@ class UtilisateurDao(metaclass=Singleton):
                     )
                     res = cursor.rowcount
         except Exception as e:
-            logging.info(e)
+            logging.exception("Erreur lors de la création de compte")
             raise
 
         return res > 0
@@ -219,7 +217,7 @@ class UtilisateurDao(metaclass=Singleton):
 
 # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
 
-    ## fonction commune pour la mmodif des elements
+    ## OPTION 1 : fonction commune pour la mmodif des elements
     @log
     def modifier(self, utilisateur) -> bool:
         """
@@ -263,10 +261,9 @@ class UtilisateurDao(metaclass=Singleton):
                     res = cursor.rowcount  # renvoie le nombre de lignes affectées
         except Exception as e:
             logging.info(e)
-
         return res == 1
 
-    ## fonctions séparées pour la mmodif des elements
+    ## OPTION 2 : fonctions séparées pour la mmodif des elements
 
     @log
     def changer_mdp(self, utilisateur, nouveau_mdp) -> bool:
@@ -276,7 +273,7 @@ class UtilisateurDao(metaclass=Singleton):
         Parameters
         ----------
         utilisateur : Utilisateur
-        nouveau_mdp : str
+        nouveau_mdp hashé : str
 
         Returns
         -------

@@ -31,6 +31,8 @@ class UtilisateurService:
         """
         if(age>=18):
             est_majeur = True
+        else:
+            est_majeur = False
         # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
             pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue,
@@ -43,7 +45,7 @@ class UtilisateurService:
             return None
 
     @log
-    def se_connecter(self, pseudo, mdp) -> Utilisateur:
+    def se_connecter(self, pseudo, mdp, test_mode=False) -> Utilisateur:
         """
         Se connecter avec un pseudo et un mot de passe.
 
@@ -60,7 +62,9 @@ class UtilisateurService:
             L'utilisateur trouvé si succès
             sinon None
         """
-        return UtilisateurDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+        if not test_mode:
+            mdp = hash_password(mdp, pseudo)
+        return UtilisateurDao().se_connecter(pseudo, mdp)
 
     @log
     def deconnecter(self, utilisateur) -> bool:
@@ -100,7 +104,7 @@ class UtilisateurService:
         return UtilisateurDao().supprimer(utilisateur)
 
     @log
-    def pseudo_deja_utilise(self, pseudo: str) -> bool:
+    def pseudo_deja_utilise(self, pseudo: str, utilisateur_id=None) -> bool:
         """
         Vérifie si le pseudo est déjà utilisé dans la base de données.
 
@@ -114,13 +118,16 @@ class UtilisateurService:
         bool
             True si le pseudo existe déjà en BDD, False sinon.
         """
+        pseudo = pseudo.strip().lower()
         utilisateurs = UtilisateurDao().lister_tous()
-        return pseudo in [u.pseudo for u in utilisateurs]
+        pseudos_existant = [u.pseudo.strip().lower() for u in utilisateurs if u.id_utilisateur != utilisateur_id]
+        return pseudo in pseudos_existant
+
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
         """Trouver un utilisateur à partir de son id"""
-        return UtilisateurDao().trouver_par_id(id_Utilisateur)
+        return UtilisateurDao().trouver_par_id(id_utilisateur)
 
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
 
@@ -179,6 +186,9 @@ class UtilisateurService:
             True si succés
             sinon False
         """
+        # verification de la validité du pseudo
+        if self.pseudo_deja_utilise(nouveau_pseudo):
+            return False
         utilisateur.pseudo = nouveau_pseudo
         return UtilisateurDao().modifier(utilisateur)
 
