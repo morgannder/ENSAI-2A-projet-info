@@ -9,6 +9,7 @@ INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur) VA
 (8, 'Senior',     'jsp',      35,     'Deutsch',       true)
 ;
 
+SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));
 
 INSERT INTO cocktail(id_cocktail, nom_cocktail, categorie, alcool, verre, instructions, instructions_es, instructions_de, instructions_fr, instructions_it, image_url) VALUES
 (0, 'Mojito', 'Cocktail', 'Alcoholic', 'Highball glass', 'Muddle mint leaves with sugar and lime juice. Add a splash of soda water and fill the glass with cracked ice. Pour the rum and top with soda water. Garnish and serve with straw.', 'Mezcle las hojas de menta con el azúcar y el zumo de lima. Añada un chorrito de soda y llene el vaso con hielo picado. Verter el ron y completar con soda. Decorar y servir con pajita.', 'Minzblätter mit Zucker und Limettensaft verrühren. Füge einen Spritzer Sodawasser hinzu und fülle das Glas mit gebrochenem Eis. Den Rum eingießen und mit Sodawasser übergießen. Garnieren und mit einem Strohhalm servieren.', 'Mélanger les feuilles de menthe avec le sucre et le jus de citron vert. Ajoutez un filet d''eau gazeuse et remplissez le verre de glace concassée. Verser le rhum et compléter avec de l''eau gazeuse. Décorer et servir avec une paille.', 'Pestare le foglie di menta con lo zucchero e il succo di lime.  Aggiungere una spruzzata di acqua di seltz e riempi il bicchiere con ghiaccio tritato.  Versare il rum e riempire con acqua di seltz.  Guarnire con una fetta di lime, servire con una cannuccia.', 'https://www.thecocktaildb.com/images/media/drink/metwgh1606770327.jpg'),
@@ -57,7 +58,6 @@ INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES
 (3,361),
 (3, 65),
 (3, 18),
-(3, 379),
 (5, 244),
 (5, 251),
 (6, 244),
@@ -65,6 +65,5 @@ INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES
 (6, 379),
 (6, 273),
 (6, 65),
-(6, 18),
-(6, 379)
+(6, 18)
 ;

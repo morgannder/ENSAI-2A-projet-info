@@ -22,3 +22,5 @@
 
 # Peu probables
     - Notation des cocktails
+    - Conserver des Statistiques d'utilisateur (ex : nombre de connexion, de cocktails recherchés,
+        d'ingrédients ajoutés/supprimés, date d'inscription, nombre de cocktails favoris) 
