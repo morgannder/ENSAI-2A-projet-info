@@ -48,6 +48,9 @@ class UserUpdate(BaseModel):
     nouveau_mdp: Optional[str] = None
     langue: Optional[str] = None
 
+class Filtres(BaseModel):
+    Alcool: Optional[str] = None
+
 
 # ---------------------------
 # UTILS TOKEN AVEC TRACE
@@ -103,6 +106,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
 
 
 # --- Modèle de requête pour l'inscription ---
+LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
+
+
 class UserCreate(BaseModel):
     pseudo: str
     mdp: str
@@ -142,6 +148,11 @@ def inscription(data: UserCreate):
     print("DEBUG /register: données reçues:", data)
 
     try:
+        if data.langue not in LANGUES_VALIDES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+            )
         # Appel de la méthode existante du service
         utilisateur = service_utilisateur.creer_utilisateur(
             pseudo=data.pseudo,
@@ -204,7 +215,33 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
 def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     """Met à jour le compte de l'utilisateur connecté"""
-    return
+    print("DEBUG /me/update: données reçues:", data)
+    print("DEBUG /me/update: utilisateur avant update:", utilisateur)
+
+    try:
+        if data.nouveau_pseudo:
+            succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
+            print("DEBUG changement pseudo:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
+
+        if data.nouveau_mdp:
+            succes = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
+            print("DEBUG changement mdp:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Erreur changement mot de passe")
+
+        if data.langue:
+            succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
+            print("DEBUG changement langue:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Erreur changement langue")
+
+    except Exception as e:
+        print("DEBUG /register: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la création utilisateur"
+        )
 
 
 @app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
@@ -216,6 +253,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
         # Récupérer l'ID avant suppression pour les logs
         id_utilisateur = utilisateur.id_utilisateur
         pseudo = utilisateur.pseudo
+
         if reponse.confirmation == "CONFIRMER":
             # Appeler le service pour supprimer le compte
             suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
@@ -235,11 +273,11 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
                 status_code=409,
                 detail="Erreur de conflit, vous devez taper CONFIRMER dans le champ de confirmation pour valider votre requête",
             )
-        print("la")
-    except HTTPException:
-        raise
-    except Exception:
-        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
+    except Exception as e:
+        print("DEBUG /register: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la création utilisateur"
+        )
 
 
 # ---------------------------
