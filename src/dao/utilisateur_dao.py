@@ -93,11 +93,10 @@ class UtilisateurDao(metaclass=Singleton):
                 age=res["age"],
                 langue=res["langue"],
                 est_majeur=res["est_majeur"],
-                id_utilisateur=res["id_utilisateur"]
+                id_utilisateur=res["id_utilisateur"],
             )
 
         return utilisateur
-
 
     @log
     def supprimer_utilisateur(self, utilisateur: Utilisateur) -> bool:
@@ -123,12 +122,11 @@ class UtilisateurDao(metaclass=Singleton):
                         {"id_utilisateur": utilisateur.id_utilisateur},
                     )
                     res = cursor.rowcount
-        except Exception as e:
+        except Exception:
             logging.exception("Erreur lors de la création de compte")
             raise
 
         return res > 0
-
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
@@ -214,8 +212,7 @@ class UtilisateurDao(metaclass=Singleton):
 
         return liste_utilisateurs
 
-
-# ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
+    # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
 
     ## OPTION 1 : fonction commune pour la mmodif des elements
     @log
@@ -287,19 +284,15 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET mdp = %(mdp)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "mdp": nouveau_mdp,
-                            "id_utilisateur": utilisateur.id_utilisateur
-                        }
+                        {"mdp": nouveau_mdp, "id_utilisateur": utilisateur.id_utilisateur},
                     )
                     res = cursor.rowcount
         except Exception as e:
             logging.info(e)
         return res == 1
 
-
     @log
-    def choisir_langue(self, utilisateur, langue) -> bool:
+    def choisir_langue(self, utilisateur, nouvelle_langue) -> bool:
         """
         Choisir la langue des instructions pour un utilisateur.
 
@@ -320,10 +313,7 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET langue = %(langue)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "langue": nouvelle_langue,
-                            "id_utilisateur": utilisateur.id_utilisateur
-                        }
+                        {"langue": nouvelle_langue, "id_utilisateur": utilisateur.id_utilisateur},
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -351,10 +341,7 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET pseudo = %(pseudo)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "pseudo": nouveau_pseudo,
-                            "id_utilisateur": utilisateur.id_utilisateur
-                        }
+                        {"pseudo": nouveau_pseudo, "id_utilisateur": utilisateur.id_utilisateur},
                     )
                     res = cursor.rowcount
         except Exception as e:

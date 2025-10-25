@@ -29,14 +29,17 @@ class UtilisateurService:
             L'utilisateur créé si succès
             sinon None
         """
-        if(age>=18):
+        if age >= 18:
             est_majeur = True
         else:
             est_majeur = False
         # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
-            pseudo=pseudo, mdp=hash_password(mdp, pseudo), age=age, langue=langue,
-            est_majeur=est_majeur
+            pseudo=pseudo,
+            mdp=hash_password(mdp, pseudo),
+            age=age,
+            langue=langue,
+            est_majeur=est_majeur,
         )
 
         if UtilisateurDao().creer_compte(utilisateur):
@@ -101,7 +104,7 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        return UtilisateurDao().supprimer(utilisateur)
+        return UtilisateurDao().supprimer_utilisateur(utilisateur)
 
     @log
     def pseudo_deja_utilise(self, pseudo: str, utilisateur_id=None) -> bool:
@@ -120,9 +123,10 @@ class UtilisateurService:
         """
         pseudo = pseudo.strip().lower()
         utilisateurs = UtilisateurDao().lister_tous()
-        pseudos_existant = [u.pseudo.strip().lower() for u in utilisateurs if u.id_utilisateur != utilisateur_id]
+        pseudos_existant = [
+            u.pseudo.strip().lower() for u in utilisateurs if u.id_utilisateur != utilisateur_id
+        ]
         return pseudo in pseudos_existant
-
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
@@ -168,7 +172,6 @@ class UtilisateurService:
         """
         utilisateur.langue = langue
         return UtilisateurDao().modifier(utilisateur)
-
 
     @log
     def changer_pseudo(self, utilisateur, nouveau_pseudo) -> bool:

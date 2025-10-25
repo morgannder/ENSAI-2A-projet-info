@@ -10,3 +10,5 @@ regex
 requests
 tabulate
 uvicorn
+jwt
+pyjwt

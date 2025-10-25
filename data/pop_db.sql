@@ -3,6 +3,8 @@ INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur) VA
 (2, 'a',             'a',     20,     'Français',      true)
 ;
 
+SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));
+
 INSERT INTO ingredient (id_ingredient, nom_ingredient, desc_ingredient) VALUES
 (0, 'Vodka', 'Vodka is a distilled beverage composed primarily of water and ethanol, sometimes with traces of impurities and flavorings. Traditionally, vodka is made by the distillation of fermented cereal grains or potatoes, though some modern brands use other substances, such as fruits or sugar.
 
