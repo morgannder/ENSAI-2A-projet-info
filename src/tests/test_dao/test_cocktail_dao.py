@@ -1,173 +1,131 @@
 import os
-import pytest
-
 from unittest.mock import patch
 
-from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
-
-from dao.cocktail_dao import CocktailDao
+import pytest
 
 from business_object.cocktail import Cocktail
+from dao.cocktail_dao import CocktailDao
+from utils.reset_database import ResetDatabase
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def setup_test_environment():
     """Initialisation des données de test"""
-    with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
+    with patch.dict(os.environ, {"POSTGRES_SCHEMA": "projet_test_dao"}):
         ResetDatabase().lancer(test_dao=True)
         yield
 
 
-def test_trouver_par_id_existant():
-    """Recherche par id d'un cocktail existant"""
-
-    # GIVEN
-    id_cocktail = 998
-
-    # WHEN
-    cocktail = CocktailDao().trouver_par_id(id_cocktail)
-
-    # THEN
-    assert cocktail is not None
+# -------------------- TEST 1 : Cocktails réalisables complètement --------------------
 
 
-def test_trouver_par_id_non_existant():
-    """Recherche par id d'un cocktail n'existant pas"""
+def test_cocktail_complet_ok(setup_test_environment):
+    """Utilisateur 3 possède tous les ingrédients pour Mojito et Old Fashioned."""
 
-    # GIVEN
-    id_cocktail = 9999999999999
+    # Given
+    id_utilisateur = 3
 
     # WHEN
-    cocktail = CocktailDao().trouver_par_id(id_cocktail)
-
-    # THEN
-    assert cocktail is None
-
-
-def test_lister_tous():
-    """Vérifie que la méthode renvoie une liste de Cocktail
-    de taille supérieure ou égale à 2
-    """
-
-    # GIVEN
-
-    # WHEN
-    cocktails = CocktailDao().lister_tous()
+    cocktails = CocktailDao().cocktail_complet(id_utilisateur)
 
     # THEN
     assert isinstance(cocktails, list)
-    for j in cocktails:
-        assert isinstance(j, Cocktail)
-    assert len(cocktails) >= 2
+    for c in cocktails:
+        assert isinstance(c, Cocktail)
+        print(c.nom_cocktail)
+
+    noms = sorted([c.nom_cocktail for c in cocktails])
+    # D’après la base de test : John (id 3) a tous les ingrédients de Mojito mais pas un Old Fashioned ni de Long Island
+    assert "Mojito" in noms  # 0 manquants
+    assert "Long Island" not in noms  # 0 manquants
+    assert "Old Fashioned" not in noms  # 0 manquants
 
 
-def test_creer_ok():
-    """Création de Cocktail réussie"""
+def test_cocktail_complet_ko(setup_test_environment):
+    """Utilisateur 6  n'a pas tous les ingrédients pour aucun cocktail."""
 
-    # GIVEN
-    cocktail = Cocktail(pseudo="gg", age=44, mail="test@test.io")
-
-    # WHEN
-    creation_ok = CocktailDao().creer(cocktail)
-
-    # THEN
-    assert creation_ok
-    assert cocktail.id_cocktail
-
-
-def test_creer_ko():
-    """Création de Cocktail échouée (age et mail incorrects)"""
-
-    # GIVEN
-    cocktail = Cocktail(pseudo="gg", age="chaine de caractere", mail=12)
+    # Given
+    id_utilisateur = 6
 
     # WHEN
-    creation_ok = CocktailDao().creer(cocktail)
+    cocktails = CocktailDao().cocktail_complet(id_utilisateur)
 
     # THEN
-    assert not creation_ok
+    assert isinstance(cocktails, list)
+    assert len(cocktails) == 0  # Aucun cocktail réalisable complètement
 
 
-def test_modifier_ok():
-    """Modification de Cocktail réussie"""
+# -------------------- TEST 2 : Cocktails partiels --------------------
 
-    # GIVEN
-    new_mail = "maurice@mail.com"
-    cocktail = Cocktail(id_cocktail=997, pseudo="maurice", age=20, mail=new_mail)
+
+def test_cocktail_partiel(setup_test_environment):
+    """Utilisateur peut faire Mojito et Old Fashioned"""
+
+    # Given
+    id_utilisateur = 3
+    nb_manquants = 2
 
     # WHEN
-    modification_ok = CocktailDao().modifier(cocktail)
+    cocktails = CocktailDao().cocktail_partiel(id_utilisateur, nb_manquants)
 
     # THEN
-    assert modification_ok
+    assert isinstance(cocktails, list)
+    for c in cocktails:
+        assert isinstance(c, Cocktail)
+        print(c.nom_cocktail)
+
+    noms = [c.nom_cocktail for c in cocktails]
+    assert len(cocktails) == 2
+    assert "Mojito" in noms  # 0 manquants
+    assert "Old Fashioned" in noms  # 0 manquants
+    assert "Long Island Tea" not in noms  # 4 manquants (trop)
 
 
-def test_modifier_ko():
-    """Modification de Cocktail échouée (id inconnu)"""
+# -------------------- TEST 3 : Recherche --------------------
+
+
+def test_rechercher_multi_filtres(setup_test_environment):
+    """Recherche combinant nom, catégorie, alcool  et verre."""
 
     # GIVEN
-    cocktail = Cocktail(id_cocktail=8888, pseudo="id inconnu", age=1, mail="no@mail.com")
+    alcool = "Non alcoholic"
+    nom_cocktail = "Coke"
+    categorie = "Soft Drink"
+    verre = "Cocktail glass"
 
     # WHEN
-    modification_ok = CocktailDao().modifier(cocktail)
+    cocktails = CocktailDao().rechercher_cocktails(nom_cocktail, categorie, verre, alcool)
 
     # THEN
-    assert not modification_ok
+    assert len(cocktails) == 1  # on s'attend à un seul cocktail correspondant
+    c = cocktails[0]
+    assert c.nom_cocktail == "Coke and Drops"
 
 
-def test_supprimer_ok():
-    """Suppression de Cocktail réussie"""
+# -------------------- TEST 4 : Cocktails aléatoires --------------------
+
+
+def test_cocktails_aleatoires(setup_test_environment):
+    """La méthode doit retourner entre 1 et 5 cocktails"""
 
     # GIVEN
-    cocktail = Cocktail(id_cocktail=995, pseudo="miguel", age=1, mail="miguel@projet.fr")
+    nb = 2
 
     # WHEN
-    suppression_ok = CocktailDao().supprimer(cocktail)
+    cocktails = CocktailDao().cocktails_aleatoires(nb)
 
     # THEN
-    assert suppression_ok
+    assert 1 <= len(cocktails) <= 2
+    for c in cocktails:
+        assert isinstance(c, Cocktail)
+        assert c.nom_cocktail  # le nom doit être présent
 
 
-def test_supprimer_ko():
-    """Suppression de Cocktail échouée (id inconnu)"""
+def test_cocktails_aleatoires_limite(setup_test_environment):
+    """Même si on demande plus de 10, le max doit être 5."""
 
-    # GIVEN
-    cocktail = Cocktail(id_cocktail=8888, pseudo="id inconnu", age=1, mail="no@z.fr")
-
-    # WHEN
-    suppression_ok = CocktailDao().supprimer(cocktail)
-
-    # THEN
-    assert not suppression_ok
-
-
-def test_se_connecter_ok():
-    """Connexion de Cocktail réussie"""
-
-    # GIVEN
-    pseudo = "batricia"
-    mdp = "9876"
-
-    # WHEN
-    cocktail = CocktailDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
-    assert isinstance(cocktail, Cocktail)
-
-
-def test_se_connecter_ko():
-    """Connexion de Cocktail échouée (pseudo ou mdp incorrect)"""
-
-    # GIVEN
-    pseudo = "toto"
-    mdp = "poiuytreza"
-
-    # WHEN
-    cocktail = CocktailDao().se_connecter(pseudo, hash_password(mdp, pseudo))
-
-    # THEN
-    assert not cocktail
+    cocktails = CocktailDao().cocktails_aleatoires(50)
+    assert len(cocktails) <= 5
 
 
 if __name__ == "__main__":
