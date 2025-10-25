@@ -7,6 +7,7 @@ from dao.cocktail_dao import CocktailDao
 from service.cocktail_service import CocktailService
 
 # ----- données de test -----
+
 cocktail1 = Cocktail(
     id_cocktail=1,
     nom_cocktail="Mojito",
