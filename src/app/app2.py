@@ -110,6 +110,14 @@ class UserCreate(BaseModel):
     langue: str  # "FR", "EN", "ES"
 
 
+class Ingredient(BaseModel):
+    nom_ingredient: str
+
+
+class Reponse(BaseModel):
+    confirmation: str
+
+
 # --- Route d'inscription ---
 
 
@@ -176,12 +184,12 @@ def connexion(data):
 # ---------------------------
 
 
-@app.post("/deconnexion", tags=["Utilisateur"])
+@app.post("/mon_compte/deconnexion", tags=["Utilisateur"])
 def deconnexion(tilisateur: Utilisateur = Depends(get_current_user)):
     return
 
 
-@app.get("/moi/compte", tags=["Utilisateur"])
+@app.get("/mon_compte/informations", tags=["Utilisateur"])
 def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     print("DEBUG /me appelé pour l'utilisateur:", utilisateur)
 
@@ -193,16 +201,45 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     }
 
 
-@app.put("/moi/mise_a_jour", tags=["Utilisateur"])
+@app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
 def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     """Met à jour le compte de l'utilisateur connecté"""
     return
 
 
-@app.delete("/moi/supprimer", tags=["Utilisateur"])
-def supprime_compte(utilisateur: Utilisateur = Depends(get_current_user)):
-    """Supprime le compte de l'utilisateur connecté"""
-    return
+@app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
+def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
+    """
+    Supprime le compte de l'utilisateur connecté et le déconnecte
+    """
+    try:
+        # Récupérer l'ID avant suppression pour les logs
+        id_utilisateur = utilisateur.id_utilisateur
+        pseudo = utilisateur.pseudo
+        if reponse.confirmation == "CONFIRMER":
+            # Appeler le service pour supprimer le compte
+            suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
+
+            if not suppression_reussie:
+                raise HTTPException(
+                    status_code=500, detail="Erreur lors de la suppression du compte"
+                )
+
+            return {
+                "information": f"Le compte au nom de {pseudo}, associé à l'id {id_utilisateur} à été supprimé",
+                "message": "Compte supprimé avec succès. Vous avez été déconnecté.",
+                "supprime": True,
+            }
+        else:
+            raise HTTPException(
+                status_code=409,
+                detail="Erreur de conflit, vous devez taper CONFIRMER dans le champ de confirmation pour valider votre requête",
+            )
+        print("la")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Erreur interne du serveur")
 
 
 # ---------------------------
@@ -211,18 +248,24 @@ def supprime_compte(utilisateur: Utilisateur = Depends(get_current_user)):
 @app.get("/inventaire/vue", tags=["Inventaire"])
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     """Montre l'inventaire de l'utilisateur"""
+    try:
+        return service_inventaire.consulter_inventaire(utilisateur.id_utilisateur)
 
-    return service_inventaire.consulter_inventaire(utilisateur.id_utilisateur)
+    except Exception as e:
+        print("DEBUG /inventaire/vue: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la visualisation de l'inventaire"
+        )
 
 
-@app.put("/inventaire/ajoute", tags=["Inventaire"])
-def ajoute_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
+@app.put("/inventaire/ajouter", tags=["Inventaire"])
+def ajoute_ingredient(request: Ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
 
     return
 
 
-@app.delete("/inventaire/supprime", tags=["Inventaire"])
+@app.delete("/inventaire/supprimer", tags=["Inventaire"])
 def supprime_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
 
