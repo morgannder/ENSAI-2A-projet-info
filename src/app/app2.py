@@ -146,12 +146,19 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/inscription", tags=["Visiteur"])
 def inscription(data: UserCreate):
     print("DEBUG /register: données reçues:", data)
-
+    print("DEBUG: langue reçue =", data.langue)
+    print("DEBUG: langues valides =", LANGUES_VALIDES)
+    print("DEBUG: test langue valide =", data.langue in LANGUES_VALIDES)
     try:
         if data.langue not in LANGUES_VALIDES:
             raise HTTPException(
                 status_code=400,
                 detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+            )
+        if data.age < 13 or data.age > 130:
+            raise HTTPException(
+                status_code=400,
+                detail=f"L'âge '{data.age}' n'est pas valide. Il doit être compris entre 13 et 130 ans.",
             )
         # Appel de la méthode existante du service
         utilisateur = service_utilisateur.creer_utilisateur(
@@ -177,7 +184,8 @@ def inscription(data: UserCreate):
             "access_token": token,
             "token_type": "bearer",
         }
-
+    except HTTPException:
+        raise
     except Exception as e:
         print("DEBUG /register: exception", e)
         raise HTTPException(
@@ -208,40 +216,54 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
         "langue": utilisateur.langue,
-        "est_majeur": utilisateur.est_majeur,
     }
 
 
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
 def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
-    """Met à jour le compte de l'utilisateur connecté"""
     print("DEBUG /me/update: données reçues:", data)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
+    changements = []
+
     try:
         if data.nouveau_pseudo:
+            if data.nouveau_pseudo == utilisateur.pseudo:
+                raise HTTPException(status_code=400, detail="Le nouveau pseudo est identique à l'ancien")
             succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
-            print("DEBUG changement pseudo:", succes)
             if not succes:
                 raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
+            changements.append("pseudo")
 
         if data.nouveau_mdp:
-            succes = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
-            print("DEBUG changement mdp:", succes)
-            if not succes:
-                raise HTTPException(status_code=400, detail="Erreur changement mot de passe")
+            resultat = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
+            if resultat == "identique":
+                raise HTTPException(status_code=400, detail="Le nouveau mot de passe est identique à l'ancien")
+            elif resultat == "erreur":
+                raise HTTPException(status_code=500, detail="Erreur interne lors du changement de mot de passe")
+            else:
+                changements.append("mot de passe")
 
         if data.langue:
             succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
-            print("DEBUG changement langue:", succes)
             if not succes:
-                raise HTTPException(status_code=400, detail="Erreur changement langue")
+                raise HTTPException(status_code=400, detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}")
+            changements.append("langue")
 
+        if not changements:
+            raise HTTPException(status_code=400, detail="Aucune modification fournie")
+
+        return {
+            "message": f"Modification réussie : {', '.join(changements)}",
+            "utilisateur": utilisateur.pseudo,
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
         print("DEBUG /register: exception", e)
-        raise HTTPException(
-            status_code=500, detail="Erreur interne lors de la création utilisateur"
-        )
+        raise HTTPException(status_code=500, detail="Erreur interne lors de la mise à jour utilisateur")
+
 
 
 @app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
@@ -273,6 +295,8 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
                 status_code=409,
                 detail="Erreur de conflit, vous devez taper CONFIRMER dans le champ de confirmation pour valider votre requête",
             )
+    except HTTPException:
+        raise
     except Exception as e:
         print("DEBUG /register: exception", e)
         raise HTTPException(
@@ -384,4 +408,4 @@ def update_my_info(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=5432)
