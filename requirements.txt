@@ -12,3 +12,4 @@ tabulate
 uvicorn
 jwt
 pyjwt
+python-multipart

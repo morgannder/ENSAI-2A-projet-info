@@ -33,10 +33,12 @@ class UtilisateurService:
             est_majeur = True
         else:
             est_majeur = False
+
+
         # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
             pseudo=pseudo,
-            mdp=hash_password(mdp, pseudo),
+            mdp=hash_password(mdp, langue),
             age=age,
             langue=langue,
             est_majeur=est_majeur,
@@ -48,7 +50,12 @@ class UtilisateurService:
             return None
 
     @log
-    def se_connecter(self, pseudo, mdp, test_mode=False) -> Utilisateur:
+    def trouver_par_pseudo(self, id_utilisateur) -> Utilisateur:
+        """Trouver un utilisateur à partir de son pseudo"""
+        return UtilisateurDao().trouver_par_pseudo(id_utilisateur)
+
+    @log
+    def se_connecter(self, pseudo, mdp) -> Utilisateur:
         """
         Se connecter avec un pseudo et un mot de passe.
 
@@ -65,8 +72,10 @@ class UtilisateurService:
             L'utilisateur trouvé si succès
             sinon None
         """
-        if not test_mode:
-            mdp = hash_password(mdp, pseudo)
+        utilisateur = self.trouver_par_pseudo(pseudo)
+        if not utilisateur:
+            return None
+        mdp = hash_password(mdp, utilisateur.langue)
         return UtilisateurDao().se_connecter(pseudo, mdp)
 
     @log
@@ -121,22 +130,23 @@ class UtilisateurService:
         bool
             True si le pseudo existe déjà en BDD, False sinon.
         """
-        pseudo = pseudo.strip().lower()
         utilisateurs = UtilisateurDao().lister_tous()
-        pseudos_existant = [
-            u.pseudo.strip().lower() for u in utilisateurs if u.id_utilisateur != utilisateur_id
-        ]
-        return pseudo in pseudos_existant
+        return pseudo in [u.pseudo for u in utilisateurs]
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
         """Trouver un utilisateur à partir de son id"""
         return UtilisateurDao().trouver_par_id(id_utilisateur)
 
+
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
+    @log
+    def verif_mdp(self, mdp_clair: str, mdp_hash: str, sel: str = "") -> bool:
+        """Vérifie si le mot de passe en clair correspond au hash stocké"""
+        return hash_password(mdp_clair, sel) == mdp_hash
 
     @log
-    def changer_mdp(self, utilisateur, nouveau_mdp) -> bool:
+    def changer_mdp(self, utilisateur, nouveau_mdp) -> str:
         """
         Changer le mot de passe d'un utilisateur.
 
@@ -147,12 +157,19 @@ class UtilisateurService:
 
         Returns
         -------
-        bool
-            True si la suppression a réussie
-            False sinon
+        str
+            identique si le mdp entré est le même que l'ancien
+            success si changement réussi
+            echec sinon
         """
-        utilisateur.mdp = hash_password(nouveau_mdp, utilisateur.pseudo)
-        return UtilisateurDao().modifier(utilisateur)
+        if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=utilisateur.langue):
+            return "identique"
+        utilisateur.mdp = hash_password(nouveau_mdp, utilisateur.langue)
+
+        if UtilisateurDao().modifier(utilisateur):
+            return "success"
+        else:
+            return "echec"
 
     @log
     def choisir_langue(self, utilisateur, langue) -> bool:
