@@ -170,6 +170,47 @@ class UtilisateurDao(metaclass=Singleton):
         return utilisateur
 
     @log
+    def trouver_par_pseudo(self, pseudo) -> Utilisateur:
+        """trouver un utilisateur grace à son id
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            numéro id de l'utilisateur que l'on souhaite trouver
+
+        Returns
+        -------
+        utilisateur : Utilisateur
+            renvoie l'utilisateur que l'on cherche par id
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT *                           "
+                        "  FROM utilisateur                      "
+                        " WHERE pseudo = %(pseudo)s;  ",
+                        {"pseudo": pseudo},
+                    )
+                    res = cursor.fetchone()
+        except Exception as e:
+            logging.info(e)
+            raise
+
+        utilisateur = None
+        if res:
+            utilisateur = Utilisateur(
+                pseudo=res["pseudo"],
+                mdp=res["mdp"],
+                age=res["age"],
+                langue=res["langue"],
+                est_majeur=res["est_majeur"],
+                id_utilisateur=res["id_utilisateur"],
+            )
+
+        return utilisateur
+
+    @log
     def lister_tous(self) -> list[Utilisateur]:
         """lister tous les utilisateurs
 
@@ -212,7 +253,9 @@ class UtilisateurDao(metaclass=Singleton):
 
         return liste_utilisateurs
 
-    # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
+    # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------
+
+
 
     ## OPTION 1 : fonction commune pour la mmodif des elements
     @log

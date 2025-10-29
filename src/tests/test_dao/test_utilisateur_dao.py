@@ -41,6 +41,26 @@ def test_trouver_par_id_non_existant():
     assert utilisateur is None
 
 
+def test_trouver_par_pseudo_existant():
+    """Recherche par id d'un utilisateur existant"""
+    # GIVEN
+    pseudo = "batricia"
+
+    # WHEN
+    utilisateur = UtilisateurDao().trouver_par_pseudo(pseudo)
+
+    # THEN
+    assert utilisateur is not None
+    assert isinstance(utilisateur, Utilisateur)
+    assert utilisateur.id_utilisateur == 4
+
+
+def test_trouver_par_pseudo_non_existant():
+    """Recherche par id d'un utilisateur n'existant pas"""
+    utilisateur = UtilisateurDao().trouver_par_pseudo("allllo")
+    assert utilisateur is None
+
+
 def test_lister_tous():
     """Liste complète des utilisateurs"""
     utilisateurs = UtilisateurDao().lister_tous()
