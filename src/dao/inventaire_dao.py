@@ -11,14 +11,68 @@ class InventaireDao(metaclass=Singleton):
     """Accès aux ingrédients de la base de données."""
 
     @log
-    def creer_ingredient(self, ingredient: Ingredient) -> bool:
-        """
-        Créer un ingrédient dans l'inventaire global.
-        Attend: Ingredient(id_ingredient: Optional[int], nom_ingredient: str, desc_ingredient: Optional[str])
-        """
-        if ingredient is None:
+    def ajouter_ingredient_inventaire(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
+
+        if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
             return False
-        if not isinstance(ingredient.nom_ingredient, str) or not ingredient.nom_ingredient.strip():
+        if ingredient is None or not isinstance(ingredient.nom_ingredient, str) or not ingredient.nom_ingredient.strip():
+            return False
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # 1) Récupérer/créer l'ingrédient si pas d'id
+                    if ingredient.id_ingredient is None:
+                        cursor.execute(
+                            """
+                            SELECT id_ingredient
+                            FROM ingredient
+                            WHERE lower(nom_ingredient) = lower(%(nom)s);
+                            """,
+                            {"nom": ingredient.nom_ingredient.strip()},
+                        )
+                        row = cursor.fetchone()
+                        if row:
+                            ing_id = row["id_ingredient"] if isinstance(row, dict) else row[0]
+                        else:
+                            cursor.execute(
+                                """
+                                INSERT INTO ingredient (nom_ingredient, desc_ingredient)
+                                VALUES (%(nom)s, %(desc)s)
+                                RETURNING id_ingredient;
+                                """,
+                                {
+                                    "nom": ingredient.nom_ingredient.strip(),
+                                    "desc": getattr(ingredient, "desc_ingredient", None),
+                                },
+                            )
+                            row = cursor.fetchone()
+                            if not row:
+                                return False
+                            ing_id = row["id_ingredient"] if isinstance(row, dict) else row[0]
+                            ingredient.id_ingredient = int(ing_id)
+                    else:
+                        ing_id = int(ingredient.id_ingredient)
+
+                    # 2) Lier à l'inventaire utilisateur (éviter doublons)
+                    cursor.execute(
+                        """
+                        INSERT INTO inventaire_ingredient (id_ingredient, id_utilisateur)
+                        VALUES (%(id_ing)s, %(id_user)s)
+                        ON CONFLICT (id_ingredient, id_utilisateur) DO NOTHING;
+                        """,
+                        {"id_ing": ing_id, "id_user": id_utilisateur},
+                    )
+                    return True
+        except Exception as e:
+            logging.exception("Erreur lors de l'ajout à l'inventaire: %s", e)
+            return False
+
+    @log
+    def supprimer_ingredient(self, id_utilisateur: int, id_ingredient: int) -> bool:
+        if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
+            return False
+        if not isinstance(id_ingredient, int) or id_ingredient <= 0:
             return False
 
         try:
@@ -26,56 +80,15 @@ class InventaireDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        INSERT INTO ingredient (nom_ingredient, desc_ingredient)
-                        VALUES (%(nom)s, %(desc)s)
-                        RETURNING id_ingredient;
+                        DELETE FROM inventaire_ingredient
+                        WHERE id_utilisateur = %(idu)s
+                          AND id_ingredient = %(idi)s;
                         """,
-                        {"nom": ingredient.nom_ingredient.strip(), "desc": ingredient.desc_ingredient},
-                    )
-                    row = cursor.fetchone()
-        except Exception as e:
-            logging.exception("Erreur lors de la création d'un ingrédient: %s", e)
-            return False
-
-        if not row:
-            return False
-
-        new_id = row["id_ingredient"] if isinstance(row, dict) else row[0]
-        try:
-            ingredient.id_ingredient = int(new_id)  # affectation directe
-        except Exception:
-            return False
-
-        return True
-
-    @log
-    def supprimer_ingredient(self, id_ingredient: int) -> bool:
-        """
-        Supprimer un ingrédient de l'inventaire global.
-        """
-        if not isinstance(id_ingredient, int):
-            return False
-
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    # Supprimer d'abord les références éventuelles côté utilisateurs
-                    try:
-                        cursor.execute(
-                            "DELETE FROM inventaire_ingredient WHERE id_ingredient = %(id)s;",
-                            {"id": id_ingredient},
-                        )
-                    except Exception:
-                        # si la table n'existe pas (selon contexte), on ignore
-                        pass
-
-                    cursor.execute(
-                        "DELETE FROM ingredient WHERE id_ingredient = %(id)s;",
-                        {"id": id_ingredient},
+                        {"idu": id_utilisateur, "idi": id_ingredient},
                     )
                     deleted = cursor.rowcount
         except Exception as e:
-            logging.exception("Erreur lors de la suppression d'un ingrédient: %s", e)
+            logging.exception("Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s", e)
             return False
 
         return deleted > 0

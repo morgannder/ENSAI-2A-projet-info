@@ -1,174 +1,268 @@
-import os
+from unittest.mock import MagicMock
 import pytest
 
-from unittest.mock import patch
-
-from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
-
 from dao.inventaire_dao import InventaireDao
-
-from business_object.inventaire import Inventaire
-
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_test_environment():
-    """Initialisation des données de test"""
-    with patch.dict(os.environ, {"SCHEMA": "projet_test_dao"}):
-        ResetDatabase().lancer(test_dao=True)
-        yield
+from dao import db_connection as db_module
+from business_object.ingredient import Ingredient
 
 
-def test_trouver_par_id_existant():
-    """Recherche par id d'un inventaire existant"""
+
+def _patch_db(monkeypatch, cursor_mock: MagicMock):
 
     # GIVEN
-    id_inventaire = 998
+    cursor_cm = MagicMock()
+    cursor_cm.__enter__.return_value = cursor_mock
+    cursor_cm.__exit__.return_value = False
+
+    connection_mock = MagicMock()
+    connection_mock.cursor.return_value = cursor_cm
+
+    connection_cm = MagicMock()
+    connection_cm.__enter__.return_value = connection_mock
+    connection_cm.__exit__.return_value = False
+
+    fake_db = MagicMock()
+    fake_db.connection = connection_cm
 
     # WHEN
-    inventaire = InventaireDao().trouver_par_id(id_inventaire)
-
-    # THEN
-    assert inventaire is not None
+    monkeypatch.setattr(db_module, "DBConnection", lambda: fake_db)
 
 
-def test_trouver_par_id_non_existant():
-    """Recherche par id d'un inventaire n'existant pas"""
-
+def test_ajouter_ingredient_inventaire_cree_nouveau(monkeypatch):
+    """Ingrédient sans id, introuvable -> INSERT RETURNING id, puis lien inventaire."""
     # GIVEN
-    id_inventaire = 9999999999999
+    cursor = MagicMock()
+    cursor.fetchone.side_effect = [None, {"id_ingredient": 999}]
+    _patch_db(monkeypatch, cursor)
+    ing = Ingredient(id_ingredient=None, nom_ingredient="NouveauGin", desc_ingredient="desc")
 
     # WHEN
-    inventaire = InventaireDao().trouver_par_id(id_inventaire)
+    ok = InventaireDao().ajouter_ingredient_inventaire(3, ing)
 
     # THEN
-    assert inventaire is None
+    assert ok is True
+    assert ing.id_ingredient == 999
+    assert cursor.execute.call_count >= 2  # SELECT + INSERT ingredient + INSERT inventaire (>=2)
 
 
-def test_lister_tous():
-    """Vérifie que la méthode renvoie une liste de Inventaire
-    de taille supérieure ou égale à 2
-    """
-
+def test_ajouter_ingredient_inventaire_existant_par_nom(monkeypatch):
+    """Ingrédient sans id mais déjà présent (SELECT renvoie un id) -> lien inventaire."""
     # GIVEN
+    cursor = MagicMock()
+    cursor.fetchone.side_effect = [{"id_ingredient": 244}]
+    _patch_db(monkeypatch, cursor)
+    ing = Ingredient(id_ingredient=None, nom_ingredient="Light Rum", desc_ingredient=None)
 
     # WHEN
-    inventaires = InventaireDao().lister_tous()
+    ok = InventaireDao().ajouter_ingredient_inventaire(3, ing)
 
     # THEN
-    assert isinstance(inventaires, list)
-    for j in inventaires:
-        assert isinstance(j, Inventaire)
-    assert len(inventaires) >= 2
+    assert ok is True
+    assert ing.id_ingredient in (None, 244)
+    assert cursor.execute.call_count >= 2
 
 
-def test_creer_ok():
-    """Création de Inventaire réussie"""
-
+def test_ajouter_ingredient_inventaire_avec_id_deja_renseigne(monkeypatch):
+    """Ingrédient avec id -> pas de SELECT/INSERT sur ingredient, seulement lien inventaire."""
     # GIVEN
-    inventaire = Inventaire(pseudo="gg", age=44, mail="test@test.io")
+    cursor = MagicMock()
+    _patch_db(monkeypatch, cursor)
+    ing = Ingredient(id_ingredient=18, nom_ingredient="Angostura Bitters", desc_ingredient="desc")
 
     # WHEN
-    creation_ok = InventaireDao().creer(inventaire)
+    ok = InventaireDao().ajouter_ingredient_inventaire(5, ing)
 
     # THEN
-    assert creation_ok
-    assert inventaire.id_inventaire
+    assert ok is True
+    assert cursor.execute.call_count >= 1
 
 
-def test_creer_ko():
-    """Création de Inventaire échouée (age et mail incorrects)"""
-
+@pytest.mark.parametrize("user_id, ing, expected", [
+    (0, Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None), False),
+    (-1, Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None), False),
+    (1, None, False),
+    (1, Ingredient(id_ingredient=None, nom_ingredient="   ", desc_ingredient=None), False),
+])
+def test_ajouter_ingredient_inventaire_entrees_invalides(monkeypatch, user_id, ing, expected):
     # GIVEN
-    inventaire = Inventaire(pseudo="gg", age="chaine de caractere", mail=12)
+    cursor = MagicMock()
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    creation_ok = InventaireDao().creer(inventaire)
+    res = InventaireDao().ajouter_ingredient_inventaire(user_id, ing)
 
     # THEN
-    assert not creation_ok
+    assert res is expected
+    cursor.execute.assert_not_called()
 
 
-def test_modifier_ok():
-    """Modification de Inventaire réussie"""
-
+def test_ajouter_ingredient_inventaire_exception(monkeypatch):
+    """Exception d'exécution SQL -> False."""
     # GIVEN
-    new_mail = "maurice@mail.com"
-    inventaire = Inventaire(id_inventaire=997, pseudo="maurice", age=20, mail=new_mail)
+    cursor = MagicMock()
+    cursor.execute.side_effect = RuntimeError("boom execute")
+    _patch_db(monkeypatch, cursor)
+    ing = Ingredient(id_ingredient=None, nom_ingredient="Boom", desc_ingredient=None)
 
     # WHEN
-    modification_ok = InventaireDao().modifier(inventaire)
+    res = InventaireDao().ajouter_ingredient_inventaire(2, ing)
 
     # THEN
-    assert modification_ok
+    assert res is False
 
 
-def test_modifier_ko():
-    """Modification de Inventaire échouée (id inconnu)"""
+# ------------------------------
+# Tests supprimer_ingredient
+# ------------------------------
 
+def test_supprimer_ingredient_succes(monkeypatch):
+    """Suppression du lien utilisateur/ingrédient -> True si rowcount > 0."""
     # GIVEN
-    inventaire = Inventaire(id_inventaire=8888, pseudo="id inconnu", age=1, mail="no@mail.com")
+    cursor = MagicMock()
+    cursor.rowcount = 1
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    modification_ok = InventaireDao().modifier(inventaire)
+    res = InventaireDao().supprimer_ingredient(3, 244)
 
     # THEN
-    assert not modification_ok
+    assert res is True
+    cursor.execute.assert_called_once()
+    called_sql, called_params = cursor.execute.call_args[0]
+    assert "id_utilisateur" in called_sql and "id_ingredient" in called_sql
+    assert called_params["idu"] == 3 and called_params["idi"] == 244
 
 
-def test_supprimer_ok():
-    """Suppression de Inventaire réussie"""
-
+def test_supprimer_ingredient_aucune_ligne(monkeypatch):
+    """Suppression sans ligne affectée -> False."""
     # GIVEN
-    inventaire = Inventaire(id_inventaire=995, pseudo="miguel", age=1, mail="miguel@projet.fr")
+    cursor = MagicMock()
+    cursor.rowcount = 0
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    suppression_ok = InventaireDao().supprimer(inventaire)
+    res = InventaireDao().supprimer_ingredient(3, 99999)
 
     # THEN
-    assert suppression_ok
+    assert res is False
 
 
-def test_supprimer_ko():
-    """Suppression de Inventaire échouée (id inconnu)"""
-
+@pytest.mark.parametrize("user_id, ing_id, expected", [
+    (None, 1, False),
+    ("x", 1, False),
+    (0, 1, False),
+    (1, None, False),
+    (1, "y", False),
+    (1, 0, False),
+])
+def test_supprimer_ingredient_entrees_invalides(monkeypatch, user_id, ing_id, expected):
     # GIVEN
-    inventaire = Inventaire(id_inventaire=8888, pseudo="id inconnu", age=1, mail="no@z.fr")
+    cursor = MagicMock()
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    suppression_ok = InventaireDao().supprimer(inventaire)
+    res = InventaireDao().supprimer_ingredient(user_id, ing_id)
 
     # THEN
-    assert not suppression_ok
+    assert res is expected
+    cursor.execute.assert_not_called()
 
 
-def test_se_connecter_ok():
-    """Connexion de Inventaire réussie"""
-
+def test_supprimer_ingredient_exception(monkeypatch):
+    """Exception pendant le DELETE -> False."""
     # GIVEN
-    pseudo = "batricia"
-    mdp = "9876"
+    cursor = MagicMock()
+    cursor.execute.side_effect = RuntimeError("boom")
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    inventaire = InventaireDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+    res = InventaireDao().supprimer_ingredient(3, 244)
 
     # THEN
-    assert isinstance(inventaire, Inventaire)
+    assert res is False
 
 
-def test_se_connecter_ko():
-    """Connexion de Inventaire échouée (pseudo ou mdp incorrect)"""
+# ------------------------------
+# Tests consulter_inventaire
+# ------------------------------
 
+def test_consulter_inventaire_retour_dicts(monkeypatch):
+    """fetchall renvoie des dicts -> mapping via clés."""
     # GIVEN
-    pseudo = "toto"
-    mdp = "poiuytreza"
+    cursor = MagicMock()
+    cursor.fetchall.return_value = [
+        {"id_ingredient": 244, "nom_ingredient": "Light Rum", "desc_ingredient": "desc"},
+        {"id_ingredient": 251, "nom_ingredient": "Lime", "desc_ingredient": None},
+    ]
+    _patch_db(monkeypatch, cursor)
 
     # WHEN
-    inventaire = InventaireDao().se_connecter(pseudo, hash_password(mdp, pseudo))
+    lst = InventaireDao().consulter_inventaire(3)
 
     # THEN
-    assert not inventaire
+    assert len(lst) == 2
+    assert lst[0].id_ingredient == 244
+    assert lst[1].nom_ingredient == "Lime"
+
+
+def test_consulter_inventaire_retour_tuples(monkeypatch):
+    """fetchall renvoie des tuples -> mapping via indices."""
+    # GIVEN
+    cursor = MagicMock()
+    cursor.fetchall.return_value = [
+        (379, "Sugar", "desc"),
+        (361, "Soda Water", None),
+    ]
+    _patch_db(monkeypatch, cursor)
+
+    # WHEN
+    lst = InventaireDao().consulter_inventaire(3)
+
+    # THEN
+    assert [x.id_ingredient for x in lst] == [379, 361]
+    assert lst[1].desc_ingredient is None
+
+
+def test_consulter_inventaire_aucun_resultat(monkeypatch):
+    """Aucun ingrédient -> liste vide."""
+    # GIVEN
+    cursor = MagicMock()
+    cursor.fetchall.return_value = []
+    _patch_db(monkeypatch, cursor)
+
+    # WHEN
+    res = InventaireDao().consulter_inventaire(3)
+
+    # THEN
+    assert res == []
+
+
+def test_consulter_inventaire_id_invalide():
+    """Id utilisateur invalide -> court-circuit, pas d'appel DB, liste vide."""
+    # GIVEN
+    # (rien)
+
+    # WHEN
+    res = InventaireDao().consulter_inventaire("x")
+
+    # THEN
+    assert res == []
+
+
+def test_consulter_inventaire_exception(monkeypatch):
+    """Exception pendant la requête -> []"""
+    # GIVEN
+    cursor = MagicMock()
+    cursor.execute.side_effect = RuntimeError("boom")
+    _patch_db(monkeypatch, cursor)
+
+    # WHEN
+    res = InventaireDao().consulter_inventaire(3)
+
+    # THEN
+    assert res == []
 
 
 if __name__ == "__main__":
+    import pytest
     pytest.main([__file__])

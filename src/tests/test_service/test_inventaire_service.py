@@ -1,107 +1,273 @@
 from unittest.mock import MagicMock
+import pytest
 
 from service.inventaire_service import InventaireService
-
 from dao.inventaire_dao import InventaireDao
+from business_object.ingredient import Ingredient
 
-from business_object.inventaire import Inventaire
 
+# -----------------------------
+# Jeux de données de base
+# -----------------------------
 
-liste_inventaires = [
-    Inventaire(pseudo="jp", age="10", mail="jp@mail.fr", mdp="1234"),
-    Inventaire(pseudo="lea", age="10", mail="lea@mail.fr", mdp="0000"),
-    Inventaire(pseudo="gg", age="10", mail="gg@mail.fr", mdp="abcd"),
+ING_LISTE = [
+    Ingredient(id_ingredient=244, nom_ingredient="Light Rum", desc_ingredient="desc"),
+    Ingredient(id_ingredient=251, nom_ingredient="Lime", desc_ingredient=None),
+    Ingredient(id_ingredient=379, nom_ingredient="Sugar", desc_ingredient="desc"),
 ]
 
 
-def test_creer_ok():
-    """ "Création de Inventaire réussie"""
+# -----------------------------
+# Tests lister
+# -----------------------------
 
+def test_lister_ok():
+    """La DAO renvoie une liste d'ingrédients -> le service la relaie telle quelle."""
     # GIVEN
-    pseudo, mdp, age, mail, fan_pokemon = "jp", "1234", 15, "z@mail.oo", True
-    InventaireDao().creer = MagicMock(return_value=True)
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
 
     # WHEN
-    inventaire = InventaireService().creer(pseudo, mdp, age, mail, fan_pokemon)
+    lst = InventaireService().lister(3)
 
     # THEN
-    assert inventaire.pseudo == pseudo
+    assert lst == ING_LISTE
+    InventaireDao().consulter_inventaire.assert_called_once_with(3)
 
 
-def test_creer_echec():
-    """Création de Inventaire échouée
-    (car la méthode InventaireDao().creer retourne False)"""
-
+def test_lister_id_invalide():
+    """Id utilisateur invalide -> [] sans appeler la DAO."""
     # GIVEN
-    pseudo, mdp, age, mail, fan_pokemon = "jp", "1234", 15, "z@mail.oo", True
-    InventaireDao().creer = MagicMock(return_value=False)
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
 
     # WHEN
-    inventaire = InventaireService().creer(pseudo, mdp, age, mail, fan_pokemon)
+    res = InventaireService().lister("x")
 
     # THEN
-    assert inventaire is None
+    assert res == []
+    InventaireDao().consulter_inventaire.assert_not_called()
 
 
-def test_lister_tous_inclure_mdp_true():
-    """Lister les Inventaires en incluant les mots de passe"""
+# -----------------------------
+# Tests ajouter
+# -----------------------------
 
+def test_ajouter_ok():
+    """Ajout via DAO -> True"""
     # GIVEN
-    InventaireDao().lister_tous = MagicMock(return_value=liste_inventaires)
+    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
+    ing = Ingredient(id_ingredient=None, nom_ingredient="Mint", desc_ingredient=None)
 
     # WHEN
-    res = InventaireService().lister_tous(inclure_mdp=True)
-
-    # THEN
-    assert len(res) == 3
-    for inventaire in res:
-        assert inventaire.mdp is not None
-
-
-def test_lister_tous_inclure_mdp_false():
-    """Lister les Inventaires en excluant les mots de passe"""
-
-    # GIVEN
-    InventaireDao().lister_tous = MagicMock(return_value=liste_inventaires)
-
-    # WHEN
-    res = InventaireService().lister_tous()
-
-    # THEN
-    assert len(res) == 3
-    for inventaire in res:
-        assert not inventaire.mdp
-
-
-def test_pseudo_deja_utilise_oui():
-    """Le pseudo est déjà utilisé dans liste_inventaires"""
-
-    # GIVEN
-    pseudo = "lea"
-
-    # WHEN
-    InventaireDao().lister_tous = MagicMock(return_value=liste_inventaires)
-    res = InventaireService().pseudo_deja_utilise(pseudo)
+    res = InventaireService().ajouter(3, ing)
 
     # THEN
     assert res
+    InventaireDao().ajouter_ingredient_inventaire.assert_called_once()
 
 
-def test_pseudo_deja_utilise_non():
-    """Le pseudo n'est pas utilisé dans liste_inventaires"""
-
+def test_ajouter_objet_invalide():
+    """L'objet passé n'est pas un Ingredient -> False et DAO non appelée."""
     # GIVEN
-    pseudo = "chaton"
+    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
 
     # WHEN
-    InventaireDao().lister_tous = MagicMock(return_value=liste_inventaires)
-    res = InventaireService().pseudo_deja_utilise(pseudo)
+    res = InventaireService().ajouter(3, "pas-un-ingredient")
+
+    # THEN
+    assert res is False
+    InventaireDao().ajouter_ingredient_inventaire.assert_not_called()
+
+
+# -----------------------------
+# Tests supprimer
+# -----------------------------
+
+def test_supprimer_ok():
+    """Suppression d'un ingrédient de l'inventaire perso -> True"""
+    # GIVEN
+    InventaireDao().supprimer_ingredient = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().supprimer(3, 244)
+
+    # THEN
+    assert res
+    InventaireDao().supprimer_ingredient.assert_called_once_with(3, 244)
+
+
+def test_supprimer_echec():
+    """DAO renvoie False -> service renvoie False"""
+    # GIVEN
+    InventaireDao().supprimer_ingredient = MagicMock(return_value=False)
+
+    # WHEN
+    res = InventaireService().supprimer(3, 99999)
 
     # THEN
     assert not res
 
 
+# -----------------------------
+# Tests ajouter_par_nom
+# -----------------------------
+
+def test_ajouter_par_nom_ok_sans_id():
+    """Construction d'un Ingredient et délégation à la DAO."""
+    # GIVEN
+    dao_mock = MagicMock(return_value=True)
+    InventaireDao().ajouter_ingredient_inventaire = dao_mock
+
+    # WHEN
+    res = InventaireService().ajouter_par_nom(3, "Mint", desc_ingredient="herb")
+
+    # THEN
+    assert res
+    args = dao_mock.call_args[0]  # (id_utilisateur, ingredient)
+    assert args[0] == 3
+    assert isinstance(args[1], Ingredient)
+    assert args[1].nom_ingredient == "Mint"
+    assert args[1].id_ingredient is None
+
+
+def test_ajouter_par_nom_ok_avec_id():
+    """Si on fournit id_ingredient, il est propagé à l'objet créé."""
+    # GIVEN
+    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().ajouter_par_nom(5, "Sugar", id_ingredient=379)
+
+    # THEN
+    assert res
+    called_args = InventaireDao().ajouter_ingredient_inventaire.call_args[0]
+    ing_passed: Ingredient = called_args[1]
+    assert ing_passed.id_ingredient == 379
+    assert ing_passed.nom_ingredient == "Sugar"
+
+
+def test_ajouter_par_nom_nom_vide():
+    """Nom vide/blanc -> False et DAO non appelée."""
+    # GIVEN
+    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().ajouter_par_nom(3, "   ")
+
+    # THEN
+    assert not res
+    InventaireDao().ajouter_ingredient_inventaire.assert_not_called()
+
+
+# -----------------------------
+# Tests contient
+# -----------------------------
+
+def test_contient_par_id_oui():
+    """Recherche par id présente."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+
+    # WHEN
+    res = InventaireService().contient(3, 244)
+
+    # THEN
+    assert res
+
+
+def test_contient_par_id_non():
+    """Recherche par id absente."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+
+    # WHEN
+    res = InventaireService().contient(3, 408)
+
+    # THEN
+    assert not res
+
+
+def test_contient_par_nom_oui_insensible_casse():
+    """Recherche par nom (case-insensitive, trim)."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+
+    # WHEN
+    res = InventaireService().contient(3, "  light RUM  ")
+
+    # THEN
+    assert res
+
+
+def test_contient_par_nom_non():
+    """Nom absent."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+
+    # WHEN
+    res = InventaireService().contient(3, "Coke")
+
+    # THEN
+    assert not res
+
+
+def test_contient_id_invalide():
+    """Id utilisateur invalide -> False direct."""
+    # GIVEN
+    # (rien)
+
+    # WHEN
+    res = InventaireService().contient("x", 244)
+
+    # THEN
+    assert res is False
+
+
+# -----------------------------
+# Tests supprimer_par_nom
+# -----------------------------
+
+def test_supprimer_par_nom_trouve():
+    """On trouve l'ingrédient par nom, on appelle la suppression DAO avec le bon id."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+    InventaireDao().supprimer_ingredient = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().supprimer_par_nom(3, "lime")
+
+    # THEN
+    assert res
+    InventaireDao().supprimer_ingredient.assert_called_once_with(3, 251)
+
+
+def test_supprimer_par_nom_introuvable():
+    """Aucun ingrédient ne correspond au nom donné."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+    InventaireDao().supprimer_ingredient = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().supprimer_par_nom(3, "Coke")
+
+    # THEN
+    assert not res
+    InventaireDao().supprimer_ingredient.assert_not_called()
+
+
+def test_supprimer_par_nom_nom_vide():
+    """Nom vide/blanc -> False et DAO non appelée."""
+    # GIVEN
+    InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
+    InventaireDao().supprimer_ingredient = MagicMock(return_value=True)
+
+    # WHEN
+    res = InventaireService().supprimer_par_nom(3, "   ")
+
+    # THEN
+    assert not res
+    InventaireDao().supprimer_ingredient.assert_not_called()
+
+
 if __name__ == "__main__":
     import pytest
-
     pytest.main([__file__])
