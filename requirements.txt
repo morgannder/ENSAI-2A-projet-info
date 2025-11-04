@@ -13,3 +13,4 @@ uvicorn
 jwt
 pyjwt
 python-multipart
+ruff 
