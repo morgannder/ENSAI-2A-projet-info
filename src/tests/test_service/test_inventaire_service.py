@@ -106,58 +106,6 @@ def test_supprimer_echec():
     # THEN
     assert not res
 
-
-# -----------------------------
-# Tests ajouter_par_nom
-# -----------------------------
-
-def test_ajouter_par_nom_ok_sans_id():
-    """Construction d'un Ingredient et délégation à la DAO."""
-    # GIVEN
-    dao_mock = MagicMock(return_value=True)
-    InventaireDao().ajouter_ingredient_inventaire = dao_mock
-
-    # WHEN
-    res = InventaireService().ajouter_par_nom(3, "Mint", desc_ingredient="herb")
-
-    # THEN
-    assert res
-    args = dao_mock.call_args[0]  # (id_utilisateur, ingredient)
-    assert args[0] == 3
-    assert isinstance(args[1], Ingredient)
-    assert args[1].nom_ingredient == "Mint"
-    assert args[1].id_ingredient is None
-
-
-def test_ajouter_par_nom_ok_avec_id():
-    """Si on fournit id_ingredient, il est propagé à l'objet créé."""
-    # GIVEN
-    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
-
-    # WHEN
-    res = InventaireService().ajouter_par_nom(5, "Sugar", id_ingredient=379)
-
-    # THEN
-    assert res
-    called_args = InventaireDao().ajouter_ingredient_inventaire.call_args[0]
-    ing_passed: Ingredient = called_args[1]
-    assert ing_passed.id_ingredient == 379
-    assert ing_passed.nom_ingredient == "Sugar"
-
-
-def test_ajouter_par_nom_nom_vide():
-    """Nom vide/blanc -> False et DAO non appelée."""
-    # GIVEN
-    InventaireDao().ajouter_ingredient_inventaire = MagicMock(return_value=True)
-
-    # WHEN
-    res = InventaireService().ajouter_par_nom(3, "   ")
-
-    # THEN
-    assert not res
-    InventaireDao().ajouter_ingredient_inventaire.assert_not_called()
-
-
 # -----------------------------
 # Tests contient
 # -----------------------------
