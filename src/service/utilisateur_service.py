@@ -2,6 +2,8 @@ from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
 from utils.securite import hash_password
+from datetime import datetime
+
 
 
 class UtilisateurService:
@@ -34,13 +36,16 @@ class UtilisateurService:
         else:
             est_majeur = False
 
+        date_creation = datetime.now()
+
         # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
             pseudo=pseudo,
-            mdp=hash_password(mdp, langue),
+            mdp=hash_password(mdp, str(date_creation)),
             age=age,
             langue=langue,
             est_majeur=est_majeur,
+            date_creation=date_creation,
         )
 
         if UtilisateurDao().creer_compte(utilisateur):
@@ -74,7 +79,7 @@ class UtilisateurService:
         utilisateur = self.trouver_par_pseudo(pseudo)
         if not utilisateur:
             return None
-        mdp = hash_password(mdp, utilisateur.langue)
+        mdp = hash_password(mdp, str(utilisateur.date_creation)),
         return UtilisateurDao().se_connecter(pseudo, mdp)
 
     @log
@@ -160,9 +165,9 @@ class UtilisateurService:
             success si changement réussi
             echec sinon
         """
-        if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=utilisateur.langue):
+        if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=str(utilisateur.date_creation)):
             return "identique"
-        utilisateur.mdp = hash_password(nouveau_mdp, utilisateur.langue)
+        utilisateur.mdp = hash_password(nouveau_mdp, str(utilisateur.date_creation))
 
         if UtilisateurDao().modifier(utilisateur):
             return "success"

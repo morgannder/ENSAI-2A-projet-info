@@ -4,11 +4,14 @@ from service.utilisateur_service import UtilisateurService
 from dao.utilisateur_dao import UtilisateurDao
 from business_object.utilisateur import Utilisateur
 from utils.securite import hash_password
+from datetime import datetime
+
+DATE_TEST = datetime(2024, 1, 1, 12, 0, 0)
 
 liste_utilisateurs = [
-    Utilisateur(pseudo="jp", mdp="1234", age=10, langue="Français", est_majeur=False),
-    Utilisateur(pseudo="Atty", mdp="0000Abc", age=25, langue="Italiano"),
-    Utilisateur(pseudo="gg", mdp="abcd", age=18, langue="Italiano", est_majeur=True),
+    Utilisateur(pseudo="jp", mdp="1234", age=10, langue="Français", est_majeur=False, date_creation=DATE_TEST),
+    Utilisateur(pseudo="Atty", mdp="0000Abc", age=25, langue="Italiano", date_creation=DATE_TEST),
+    Utilisateur(pseudo="gg", mdp="abcd", age=18, langue="Italiano", est_majeur=True, date_creation=DATE_TEST),
 ]
 
 
@@ -173,7 +176,7 @@ def test_changer_mdp_identique():
     """Changer mot de passe avec le même mot de passe"""
     # GIVEN
     utilisateur = Utilisateur(
-        pseudo="jp", mdp=hash_password("old", "Français"), age=20, langue="Français"
+        pseudo="jp", mdp=hash_password("old", str(DATE_TEST)), age=20, langue="Français", date_creation=DATE_TEST
     )
     service = UtilisateurService()
 

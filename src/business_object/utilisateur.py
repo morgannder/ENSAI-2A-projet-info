@@ -14,6 +14,8 @@ class Utilisateur:
         age de l'utilisateur
     langue : str
         langue souhaité par l'utilisateur pour les recettes de cocktail
+    date_creation : str
+        la date de création du compte de l'utilisateur
     """
 
     def __init__(
@@ -23,7 +25,8 @@ class Utilisateur:
         age,
         langue,
         est_majeur=False,
-        id_utilisateur=None,
+        date_creation = None,
+        id_utilisateur=None
     ):
         """Constructeur"""
 
@@ -32,6 +35,7 @@ class Utilisateur:
         self.age = age
         self.langue = langue
         self.est_majeur = est_majeur
+        self.date_creation = date_creation
         self.id_utilisateur = id_utilisateur
 
     def __str__(self):
