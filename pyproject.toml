@@ -1,0 +1,24 @@
+[project]
+name = "ensai-2a-projet-info"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "coverage>=7.11.0",
+    "fastapi>=0.121.0",
+    "inquirerpy>=0.3.4",
+    "jwt>=1.4.0",
+    "psycopg2-binary>=2.9.11",
+    "pyjwt>=2.10.1",
+    "pylint>=4.0.2",
+    "pytest>=8.4.2",
+    "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6.0.3",
+    "regex>=2025.11.3",
+    "requests>=2.32.5",
+    "ruff>=0.14.3",
+    "tabulate>=0.9.0",
+    "uvicorn>=0.38.0",
+]
