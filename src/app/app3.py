@@ -66,7 +66,9 @@ class CocktailFilter(BaseModel):
 # ---------------------------
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     print("DEBUG token créé:", token)
@@ -156,7 +158,9 @@ def register(data: UserCreate):
         )
         if not utilisateur:
             print("DEBUG /register: pseudo déjà utilisé ou erreur création")
-            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
+            raise HTTPException(
+                status_code=400, detail="Pseudo déjà utilisé ou erreur création"
+            )
 
         token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
         print("DEBUG /register: utilisateur créé, token =", token)

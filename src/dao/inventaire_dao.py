@@ -11,11 +11,16 @@ class InventaireDao(metaclass=Singleton):
     """Accès aux ingrédients de la base de données."""
 
     @log
-    def ajouter_ingredient_inventaire(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
-
+    def ajouter_ingredient_inventaire(
+        self, id_utilisateur: int, ingredient: Ingredient
+    ) -> bool:
         if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
             return False
-        if ingredient is None or not isinstance(ingredient.nom_ingredient, str) or not ingredient.nom_ingredient.strip():
+        if (
+            ingredient is None
+            or not isinstance(ingredient.nom_ingredient, str)
+            or not ingredient.nom_ingredient.strip()
+        ):
             return False
 
         try:
@@ -33,7 +38,11 @@ class InventaireDao(metaclass=Singleton):
                         )
                         row = cursor.fetchone()
                         if row:
-                            ing_id = row["id_ingredient"] if isinstance(row, dict) else row[0]
+                            ing_id = (
+                                row["id_ingredient"]
+                                if isinstance(row, dict)
+                                else row[0]
+                            )
                         else:
                             cursor.execute(
                                 """
@@ -43,13 +52,19 @@ class InventaireDao(metaclass=Singleton):
                                 """,
                                 {
                                     "nom": ingredient.nom_ingredient.strip(),
-                                    "desc": getattr(ingredient, "desc_ingredient", None),
+                                    "desc": getattr(
+                                        ingredient, "desc_ingredient", None
+                                    ),
                                 },
                             )
                             row = cursor.fetchone()
                             if not row:
                                 return False
-                            ing_id = row["id_ingredient"] if isinstance(row, dict) else row[0]
+                            ing_id = (
+                                row["id_ingredient"]
+                                if isinstance(row, dict)
+                                else row[0]
+                            )
                             ingredient.id_ingredient = int(ing_id)
                     else:
                         ing_id = int(ingredient.id_ingredient)
@@ -88,7 +103,10 @@ class InventaireDao(metaclass=Singleton):
                     )
                     deleted = cursor.rowcount
         except Exception as e:
-            logging.exception("Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s", e)
+            logging.exception(
+                "Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s",
+                e,
+            )
             return False
 
         return deleted > 0
@@ -126,7 +144,9 @@ class InventaireDao(metaclass=Singleton):
                     )
                     rows = cursor.fetchall()
         except Exception as e:
-            logging.exception("Erreur lors de la consultation de l'inventaire utilisateur: %s", e)
+            logging.exception(
+                "Erreur lors de la consultation de l'inventaire utilisateur: %s", e
+            )
             rows = None
 
         if not rows:

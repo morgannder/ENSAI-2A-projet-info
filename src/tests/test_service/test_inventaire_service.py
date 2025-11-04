@@ -21,6 +21,7 @@ ING_LISTE = [
 # Tests lister
 # -----------------------------
 
+
 def test_lister_ok():
     """La DAO renvoie une liste d'ingrédients -> le service la relaie telle quelle."""
     # GIVEN
@@ -50,6 +51,7 @@ def test_lister_id_invalide():
 # -----------------------------
 # Tests ajouter
 # -----------------------------
+
 
 def test_ajouter_ok():
     """Ajout via DAO -> True"""
@@ -82,6 +84,7 @@ def test_ajouter_objet_invalide():
 # Tests supprimer
 # -----------------------------
 
+
 def test_supprimer_ok():
     """Suppression d'un ingrédient de l'inventaire perso -> True"""
     # GIVEN
@@ -109,4 +112,5 @@ def test_supprimer_echec():
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__])

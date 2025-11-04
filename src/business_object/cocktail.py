@@ -18,8 +18,15 @@ class Cocktail:
         instruction pour la réalisation du cocktail
     """
 
-    def __init__(self, id_cocktail, nom_cocktail, categ_cocktail, image_cocktail, alcoolise_cocktail,
-                 instruc_cocktail):
+    def __init__(
+        self,
+        id_cocktail,
+        nom_cocktail,
+        categ_cocktail,
+        image_cocktail,
+        alcoolise_cocktail,
+        instruc_cocktail,
+    ):
         """Constructeur"""
         self.id_cocktail = id_cocktail
         self.nom_cocktail = nom_cocktail

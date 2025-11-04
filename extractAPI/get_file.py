@@ -114,10 +114,16 @@ def extract_cocktail_data_with_progress():
                 "file": str(filename),
             }
 
-            print(f"[{i:2d}/{len(letters)}] {letter.upper()} : {cocktail_count:3d} cocktails")
+            print(
+                f"[{i:2d}/{len(letters)}] {letter.upper()} : {cocktail_count:3d} cocktails"
+            )
 
         except Exception as e:
-            results[letter] = {"status": "error", "error": str(e), "file": str(filename)}
+            results[letter] = {
+                "status": "error",
+                "error": str(e),
+                "file": str(filename),
+            }
             print(f"[{i:2d}/{len(letters)}] {letter.upper()} : ERREUR - {e}")
         time.sleep(2)  # Pause pour éviter de surcharger le serveur
 

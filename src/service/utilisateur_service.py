@@ -34,7 +34,6 @@ class UtilisateurService:
         else:
             est_majeur = False
 
-
         # hashage du mdp avec le sel (le pseudo qui est unique pr chaque utilisateur)
         utilisateur = Utilisateur(
             pseudo=pseudo,
@@ -137,7 +136,6 @@ class UtilisateurService:
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
         """Trouver un utilisateur à partir de son id"""
         return UtilisateurDao().trouver_par_id(id_utilisateur)
-
 
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
     @log

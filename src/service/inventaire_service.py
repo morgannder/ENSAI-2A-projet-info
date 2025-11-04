@@ -5,7 +5,6 @@ from business_object.ingredient import Ingredient
 
 
 class InventaireService:
-
     def lister(self, id_utilisateur: int) -> List[Ingredient]:
         """
         Retourne la liste des ingrédients de l'utilisateur.

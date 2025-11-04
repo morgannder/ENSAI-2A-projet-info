@@ -27,7 +27,9 @@ if __name__ == "__main__":
         except Exception as e:
             logging.info(e)
             nb_erreurs += 1
-            vue_courante = AccueilVue("Une erreur est survenue, retour au menu principal")
+            vue_courante = AccueilVue(
+                "Une erreur est survenue, retour au menu principal"
+            )
 
     # Lorsque l on quitte l application
     print("----------------------------------")

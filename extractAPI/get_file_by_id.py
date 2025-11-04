@@ -127,8 +127,12 @@ def save_extraction_summary(
         },
         "cocktails_summary": {
             "total_unique": len(cocktails_list),
-            "categories": list(set([c.get("strCategory", "Unknown") for c in cocktails_list])),
-            "glasses": list(set([c.get("strGlass", "Unknown") for c in cocktails_list])),
+            "categories": list(
+                set([c.get("strCategory", "Unknown") for c in cocktails_list])
+            ),
+            "glasses": list(
+                set([c.get("strGlass", "Unknown") for c in cocktails_list])
+            ),
         },
     }
 
@@ -153,7 +157,9 @@ def print_final_summary(total_requests, successful_requests, cocktails_found):
     print(f"   • Requêtes totales      : {total_requests}")
     print(f"   • Requêtes réussies     : {successful_requests}")
     print(f"   • Cocktails trouvés     : {cocktails_found}")
-    print(f"   • Taux de réussite      : {(cocktails_found / total_requests) * 100:.2f}%")
+    print(
+        f"   • Taux de réussite      : {(cocktails_found / total_requests) * 100:.2f}%"
+    )
     print("-" * 60)
 
     if cocktails_found > 0:

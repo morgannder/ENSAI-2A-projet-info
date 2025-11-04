@@ -255,8 +255,6 @@ class UtilisateurDao(metaclass=Singleton):
 
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------
 
-
-
     ## OPTION 1 : fonction commune pour la mmodif des elements
     @log
     def modifier(self, utilisateur) -> bool:
@@ -327,7 +325,10 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET mdp = %(mdp)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"mdp": nouveau_mdp, "id_utilisateur": utilisateur.id_utilisateur},
+                        {
+                            "mdp": nouveau_mdp,
+                            "id_utilisateur": utilisateur.id_utilisateur,
+                        },
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -356,7 +357,10 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET langue = %(langue)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"langue": nouvelle_langue, "id_utilisateur": utilisateur.id_utilisateur},
+                        {
+                            "langue": nouvelle_langue,
+                            "id_utilisateur": utilisateur.id_utilisateur,
+                        },
                     )
                     res = cursor.rowcount
         except Exception as e:
@@ -384,7 +388,10 @@ class UtilisateurDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE utilisateur SET pseudo = %(pseudo)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {"pseudo": nouveau_pseudo, "id_utilisateur": utilisateur.id_utilisateur},
+                        {
+                            "pseudo": nouveau_pseudo,
+                            "id_utilisateur": utilisateur.id_utilisateur,
+                        },
                     )
                     res = cursor.rowcount
         except Exception as e:

@@ -48,6 +48,7 @@ class UserUpdate(BaseModel):
     nouveau_mdp: Optional[str] = None
     langue: Optional[str] = None
 
+
 class Filtres(BaseModel):
     Alcool: Optional[str] = None
 
@@ -130,7 +131,9 @@ class Reponse(BaseModel):
 @app.post("/token", response_model=Token, include_in_schema=False)
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
     print("DEBUG /token: username =", form_data.username)
-    utilisateur = service_utilisateur.se_connecter(form_data.username, form_data.password)
+    utilisateur = service_utilisateur.se_connecter(
+        form_data.username, form_data.password
+    )
 
     if not utilisateur:
         print("DEBUG échec connexion: identifiants incorrects")
@@ -171,7 +174,9 @@ def inscription(data: UserCreate):
         if not utilisateur:
             print(utilisateur)
             print("DEBUG /register: pseudo déjà utilisé ou erreur création")
-            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
+            raise HTTPException(
+                status_code=400, detail="Pseudo déjà utilisé ou erreur création"
+            )
 
         # Génération du token JWT pour l'utilisateur créé
         token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
@@ -220,7 +225,9 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 
 
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
-def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
+def modifie_compte(
+    data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)
+):
     print("DEBUG /me/update: données reçues:", data)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
@@ -229,8 +236,12 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
     try:
         if data.nouveau_pseudo:
             if data.nouveau_pseudo == utilisateur.pseudo:
-                raise HTTPException(status_code=400, detail="Le nouveau pseudo est identique à l'ancien")
-            succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
+                raise HTTPException(
+                    status_code=400, detail="Le nouveau pseudo est identique à l'ancien"
+                )
+            succes = service_utilisateur.changer_pseudo(
+                utilisateur, data.nouveau_pseudo
+            )
             if not succes:
                 raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
             changements.append("pseudo")
@@ -238,16 +249,25 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
         if data.nouveau_mdp:
             resultat = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
             if resultat == "identique":
-                raise HTTPException(status_code=400, detail="Le nouveau mot de passe est identique à l'ancien")
+                raise HTTPException(
+                    status_code=400,
+                    detail="Le nouveau mot de passe est identique à l'ancien",
+                )
             elif resultat == "erreur":
-                raise HTTPException(status_code=500, detail="Erreur interne lors du changement de mot de passe")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Erreur interne lors du changement de mot de passe",
+                )
             else:
                 changements.append("mot de passe")
 
         if data.langue:
             succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
             if not succes:
-                raise HTTPException(status_code=400, detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+                )
             changements.append("langue")
 
         if not changements:
@@ -262,12 +282,15 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
         raise
     except Exception as e:
         print("DEBUG /register: exception", e)
-        raise HTTPException(status_code=500, detail="Erreur interne lors de la mise à jour utilisateur")
-
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la mise à jour utilisateur"
+        )
 
 
 @app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
+def supprimer_mon_compte(
+    reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
+):
     """
     Supprime le compte de l'utilisateur connecté et le déconnecte
     """
@@ -316,19 +339,24 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
         raise HTTPException(
-            status_code=500, detail="Erreur interne lors de la visualisation de l'inventaire"
+            status_code=500,
+            detail="Erreur interne lors de la visualisation de l'inventaire",
         )
 
 
 @app.put("/inventaire/ajouter", tags=["Inventaire"])
-def ajoute_ingredient(request: Ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
+def ajoute_ingredient(
+    request: Ingredient, utilisateur: Utilisateur = Depends(get_current_user)
+):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
 
     return
 
 
 @app.delete("/inventaire/supprimer", tags=["Inventaire"])
-def supprime_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
+def supprime_ingredient(
+    ingredient, utilisateur: Utilisateur = Depends(get_current_user)
+):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
 
     return
@@ -346,7 +374,9 @@ def recherche_par_filtre(data):
 
 
 @app.get("/cocktail/realisable", tags=["Cocktail"])
-def lister_cocktails_complets(data, utilisateur: Utilisateur = Depends(get_current_user)):
+def lister_cocktails_complets(
+    data, utilisateur: Utilisateur = Depends(get_current_user)
+):
     """
     Recherche les cocktails via un filtre établi.
     """
@@ -354,7 +384,9 @@ def lister_cocktails_complets(data, utilisateur: Utilisateur = Depends(get_curre
 
 
 @app.get("/cocktail/partiel", tags=["Cocktail"])
-def lister_cocktails_partiels(data, utilisateur: Utilisateur = Depends(get_current_user)):
+def lister_cocktails_partiels(
+    data, utilisateur: Utilisateur = Depends(get_current_user)
+):
     """
     Recherche les cocktails via un filtre établi.
     """

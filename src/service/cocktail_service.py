@@ -159,12 +159,16 @@ class CocktailService:
             Si nb_manquants est négatif, si l'ID utilisateur est manquant ou invalide.
         """
         if nb_manquants < 0 or nb_manquants > 5:
-            raise ValueError("Le nombre d'ingrédients manquants doit être compris entre 0 et 5")
+            raise ValueError(
+                "Le nombre d'ingrédients manquants doit être compris entre 0 et 5"
+            )
 
         if not id_utilisateur:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
-        cocktails = CocktailDao().cocktail_partiel(id_utilisateur, nb_manquants, limit, offset)
+        cocktails = CocktailDao().cocktail_partiel(
+            id_utilisateur, nb_manquants, limit, offset
+        )
 
         # Filtrer si mineur
         if est_majeur is False:

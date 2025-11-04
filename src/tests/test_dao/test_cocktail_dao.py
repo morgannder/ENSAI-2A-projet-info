@@ -94,7 +94,9 @@ def test_rechercher_multi_filtres(setup_test_environment):
     verre = "Cocktail glass"
 
     # WHEN
-    cocktails = CocktailDao().rechercher_cocktails(nom_cocktail, categorie, verre, alcool)
+    cocktails = CocktailDao().rechercher_cocktails(
+        nom_cocktail, categorie, verre, alcool
+    )
 
     # THEN
     assert len(cocktails) == 1  # on s'attend à un seul cocktail correspondant

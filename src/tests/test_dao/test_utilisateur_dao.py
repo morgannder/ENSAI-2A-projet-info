@@ -21,6 +21,7 @@ def setup_test_environment():
 
 # --- TESTS DE LECTURE ----------------------------------------------------
 
+
 def test_trouver_par_id_existant():
     """Recherche par id d'un utilisateur existant"""
     # GIVEN
@@ -71,14 +72,11 @@ def test_lister_tous():
 
 # --- TESTS DE CREATION ----------------------------------------------------
 
+
 def test_creer_compte_ok():
     """Création de compte réussie"""
     utilisateur = Utilisateur(
-        pseudo="gg",
-        mdp="motdepasse",
-        age=30,
-        langue="Français",
-        est_majeur=True
+        pseudo="gg", mdp="motdepasse", age=30, langue="Français", est_majeur=True
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert creation_ok
@@ -88,17 +86,14 @@ def test_creer_compte_ok():
 def test_creer_compte_ko():
     """Création de compte échouée (valeurs invalides)"""
     utilisateur = Utilisateur(
-        pseudo=None,
-        mdp=None,
-        age="texte",
-        langue=123,
-        est_majeur="oui"
+        pseudo=None, mdp=None, age="texte", langue=123, est_majeur="oui"
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert not creation_ok
 
 
 # --- TESTS DE MODIFICATION ------------------------------------------------
+
 
 def test_modifier_ok():
     """Modification réussie"""
@@ -108,7 +103,7 @@ def test_modifier_ok():
         mdp="abcd",
         age=24,
         langue="Deutsch",
-        est_majeur=True
+        est_majeur=True,
     )
     modification_ok = UtilisateurDao().modifier(utilisateur)
     assert modification_ok
@@ -122,7 +117,7 @@ def test_modifier_ko():
         mdp="xxx",
         age=99,
         langue="Deutsch",
-        est_majeur=True
+        est_majeur=True,
     )
     modification_ok = UtilisateurDao().modifier(utilisateur)
     assert not modification_ok
@@ -130,14 +125,11 @@ def test_modifier_ko():
 
 # --- TESTS DE SUPPRESSION -------------------------------------------------
 
+
 def test_supprimer_utilisateur_ok():
     """Suppression d'un utilisateur existant"""
     utilisateur = Utilisateur(
-        pseudo="test_supp",
-        mdp="motdepasse",
-        age=30,
-        langue="Français",
-        est_majeur=True
+        pseudo="test_supp", mdp="motdepasse", age=30, langue="Français", est_majeur=True
     )
     UtilisateurDao().creer_compte(utilisateur)
     suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
@@ -152,13 +144,14 @@ def test_supprimer_utilisateur_ko():
         age=10,
         langue="Français",
         est_majeur=False,
-        id_utilisateur=9999
+        id_utilisateur=9999,
     )
     suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
     assert not suppression_ok
 
 
 # --- TESTS DE CONNEXION --------------------------------------------------
+
 
 def test_se_connecter_ok():
     """Connexion réussie"""

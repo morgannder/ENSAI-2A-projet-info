@@ -61,7 +61,9 @@ async def creer_joueur(j: JoueurModel):
 
     joueur = joueur_service.creer(j.pseudo, j.mdp, j.age, j.mail, j.fan_pokemon)
     if not joueur:
-        raise HTTPException(status_code=404, detail="Erreur lors de la création du joueur")
+        raise HTTPException(
+            status_code=404, detail="Erreur lors de la création du joueur"
+        )
 
     return joueur
 
@@ -81,7 +83,9 @@ def modifier_joueur(id_joueur: int, j: JoueurModel):
     joueur.fan_pokemon = j.fan_pokemon
     joueur = joueur_service.modifier(joueur)
     if not joueur:
-        raise HTTPException(status_code=404, detail="Erreur lors de la modification du joueur")
+        raise HTTPException(
+            status_code=404, detail="Erreur lors de la modification du joueur"
+        )
 
     return f"Joueur {j.pseudo} modifié"
 

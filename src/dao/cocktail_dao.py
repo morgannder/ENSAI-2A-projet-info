@@ -65,7 +65,11 @@ class CocktailDao(metaclass=Singleton):
                         ORDER BY c.nom_cocktail
                         LIMIT %(limit)s OFFSET %(offset)s;
                         """,
-                        {"id_utilisateur": id_utilisateur, "limit": limit, "offset": offset},
+                        {
+                            "id_utilisateur": id_utilisateur,
+                            "limit": limit,
+                            "offset": offset,
+                        },
                     )
                     rows = cursor.fetchall()
 

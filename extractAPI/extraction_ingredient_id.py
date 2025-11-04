@@ -46,7 +46,9 @@ def extraction_ingredient_par_id():
                     ingredients_trouves.append(ingredient)
                     extractions_reussies += 1
 
-                    fichier_ingredient = chemin_de_sortie / f"ingredient_{ingredient_id}.json"
+                    fichier_ingredient = (
+                        chemin_de_sortie / f"ingredient_{ingredient_id}.json"
+                    )
                     with open(fichier_ingredient, "w", encoding="utf-8") as f:
                         json.dump(ingredient, f, indent=2, ensure_ascii=False)
 
@@ -62,7 +64,9 @@ def extraction_ingredient_par_id():
     if ingredients_trouves:
         fichier_bdd = chemin_de_sortie / "total_ingredients.json"
         with open(fichier_bdd, "w", encoding="utf-8") as f:
-            json.dump({"ingredients": ingredients_trouves}, f, indent=2, ensure_ascii=False)
+            json.dump(
+                {"ingredients": ingredients_trouves}, f, indent=2, ensure_ascii=False
+            )
 
     print(f"\nNombre d'extraction(s) réussie(s): {extractions_reussies}")
 

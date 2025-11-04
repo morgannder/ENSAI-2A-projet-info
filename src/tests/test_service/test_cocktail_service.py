@@ -87,7 +87,9 @@ def test_lister_cocktails_partiels_ok():
     service = CocktailService()
 
     # WHEN
-    res = service.lister_cocktails_partiels(nb_manquants=1, id_utilisateur=1, est_majeur=True)
+    res = service.lister_cocktails_partiels(
+        nb_manquants=1, id_utilisateur=1, est_majeur=True
+    )
 
     # THEN
     assert len(res) == 3
@@ -100,7 +102,9 @@ def test_lister_cocktails_partiels_nb_manquants_invalide():
 
     # WHEN / THEN
     with pytest.raises(ValueError):
-        service.lister_cocktails_partiels(nb_manquants=6, id_utilisateur=1, est_majeur=True)
+        service.lister_cocktails_partiels(
+            nb_manquants=6, id_utilisateur=1, est_majeur=True
+        )
 
 
 def test_cocktails_aleatoires_ok():
@@ -166,7 +170,9 @@ def test_lister_categories_verres():
     """Lister catégories et verres"""
     # GIVEN
     CocktailDao().lister_categories = MagicMock(return_value=["Cocktail", "Shot"])
-    CocktailDao().lister_verres = MagicMock(return_value=["Highball glass", "Martini glass"])
+    CocktailDao().lister_verres = MagicMock(
+        return_value=["Highball glass", "Martini glass"]
+    )
     service = CocktailService()
 
     # WHEN

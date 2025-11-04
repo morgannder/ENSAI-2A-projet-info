@@ -16,7 +16,15 @@ class Utilisateur:
         langue souhaité par l'utilisateur pour les recettes de cocktail
     """
 
-    def __init__(self, pseudo, mdp, age, langue, est_majeur=False, id_utilisateur=None,):
+    def __init__(
+        self,
+        pseudo,
+        mdp,
+        age,
+        langue,
+        est_majeur=False,
+        id_utilisateur=None,
+    ):
         """Constructeur"""
 
         self.pseudo = pseudo
