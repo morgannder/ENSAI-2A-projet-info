@@ -200,7 +200,6 @@ def inscription(data: UserCreate):
 # ---------------------------
 
 
-
 @app.get("/mon_compte/informations", tags=["Utilisateur"])
 def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     print("DEBUG /me appelé pour l'utilisateur:", utilisateur)
@@ -317,7 +316,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     """Montre l'inventaire de l'utilisateur"""
     try:
-        return service_inventaire.consulter_inventaire(utilisateur.id_utilisateur)
+        return service_inventaire.lister(utilisateur.id_utilisateur)
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)

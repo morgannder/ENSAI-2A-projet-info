@@ -71,3 +71,13 @@ CREATE TABLE cocktail_ingredient (
     CONSTRAINT fk_ingredient
         FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
 );
+
+
+-- Dans init_db.sql, après la création des tables
+CREATE OR REPLACE FUNCTION hash_password(password TEXT, sel TEXT)
+RETURNS TEXT AS $$
+BEGIN
+    RETURN encode(sha256((password || sel)::bytea), 'hex');
+END;
+$$ LANGUAGE plpgsql
+;

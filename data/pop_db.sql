@@ -1,6 +1,10 @@
-INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur) VALUES
-(1, 'admin',      '102938',     30,      'Français',      true),
-(2, 'a',             'a',     20,     'Français',      true)
+INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation) VALUES
+(1, 'admin',    hash_password('0000', '2025-04-11 14:30:00'),   1,  'FR',   false,  '2025-04-11 14:30:00'),
+(2, 'a',        hash_password('a', '2025-04-11 16:00:00'),      20, 'FR',   true,   '2025-04-11 16:00:00'),
+(3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'EN',   true,   '2025-04-11 16:03:00'),
+(4, 'batricia', hash_password('9876', '2025-04-11 16:34:00'),   15, 'IT',   false,  '2025-04-11 16:34:00'),
+(5, 'Gilbert',  hash_password('abcd', '2025-04-11 16:42:10'),   23, 'GE',   true,   '2025-04-11 16:42:10'),
+(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ES',   false,  '2025-04-11 16:43:00')
 ;
 
 SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));
