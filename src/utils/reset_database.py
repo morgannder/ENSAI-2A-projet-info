@@ -5,7 +5,6 @@ from unittest import mock
 import dotenv
 
 from dao.db_connection import DBConnection
-from service.utilisateur_service import UtilisateurService
 from utils.log_decorator import log
 from utils.singleton import Singleton
 
@@ -29,9 +28,7 @@ class ResetDatabase(metaclass=Singleton):
 
         schema = os.environ["POSTGRES_SCHEMA"]
 
-        create_schema = (
-            f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
-        )
+        create_schema = f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
 
         init_db = open("data/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
@@ -50,11 +47,6 @@ class ResetDatabase(metaclass=Singleton):
         except Exception as e:
             logging.info(e)
             raise
-
-        # Appliquer le hashage des mots de passe à chaque joueur
-        utilisateur_service = UtilisateurService()
-        # for j in joueur_service.lister_tous(inclure_mdp=True):
-        # joueur_service.modifier(j)
 
         return True
 
