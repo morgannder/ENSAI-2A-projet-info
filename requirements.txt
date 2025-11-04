@@ -10,7 +10,6 @@ regex
 requests
 tabulate
 uvicorn
-jwt
-pyjwt
+PyJWT
 python-multipart
 ruff 
