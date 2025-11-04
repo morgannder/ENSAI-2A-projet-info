@@ -131,9 +131,7 @@ class Reponse(BaseModel):
 @app.post("/token", response_model=Token, include_in_schema=False)
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
     print("DEBUG /token: username =", form_data.username)
-    utilisateur = service_utilisateur.se_connecter(
-        form_data.username, form_data.password
-    )
+    utilisateur = service_utilisateur.se_connecter(form_data.username, form_data.password)
 
     if not utilisateur:
         print("DEBUG échec connexion: identifiants incorrects")
@@ -174,9 +172,7 @@ def inscription(data: UserCreate):
         if not utilisateur:
             print(utilisateur)
             print("DEBUG /register: pseudo déjà utilisé ou erreur création")
-            raise HTTPException(
-                status_code=400, detail="Pseudo déjà utilisé ou erreur création"
-            )
+            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
 
         # Génération du token JWT pour l'utilisateur créé
         token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
@@ -225,9 +221,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 
 
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
-def modifie_compte(
-    data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)
-):
+def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     print("DEBUG /me/update: données reçues:", data)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
@@ -239,9 +233,7 @@ def modifie_compte(
                 raise HTTPException(
                     status_code=400, detail="Le nouveau pseudo est identique à l'ancien"
                 )
-            succes = service_utilisateur.changer_pseudo(
-                utilisateur, data.nouveau_pseudo
-            )
+            succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
             if not succes:
                 raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
             changements.append("pseudo")
@@ -288,9 +280,7 @@ def modifie_compte(
 
 
 @app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(
-    reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
-):
+def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     Supprime le compte de l'utilisateur connecté et le déconnecte
     """
@@ -346,17 +336,23 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
 
 @app.put("/inventaire/ajouter", tags=["Inventaire"])
 def ajoute_ingredient(
-    request: Ingredient, utilisateur: Utilisateur = Depends(get_current_user)
+    demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
+    try:
+        requete = service_inventaire.recherche_ingredient(demande_ingredient)
+        return service_inventaire.ajouter(utilisateur.id_utilisateur, requete)
 
-    return
+    except Exception as e:
+        print("DEBUG /inventaire/vue: exception", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Erreur interne lors de la visualisation de l'inventaire",
+        )
 
 
 @app.delete("/inventaire/supprimer", tags=["Inventaire"])
-def supprime_ingredient(
-    ingredient, utilisateur: Utilisateur = Depends(get_current_user)
-):
+def supprime_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
     """ajoute un ingrédient à l'inventaire de l'utilisateur"""
 
     return
@@ -374,9 +370,7 @@ def recherche_par_filtre(data):
 
 
 @app.get("/cocktail/realisable", tags=["Cocktail"])
-def lister_cocktails_complets(
-    data, utilisateur: Utilisateur = Depends(get_current_user)
-):
+def lister_cocktails_complets(data, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     Recherche les cocktails via un filtre établi.
     """
@@ -384,9 +378,7 @@ def lister_cocktails_complets(
 
 
 @app.get("/cocktail/partiel", tags=["Cocktail"])
-def lister_cocktails_partiels(
-    data, utilisateur: Utilisateur = Depends(get_current_user)
-):
+def lister_cocktails_partiels(data, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     Recherche les cocktails via un filtre établi.
     """
@@ -440,4 +432,4 @@ def update_my_info(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=5432)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
