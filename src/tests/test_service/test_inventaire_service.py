@@ -109,8 +109,66 @@ def test_supprimer_echec():
     # THEN
     assert not res
 
+# -----------------------------
+# Tests de suggestions d'ingrédients
+# -----------------------------
+def test_suggerer_ingredients_ok():
+    """La méthode renvoie bien une liste d'ingrédients"""
+    # GIVEN
+    InventaireDao().ingredients_aleatoires = MagicMock(return_value=ING_LISTE)
+    service = InventaireService()
+
+    # WHEN
+    res = service.suggerer_ingredients(n=3)
+
+    # THEN
+    assert len(res) == 3
+    for ing in res:
+        assert isinstance(ing, Ingredient)
+        assert ing.nom_ingredient
+
+
+def test_suggerer_ingredients_nb_trop_grand():
+    """Si on demande plus de 10, on borne à 10"""
+    # GIVEN
+    InventaireDao().ingredients_aleatoires = MagicMock(return_value=ING_LISTE)
+    service = InventaireService()
+
+    # WHEN
+    res = service.suggerer_ingredients(n=50)
+
+    # THEN
+    assert isinstance(res, list)
+
+
+def test_suggerer_ingredients_nb_trop_petit():
+    """Si on demande moins de 1, on borne à 1"""
+    # GIVEN
+    InventaireDao().ingredients_aleatoires = MagicMock(return_value=ING_LISTE)
+    service = InventaireService()
+
+    # WHEN
+    res = service.suggerer_ingredients(n=0)
+
+    # THEN
+    assert isinstance(res, list)
+
+
+def test_suggerer_ingredients_type_invalide():
+    """Erreur si n n'est pas un entier"""
+    # GIVEN
+    service = InventaireService()
+
+    # WHEN / THEN
+    try:
+        service.suggerer_ingredients("trois")
+        assert False
+    except ValueError:
+        assert True
+
+
 
 if __name__ == "__main__":
     import pytest
 
-    pytest.main([__file__])
+    pytest.main([__file__, "-v"])
