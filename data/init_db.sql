@@ -14,7 +14,8 @@ CREATE TABLE utilisateur(
     mdp          VARCHAR(256),
     age          INTEGER,
     langue       VARCHAR(50),
-    est_majeur  BOOLEAN
+    est_majeur  BOOLEAN,
+    date_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -65,8 +66,18 @@ CREATE TABLE cocktail_ingredient (
     id_ingredient   INT NOT NULL,
     quantite VARCHAR(50),
     PRIMARY KEY (id_cocktail, id_ingredient),
-    CONSTRAINT fk_cocktail 
+    CONSTRAINT fk_cocktail
         FOREIGN KEY (id_cocktail) REFERENCES cocktail(id_cocktail),
-    CONSTRAINT fk_ingredient 
+    CONSTRAINT fk_ingredient
         FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
 );
+
+
+-- Dans init_db.sql, après la création des tables
+CREATE OR REPLACE FUNCTION hash_password(password TEXT, sel TEXT)
+RETURNS TEXT AS $$
+BEGIN
+    RETURN encode(sha256((password || sel)::bytea), 'hex');
+END;
+$$ LANGUAGE plpgsql
+;

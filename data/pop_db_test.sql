@@ -1,12 +1,12 @@
-INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur) VALUES
-(1, 'admin',      '0000',     1,      'Français',      false),
-(2, 'a',             'a',     20,     'Français',      true),
-(3, 'John',    '1234',        20,     'English',       true),
-(4, 'batricia',   '9876',     15,     'Italiano',      false),
-(5, 'Gilbert',     'abcd',    23,     'Deutsch',       true),
-(6, 'miguel',    'toto',      11,     'Español',       false),
-(7, 'junior',     'aaaa',     35,     'Deutsch',       true),
-(8, 'Senior',     'jsp',      35,     'Deutsch',       true)
+INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation) VALUES
+(1, 'admin',    hash_password('0000', '2025-04-11 14:30:00'),   1,  'FRA',   false,  '2025-04-11 14:30:00'),
+(2, 'a',        hash_password('a', '2025-04-11 16:00:00'),      20, 'FRA',   true,   '2025-04-11 16:00:00'),
+(3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'ENG',   true,   '2025-04-11 16:03:00'),
+(4, 'batricia', hash_password('9876', '2025-04-11 16:34:00'),   15, 'ITA',   false,  '2025-04-11 16:34:00'),
+(5, 'Gilbert',  hash_password('abcd', '2025-04-11 16:42:10'),   23, 'GER',   true,   '2025-04-11 16:42:10'),
+(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ESP',   false,  '2025-04-11 16:43:00'),
+(7, 'Adriana',  hash_password('abcd', '2025-04-11 16:45:10'),   25, 'ITA',   true,   '2025-04-11 16:45:10'),
+(8, 'Angela',   hash_password('toto', '2025-04-11 16:46:03'),   8,  'GER',   false,  '2025-04-11 16:46:03')
 ;
 
 SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));
@@ -24,7 +24,7 @@ INSERT INTO ingredient (id_ingredient, nom_ingredient, desc_ingredient) VALUES
 (18, 'Angostura Bitters', 'desc'),
 (65, 'Bourbon', 'desc'),
 (105, 'Coca-cola', 'desc'),
-(240, 'lemon', 'desc'),
+(240, 'Lemon', 'desc'),
 (244, 'Light Rum', 'desc'),
 (251, 'Lime', 'desc'),
 (273, 'Mint', 'desc'),

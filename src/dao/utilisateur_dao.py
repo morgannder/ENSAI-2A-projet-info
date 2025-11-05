@@ -30,8 +30,8 @@ class UtilisateurDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO utilisateur(pseudo, mdp, age, langue, est_majeur) VALUES        "
-                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s, %(est_majeur)s)                    "
+                        "INSERT INTO utilisateur(pseudo, mdp, age, langue, est_majeur, date_creation) VALUES        "
+                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s, %(est_majeur)s, %(date_creation)s)                    "
                         "  RETURNING id_utilisateur;                                                ",
                         {
                             "pseudo": utilisateur.pseudo,
@@ -39,6 +39,7 @@ class UtilisateurDao(metaclass=Singleton):
                             "age": utilisateur.age,
                             "langue": utilisateur.langue,
                             "est_majeur": utilisateur.est_majeur,
+                            "date_creation": utilisateur.date_creation
                         },
                     )
                     res = cursor.fetchone()
@@ -93,6 +94,7 @@ class UtilisateurDao(metaclass=Singleton):
                 age=res["age"],
                 langue=res["langue"],
                 est_majeur=res["est_majeur"],
+                date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
             )
 
@@ -164,6 +166,7 @@ class UtilisateurDao(metaclass=Singleton):
                 age=res["age"],
                 langue=res["langue"],
                 est_majeur=res["est_majeur"],
+                date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
             )
 
@@ -205,6 +208,7 @@ class UtilisateurDao(metaclass=Singleton):
                 age=res["age"],
                 langue=res["langue"],
                 est_majeur=res["est_majeur"],
+                date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
             )
 
@@ -246,6 +250,7 @@ class UtilisateurDao(metaclass=Singleton):
                     age=row["age"],
                     langue=row["langue"],
                     est_majeur=row["est_majeur"],
+                    date_creation=row["date_creation"],
                     id_utilisateur=row["id_utilisateur"],
                 )
 

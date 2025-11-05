@@ -150,6 +150,7 @@ def inscription(data: UserCreate):
     print("DEBUG: langue reçue =", data.langue)
     print("DEBUG: langues valides =", LANGUES_VALIDES)
     print("DEBUG: test langue valide =", data.langue in LANGUES_VALIDES)
+
     try:
         if data.langue not in LANGUES_VALIDES:
             raise HTTPException(
@@ -194,19 +195,9 @@ def inscription(data: UserCreate):
         )
 
 
-@app.post("/connexion", tags=["Visiteur"])
-def connexion(data):
-    return
-
-
 # ---------------------------
 # Utilisateur
 # ---------------------------
-
-
-@app.post("/mon_compte/deconnexion", tags=["Utilisateur"])
-def deconnexion(tilisateur: Utilisateur = Depends(get_current_user)):
-    return
 
 
 @app.get("/mon_compte/informations", tags=["Utilisateur"])
@@ -217,6 +208,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
         "langue": utilisateur.langue,
+        "date_creation": utilisateur.date_creation.isoformat(),
     }
 
 
@@ -300,7 +292,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
 
             return {
                 "information": f"Le compte au nom de {pseudo}, associé à l'id {id_utilisateur} à été supprimé",
-                "message": "Compte supprimé avec succès. Vous avez été déconnecté.",
+                "message": "Compte supprimé avec succès.",
                 "supprime": True,
             }
         else:
@@ -324,7 +316,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     """Montre l'inventaire de l'utilisateur"""
     try:
-        return service_inventaire.consulter_inventaire(utilisateur.id_utilisateur)
+        return service_inventaire.lister(utilisateur.id_utilisateur)
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
@@ -333,12 +325,25 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
             detail="Erreur interne lors de la visualisation de l'inventaire",
         )
 
+@app.get("/ingredients/suggestion", tags=["Inventaire"],
+    responses={
+        200: {"description": "Sélection aléatoire de cocktails."},
+        400: {"description": "Paramètre invalide."},
+    })
+def suggestion_ingredients(n: int = 5):
+    """
+    Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.
+    Limité entre 1 et 10.
+    """
+    suggestions = service_inventaire.suggerer_ingredients(n)
+    return [ing.nom_ingredient for ing in suggestions]
+
 
 @app.put("/inventaire/ajouter", tags=["Inventaire"])
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """ajoute un ingrédient à l'inventaire de l'utilisateur"""
+    """Ajoute un ingrédient à l'inventaire de l'utilisateur"""
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         return service_inventaire.ajouter(utilisateur.id_utilisateur, requete)
@@ -352,10 +357,20 @@ def ajoute_ingredient(
 
 
 @app.delete("/inventaire/supprimer", tags=["Inventaire"])
-def supprime_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
-    """ajoute un ingrédient à l'inventaire de l'utilisateur"""
+def supprime_ingredient(
+    demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
+):
+    """Supprime un ingrédient à l'inventaire de l'utilisateur"""
+    try:
+        requete = service_inventaire.recherche_ingredient(demande_ingredient)
+        return service_inventaire.supprimer(utilisateur.id_utilisateur, requete.id_ingredient)
 
-    return
+    except Exception as e:
+        print("DEBUG /inventaire/vue: exception", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Erreur interne lors de la visualisation de l'inventaire",
+        )
 
 
 # ---------------------------
@@ -383,47 +398,6 @@ def lister_cocktails_partiels(data, utilisateur: Utilisateur = Depends(get_curre
     Recherche les cocktails via un filtre établi.
     """
     return
-
-
-# update mais focntionne pas bien (update specifique pour chaque cas)
-
-""" @app.put("/me/update", tags=["Utilisateur"])
-def update_my_info(
-    data: UserUpdate,
-    utilisateur: Utilisateur = Depends(get_current_user)
-):
-    print("DEBUG /me/update: données reçues:", data)
-    print("DEBUG /me/update: utilisateur avant update:", utilisateur)
-
-    if data.nouveau_pseudo:
-        ok = service.changer_pseudo(utilisateur, data.nouveau_pseudo)
-        print("DEBUG changement pseudo:", ok)
-        if not ok:
-            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
-
-    if data.nouveau_mdp:
-        ok = service.changer_mdp(utilisateur, data.nouveau_mdp)
-        print("DEBUG changement mdp:", ok)
-        if not ok:
-            raise HTTPException(status_code=400, detail="Erreur changement mot de passe")
-
-    if data.langue:
-        ok = service.choisir_langue(utilisateur, data.langue)
-        print("DEBUG changement langue:", ok)
-        if not ok:
-            raise HTTPException(status_code=400, detail="Erreur changement langue")
-
-    # Générer un nouveau token après mise à jour
-    new_token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
-    print("DEBUG /me/update: nouvel utilisateur et token:", utilisateur, new_token)
-    print("DEBUG mot de passe stocké:", service.trouver_par_id(utilisateur.id_utilisateur).mdp)
-
-
-    return {
-        "message": "Informations mises à jour",
-        "pseudo": utilisateur.pseudo,
-        "access_token": new_token
-    } """
 
 
 # ---------------------------
