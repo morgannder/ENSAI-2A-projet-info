@@ -172,7 +172,6 @@ class InventaireDao(metaclass=Singleton):
                         {"ingredient": ingredient},
                     )
                     row = cursor.fetchone()
-                    print(row)
                 sortie_ingredient = Ingredient(
                     id_ingredient=row["id_ingredient"],
                     nom_ingredient=row["nom_ingredient"],
