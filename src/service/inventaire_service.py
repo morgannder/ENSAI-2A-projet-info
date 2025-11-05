@@ -18,7 +18,6 @@ class InventaireService:
         Ajoute un ingrédient (création si besoin) puis le lie à l'utilisateur.
         """
         if not isinstance(ingredient, Ingredient):
-            print(type(ingredient), Ingredient)
             return False
         return InventaireDao().ajouter_ingredient_inventaire(id_utilisateur, ingredient)
 

@@ -163,13 +163,13 @@ class InventaireDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    # 1) Récupérer/créer l'ingrédient si pas d'id
                     cursor.execute(
                         """
                         SELECT *
                         FROM ingredient
                         WHERE lower(nom_ingredient) = lower(%(ingredient)s);
                         """,
+                        {"ingredient": ingredient},
                     )
                     row = cursor.fetchone()
                     print(row)
