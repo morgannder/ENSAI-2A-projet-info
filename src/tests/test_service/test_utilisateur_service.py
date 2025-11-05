@@ -29,7 +29,7 @@ liste_utilisateurs = [
 def test_creer_ok():
     """Création de Utilisateur réussie"""
     # GIVEN
-    pseudo, mdp, age, langue, est_majeur = "test", "1234", 15, "English", True
+    pseudo, mdp, age, langue, est_majeur = "test", "Mdp1234!", 15, "English", True
     UtilisateurDao().creer_compte = MagicMock(return_value=True)
 
     # WHEN
@@ -44,7 +44,7 @@ def test_creer_ok():
 def test_creer_echec():
     """Création de Utilisateur échouée"""
     # GIVEN
-    pseudo, mdp, age, langue, est_majeur = "test", "1234", 15, "English", True
+    pseudo, mdp, age, langue, est_majeur = "test", "Mdp1234!", 15, "English", True
     UtilisateurDao().creer_compte = MagicMock(return_value=False)
 
     # WHEN
@@ -226,7 +226,7 @@ def test_changer_mdp_identique():
     # GIVEN
     utilisateur = Utilisateur(
         pseudo="jp",
-        mdp=hash_password("old", str(DATE_TEST)),  # Hash avec la date de création
+        mdp=hash_password("Mdpold1!", str(DATE_TEST)),  # Hash avec la date de création
         age=20,
         langue="Français",
         date_creation=DATE_TEST,  # ⬅️ IMPORTANT : même date pour le sel
@@ -234,7 +234,7 @@ def test_changer_mdp_identique():
     service = UtilisateurService()
 
     # WHEN
-    result = service.changer_mdp(utilisateur, "old")
+    result = service.changer_mdp(utilisateur, "Mdpold1!")
 
     # THEN
     assert result == "identique"
@@ -245,12 +245,12 @@ def test_changer_mdp_success():
     # GIVEN
     utilisateur = Utilisateur(
         pseudo="jp",
-        mdp=hash_password("old", str(DATE_TEST)),
+        mdp=hash_password("Mdpold1!", str(DATE_TEST)),
         age=20,
         langue="Français",
         date_creation=DATE_TEST,
     )
-    nouveau_mdp = "nvMDP"
+    nouveau_mdp = "nvMDP12!"
     service = UtilisateurService()
 
     # WHEN
@@ -272,12 +272,12 @@ def test_changer_mdp_echec_dao():
     # GIVEN
     utilisateur = Utilisateur(
         pseudo="jp",
-        mdp=hash_password("old", str(DATE_TEST)),
+        mdp=hash_password("Mdpold1!", str(DATE_TEST)),
         age=20,
         langue="Français",
         date_creation=DATE_TEST,
     )
-    nouveau_mdp = "nvMDP"
+    nouveau_mdp = "nvMDP12!"
     service = UtilisateurService()
 
     # WHEN
