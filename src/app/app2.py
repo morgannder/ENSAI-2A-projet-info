@@ -330,7 +330,7 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """ajoute un ingrédient à l'inventaire de l'utilisateur"""
+    """Ajoute un ingrédient à l'inventaire de l'utilisateur"""
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         return service_inventaire.ajouter(utilisateur.id_utilisateur, requete)
@@ -344,10 +344,20 @@ def ajoute_ingredient(
 
 
 @app.delete("/inventaire/supprimer", tags=["Inventaire"])
-def supprime_ingredient(ingredient, utilisateur: Utilisateur = Depends(get_current_user)):
-    """ajoute un ingrédient à l'inventaire de l'utilisateur"""
+def supprime_ingredient(
+    demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
+):
+    """Supprime un ingrédient à l'inventaire de l'utilisateur"""
+    try:
+        requete = service_inventaire.recherche_ingredient(demande_ingredient)
+        return service_inventaire.supprimer(utilisateur.id_utilisateur, requete.id_ingredient)
 
-    return
+    except Exception as e:
+        print("DEBUG /inventaire/vue: exception", e)
+        raise HTTPException(
+            status_code=500,
+            detail="Erreur interne lors de la visualisation de l'inventaire",
+        )
 
 
 # ---------------------------
