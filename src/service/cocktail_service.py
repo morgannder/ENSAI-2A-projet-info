@@ -19,6 +19,7 @@ class CocktailService:
         alcool=None,
         liste_ingredients=None,
         verre=None,
+        langue=None,
         limit=10,
         offset=0,
     ) -> list[Cocktail]:
@@ -39,6 +40,8 @@ class CocktailService:
             Liste des ingrédients que le cocktail doit contenir (tous requis).
         verre : str, optional
             Verre utilisé.
+        langue : str
+           Langue de l'utilisateur ("FR", "EN", 'ES").
         limit : int, optional
             Nombre maximum de résultats (défaut: 10).
         offset : int, optional
@@ -53,12 +56,20 @@ class CocktailService:
         ------
         ValueError
             Si le type d'alcool est invalide ou si l'utilisateur est introuvable.
+            Si l'utilisateur mineur veut appliquer un filtre Alcoholic.
         """
-        # Validation du type d'alcool
-        if alcool and alcool not in ["Alcoholic", "Non alcoholic", "Optional alcohol"]:
-            raise ValueError(
-                "Le type d'alcool doit être 'Alcoholic', 'Non alcoholic' ou 'Optional alcohol'"
-            )
+
+        # Traitement de la réponse du type d'alcool pour avoir "Alcoholic", "Non alcoholic", "Optional alcohol"
+
+        if alcool:
+            alcool = alcool[0].upper() + alcool[1:].lower()
+            print(alcool)
+
+            # Validation du type d'alcool
+            if alcool not in ["Alcoholic", "Non alcoholic", "Optional alcohol"]:
+                raise ValueError(
+                    "Le type d'alcool doit être 'Alcoholic', 'Non alcoholic' ou 'Optional alcohol'"
+                )
 
         # Validation catégories
         if categ:
@@ -78,12 +89,14 @@ class CocktailService:
                     f"Utilisez GET /cocktails/verres pour voir les verres disponibles."
                 )
 
-        # Si mineur, forcer le filtre "Non alcoholic"
-        if est_majeur is False:
-            alcool = "Non alcoholic"
+        # Si mineur, lui interdire le filtre Alcoholic
+        if est_majeur is False and alcool == "Alcoholic":
+            raise ValueError(
+                " Zéro alcool pour les mineurs ici, mais 100% fun garanti avec nos cocktails non alcolisé 😎🍹"
+            )
 
         cocktails = CocktailDao().rechercher_cocktails(
-            nom_cocktail, categ, verre, alcool, liste_ingredients, limit, offset
+            nom_cocktail, categ, verre, alcool, liste_ingredients, langue, limit, offset
         )
         return cocktails if cocktails else []
 
@@ -159,16 +172,12 @@ class CocktailService:
             Si nb_manquants est négatif, si l'ID utilisateur est manquant ou invalide.
         """
         if nb_manquants < 0 or nb_manquants > 5:
-            raise ValueError(
-                "Le nombre d'ingrédients manquants doit être compris entre 0 et 5"
-            )
+            raise ValueError("Le nombre d'ingrédients manquants doit être compris entre 0 et 5")
 
         if not id_utilisateur:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
-        cocktails = CocktailDao().cocktail_partiel(
-            id_utilisateur, nb_manquants, limit, offset
-        )
+        cocktails = CocktailDao().cocktail_partiel(id_utilisateur, nb_manquants, limit, offset)
 
         # Filtrer si mineur
         if est_majeur is False:
