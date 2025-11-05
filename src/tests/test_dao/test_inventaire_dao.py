@@ -198,6 +198,33 @@ def test_consulter_inventaire_aucun_resultat_sur_user_sans_ingredients():
     assert InventaireDao().consulter_inventaire(999_999) == []
 
 
+# ----------------------------------------------------------------------
+# Tests ingredients_aléatoires
+# ----------------------------------------------------------------------
+
+def test_ingredients_aleatoires(setup_test_environment):
+    """La méthode doit retourner entre 1 et 10 ingrédients"""
+
+    # GIVEN
+    nb = 3
+
+    # WHEN
+    ingredients = InventaireDao().ingredients_aleatoires(nb)
+
+    # THEN
+    assert 1 <= len(ingredients) <= 3
+    for ing in ingredients:
+        assert isinstance(ing, Ingredient)
+        assert ing.nom_ingredient  # le nom doit être présent
+
+
+def test_ingredients_aleatoires_limite(setup_test_environment):
+    """Même si on demande plus de 10, le max doit être 10."""
+
+    ingredients = InventaireDao().ingredients_aleatoires(50)
+    assert len(ingredients) <= 10
+
+
 if __name__ == "__main__":
     import pytest
-    pytest.main([__file__])
+    pytest.main([__file__, "-v"])
