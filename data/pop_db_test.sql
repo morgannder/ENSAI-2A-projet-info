@@ -4,7 +4,9 @@ INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, da
 (3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'ENG',   true,   '2025-04-11 16:03:00'),
 (4, 'batricia', hash_password('9876', '2025-04-11 16:34:00'),   15, 'ITA',   false,  '2025-04-11 16:34:00'),
 (5, 'Gilbert',  hash_password('abcd', '2025-04-11 16:42:10'),   23, 'GER',   true,   '2025-04-11 16:42:10'),
-(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ESP',   false,  '2025-04-11 16:43:00')
+(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ESP',   false,  '2025-04-11 16:43:00'),
+(7, 'Adriana',  hash_password('abcd', '2025-04-11 16:45:10'),   25, 'ITA',   true,   '2025-04-11 16:45:10'),
+(8, 'Angela',   hash_password('toto', '2025-04-11 16:46:03'),   8,  'GER',   false,  '2025-04-11 16:46:03')
 ;
 
 SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));

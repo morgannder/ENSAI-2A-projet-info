@@ -1,14 +1,12 @@
 import os
-import pytest
-
 from unittest.mock import patch
 
-from utils.reset_database import ResetDatabase
-from utils.securite import hash_password
-
-from dao.utilisateur_dao import UtilisateurDao
+import pytest
 
 from business_object.utilisateur import Utilisateur
+from dao.utilisateur_dao import UtilisateurDao
+from utils.reset_database import ResetDatabase
+from utils.securite import hash_password
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -76,7 +74,12 @@ def test_lister_tous():
 def test_creer_compte_ok():
     """Création de compte réussie"""
     utilisateur = Utilisateur(
-        pseudo="gg", mdp="motdepasse", age=30, langue="Français", est_majeur=True
+        pseudo="gg",
+        mdp="motdepasse",
+        age=30,
+        langue="FRA",
+        est_majeur=True,
+        date_creation="2025-04-11 16:46:03",
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert creation_ok
@@ -86,7 +89,12 @@ def test_creer_compte_ok():
 def test_creer_compte_ko():
     """Création de compte échouée (valeurs invalides)"""
     utilisateur = Utilisateur(
-        pseudo=None, mdp=None, age="texte", langue=123, est_majeur="oui"
+        pseudo=None,
+        mdp=None,
+        age="texte",
+        langue=123,
+        est_majeur="oui",
+        date_creation="2025-04-11 16:46:03",
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert not creation_ok
@@ -102,8 +110,9 @@ def test_modifier_ok():
         pseudo="Gilbert_modif",
         mdp="abcd",
         age=24,
-        langue="Deutsch",
+        langue="GER",
         est_majeur=True,
+        date_creation="2025-04-11 16:46:03",
     )
     modification_ok = UtilisateurDao().modifier(utilisateur)
     assert modification_ok
@@ -129,7 +138,12 @@ def test_modifier_ko():
 def test_supprimer_utilisateur_ok():
     """Suppression d'un utilisateur existant"""
     utilisateur = Utilisateur(
-        pseudo="test_supp", mdp="motdepasse", age=30, langue="Français", est_majeur=True
+        pseudo="test_supp",
+        mdp="motdepasse",
+        age=30,
+        langue="Français",
+        est_majeur=True,
+        date_creation="2025-04-11 16:46:03",
     )
     UtilisateurDao().creer_compte(utilisateur)
     suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
@@ -156,7 +170,7 @@ def test_supprimer_utilisateur_ko():
 def test_se_connecter_ok():
     """Connexion réussie"""
     pseudo = "batricia"
-    mdp = "9876"  # non hashé dans la base
+    mdp = hash_password("9876", "2025-04-11 16:34:00")  # non hashé dans la base
 
     utilisateur = UtilisateurDao().se_connecter(pseudo, mdp)
     assert isinstance(utilisateur, Utilisateur)
