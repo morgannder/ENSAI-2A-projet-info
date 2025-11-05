@@ -28,7 +28,7 @@ SECRET_KEY = "sssecretkey"  # pas a stocker là
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60000
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 service_utilisateur = UtilisateurService()
 service_inventaire = InventaireService()
@@ -44,9 +44,28 @@ class Token(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    nouveau_pseudo: Optional[str] = None
-    nouveau_mdp: Optional[str] = None
-    langue: Optional[str] = None
+    nouveau_pseudo: Optional[str] = Field(
+        None,
+        description=(
+            "Nouveau pseudo souhaité pour votre compte. "
+            "Doit contenir au moins 3 caractères. "
+            "Le pseudo doit être unique."
+        )
+    )
+
+    nouveau_mdp: Optional[str] = Field(
+        None,
+        description=(
+            "Nouveau mot de passe. Il doit respecter les règles de sécurité décrites lors de "
+            "l'inscription"
+        )
+    )
+
+    langue: Optional[str] = Field(
+        None,
+        description=(
+            "Nouvelle langue d’affichage préférée pour les recettes")
+    )
 
 class CocktailFilter(BaseModel):
     nom_cocktail: Optional[str] = None
@@ -61,8 +80,8 @@ class CocktailFilter(BaseModel):
 # ---------------------------
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
+def create_access_token(donnee: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = donnee.copy()
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
@@ -133,7 +152,7 @@ LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
 class UserCreate(BaseModel):
-    pseudo: str = Field(..., description="Votre pseudo")
+    pseudo: str = Field(..., description="Votre pseudo (doit être unique)")
     mdp: str = Field(..., description="Votre mot de passe")
     age: conint(ge=13, le=130) = Field(
         ...,
@@ -150,7 +169,7 @@ class UserCreate(BaseModel):
 
 
 class Ingredient(BaseModel):
-    nom_ingredient: str
+    nom_ingredient: str = Field(..., description="Le nom de l'ingrédient")
 
 
 class Reponse(BaseModel):
@@ -161,23 +180,25 @@ class Reponse(BaseModel):
 
 
 @app.post("/token", response_model=Token, include_in_schema=False)
-def token(form_data: OAuth2PasswordRequestForm = Depends()):
-    print("DEBUG /token: username =", form_data.username)
-    utilisateur = service_utilisateur.se_connecter(form_data.username, form_data.password)
+def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
+    print("DEBUG /token: username =", form_donnee.username)
+    utilisateur = service_utilisateur.se_connecter(form_donnee.username, form_donnee.password)
 
     if not utilisateur:
         print("DEBUG échec connexion: identifiants incorrects")
         raise HTTPException(status_code=401, detail="Identifiants incorrects")
 
     print("DEBUG utilisateur connecté:", utilisateur)
-    print("DEBUG /token: pseudo =", form_data.username, "mdp =", form_data.password)
-    access_token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
+    print("DEBUG /token: pseudo =", form_donnee.username, "mdp =", form_donnee.password)
+    access_token = create_access_token(donnee={"sub": str(utilisateur.id_utilisateur)})
 
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.post("/inscription", tags=["Visiteur"])
-def inscription(data: UserCreate):
+def inscription(donnee: UserCreate,
+                utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional)
+                ):
     """
     **Créer un nouveau compte utilisateur**
 
@@ -199,32 +220,41 @@ def inscription(data: UserCreate):
       - `"ENG"` (anglais)
       - `"GER"` (allemand)
     """
-    print("DEBUG /register: données reçues:", data)
-    print("DEBUG: langue reçue =", data.langue)
+    # empêche l'utilisateur connecté d'avoir accès à la création d'un nouveau compte
+    if utilisateur_connecte:
+        raise HTTPException(
+            status_code=403,
+            detail="Vous êtes déjà connecté, vous ne pouvez pas créer un nouveau compte."
+        )
+
+    print("DEBUG /register: données reçues:", donnee)
+    print("DEBUG: langue reçue =", donnee.langue)
     print("DEBUG: langues valides =", LANGUES_VALIDES)
-    print("DEBUG: test langue valide =", data.langue in LANGUES_VALIDES)
+    print("DEBUG: test langue valide =", donnee.langue in LANGUES_VALIDES)
+
 
     try:
-        if data.langue not in LANGUES_VALIDES:
+        # Vérification de tous les cas d'erreurs (sauf du mdp qui ets géré dans le service)
+        if donnee.langue not in LANGUES_VALIDES:
             raise HTTPException(
                 status_code=400,
-                detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+                detail=f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
             )
-        if data.age < 13 or data.age > 130:
+        if donnee.age < 13 or donnee.age > 130:
             raise HTTPException(
                 status_code=400,
-                detail=f"L'âge '{data.age}' n'est pas valide. Il doit être compris entre 13 et 130 ans.",
+                detail=f"L'âge '{donnee.age}' n'est pas valide. Il doit être compris entre 13 et 130 ans.",
             )
-        if len(data.pseudo) < 3:
+        if len(donnee.pseudo) < 3:
             raise HTTPException(
                 status_code=400,
                 detail="Le pseudo doit contenir au moins 3 charactères")
         # Appel de la méthode existante du service
         utilisateur = service_utilisateur.creer_utilisateur(
-            pseudo=data.pseudo,
-            mdp=data.mdp,  # mot de passe en clair, la méthode hash
-            age=data.age,
-            langue=data.langue,
+            pseudo=donnee.pseudo,
+            mdp=donnee.mdp,  # mot de passe en clair, la méthode hash
+            age=donnee.age,
+            langue=donnee.langue,
             est_majeur=None,  # sera recalculé dans la méthode
         )
         if not utilisateur:
@@ -233,7 +263,7 @@ def inscription(data: UserCreate):
             raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
 
         # Génération du token JWT pour l'utilisateur créé
-        token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
+        token = create_access_token(donnee={"sub": str(utilisateur.id_utilisateur)})
         print("DEBUG /register: utilisateur créé, token =", token)
 
         return {
@@ -280,28 +310,30 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 
 
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
-def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
+def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Modifie certaines informations du compte**
     """
-    print("DEBUG /me/update: données reçues:", data)
+    print("DEBUG /me/update: données reçues:", donnee)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
-    changements = []
+    if not any([donnee.nouveau_pseudo, donnee.nouveau_mdp, donnee.langue]):
+        raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
 
+    changements = []
     try:
-        if data.nouveau_pseudo:
-            if data.nouveau_pseudo == utilisateur.pseudo:
+        if donnee.nouveau_pseudo:
+            if donnee.nouveau_pseudo == utilisateur.pseudo:
                 raise HTTPException(
                     status_code=400, detail="Le nouveau pseudo est identique à l'ancien"
                 )
-            succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
+            succes = service_utilisateur.changer_pseudo(utilisateur, donnee.nouveau_pseudo)
             if not succes:
                 raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
             changements.append("pseudo")
 
-        if data.nouveau_mdp:
-            resultat = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
+        if donnee.nouveau_mdp:
+            resultat = service_utilisateur.changer_mdp(utilisateur, donnee.nouveau_mdp)
             if resultat == "identique":
                 raise HTTPException(
                     status_code=400,
@@ -315,22 +347,19 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
             else:
                 changements.append("mot de passe")
 
-        if data.langue not in LANGUES_VALIDES:
-            raise HTTPException(
+        if donnee.langue :
+            if donnee.langue not in LANGUES_VALIDES:
+                raise HTTPException(
                     status_code=400,
-                    detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+                    detail=f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
                 )
-        elif data.langue :
-            succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
+            succes = service_utilisateur.choisir_langue(utilisateur, donnee.langue)
             if not succes:
                 raise HTTPException(
                     status_code=400,
                     detail="Erreur interne lors de la modification de la langue",
                 )
             changements.append("langue")
-
-        if not changements:
-            raise HTTPException(status_code=400, detail="Aucune modification fournie")
 
         return {
             "message": f"Modification réussie : {', '.join(changements)}",
