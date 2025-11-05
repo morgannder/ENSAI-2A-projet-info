@@ -325,6 +325,19 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
             detail="Erreur interne lors de la visualisation de l'inventaire",
         )
 
+@app.get("/ingredients/suggestion", tags=["Inventaire"],
+    responses={
+        200: {"description": "Sélection aléatoire de cocktails."},
+        400: {"description": "Paramètre invalide."},
+    })
+def suggestion_ingredients(n: int = 5):
+    """
+    Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.
+    Limité entre 1 et 10.
+    """
+    suggestions = service_inventaire.suggerer_ingredients(n)
+    return [ing.nom_ingredient for ing in suggestions]
+
 
 @app.put("/inventaire/ajouter", tags=["Inventaire"])
 def ajoute_ingredient(

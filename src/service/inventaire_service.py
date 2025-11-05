@@ -32,3 +32,15 @@ class InventaireService:
         Recherche un ingrédient grâce à son nom et renvoie un type Ingredient
         """
         return InventaireDao().recherche_ingredient(ingredient)
+
+    def suggerer_ingredients(self, n: int = 5):
+        """
+        Retourne entre 1 et n ingrédients aléatoires pour suggestion.
+        """
+        if not isinstance(n, int):
+            raise ValueError(f"Le paramètre 'n' doit être un entier, reçu : {type(n).__name__}")
+        if n < 1:
+            n = 1
+        elif n > 10:
+            n = 10
+        return InventaireDao().ingredients_aleatoires(n)

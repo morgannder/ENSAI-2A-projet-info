@@ -181,3 +181,42 @@ class InventaireDao(metaclass=Singleton):
 
         except Exception as e:
             return e
+
+    @log
+    def ingredients_aleatoires(self, nb) -> list[Ingredient]:
+        """
+        Propose une liste d'ingrédients choisis aléatoirement.
+
+        Parameters
+        ----------
+        nb : int
+            Nombre d'ingrédients à sélectionner
+
+        Returns
+        -------
+        list[Ingredient]
+            Liste d'ingrédients aléatoires sélectionnés directement côté base de données.
+        """
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # limite nombre entre 1 et 10
+                    nb_limite = min(max(1, nb), 10)
+
+                    cursor.execute(
+                        "SELECT * FROM ingredient ORDER BY RANDOM() LIMIT %(limit)s;",
+                        {"limit": nb_limite},
+                    )
+                    rows = cursor.fetchall()
+
+                    return [
+                        Ingredient(
+                            id_ingredient=row["id_ingredient"],
+                            nom_ingredient=row["nom_ingredient"],
+                            desc_ingredient=row.get("desc_ingredient"),
+                        )
+                        for row in rows
+                    ]
+        except Exception:
+            logging.exception("Erreur ingredients_aleatoires")
+            raise
