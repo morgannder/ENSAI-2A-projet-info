@@ -600,8 +600,8 @@ In the United Kingdom, the term lager commonly refers specifically to pale lager
 (236, 'Lemon soda', ''),
 (237, 'Lemon vodka', ''),
 (238, 'Lemon-lime soda', ''),
-(239, 'lemon-lime', ''),
-(240, 'lemon', 'The lemon, Citrus limon (L.) Osbeck, is a species of small evergreen tree in the flowering plant family Rutaceae, native to Asia.
+(239, 'Lemon-lime', ''),
+(240, 'Lemon', 'The lemon, Citrus limon (L.) Osbeck, is a species of small evergreen tree in the flowering plant family Rutaceae, native to Asia.
 
 The tree''s ellipsoidal yellow fruit is used for culinary and non-culinary purposes throughout the world, primarily for its juice, which has both culinary and cleaning uses. The pulp and rind (zest) are also used in cooking and baking. The juice of the lemon is about 5% to 6% citric acid, with a pH of around 2.2, giving it a sour taste. The distinctive sour taste of lemon juice makes it a key ingredient in drinks and foods such as lemonade and lemon meringue pie.'),
 (241, 'Lemonade', 'Lemonade is any of various sweetened beverages found around the world, all characterized by lemon flavour.

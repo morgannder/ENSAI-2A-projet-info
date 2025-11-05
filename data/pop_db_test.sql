@@ -24,7 +24,7 @@ INSERT INTO ingredient (id_ingredient, nom_ingredient, desc_ingredient) VALUES
 (18, 'Angostura Bitters', 'desc'),
 (65, 'Bourbon', 'desc'),
 (105, 'Coca-cola', 'desc'),
-(240, 'lemon', 'desc'),
+(240, 'Lemon', 'desc'),
 (244, 'Light Rum', 'desc'),
 (251, 'Lime', 'desc'),
 (273, 'Mint', 'desc'),
