@@ -18,10 +18,16 @@ class InventaireService:
         List[Ingredient]
             Renvoie une liste de l'ensemble des ingrédient de l'inventaire.
 
+        Raises
+        -------
+        ValueError
+            Si l'inventaire est vide
+
         """
-        if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
-            return []
-        return InventaireDao().consulter_inventaire(id_utilisateur)
+        inventaire = InventaireDao().consulter_inventaire(id_utilisateur)
+        if inventaire == []:
+            raise ValueError("Votre inventaire est vide, allez le remplir au plus vite !!")
+        return inventaire
 
     def ajouter(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
         """Ajoute un ingrédient dans l'inventaire de l'utilisateur.

@@ -423,6 +423,8 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     try:
         return service_inventaire.lister(utilisateur.id_utilisateur)
 
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
         raise HTTPException(
