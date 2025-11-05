@@ -12,6 +12,20 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def ajouter_ingredient_inventaire(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
+        """Ajout d'un ingrédient dans l'inventaire personnel d'un utilisateur
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            L'id associé à l'utilisateur
+        ingredient : Ingredient
+
+        Returns
+        -------
+        created : bool
+            True si la création est un succès
+            False sinon
+        """
         if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
             return False
         if (
@@ -73,6 +87,18 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def supprimer_ingredient(self, id_utilisateur: int, id_ingredient: int) -> bool:
+        """Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        created : bool
+            True si la création est un succès
+            False sinon
+        """
         if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
             return False
         if not isinstance(id_ingredient, int) or id_ingredient <= 0:
@@ -102,17 +128,17 @@ class InventaireDao(metaclass=Singleton):
     @log
     def consulter_inventaire(self, id_utilisateur: int) -> List[Ingredient]:
         """
-        Lister les ingrédients de l'inventaire d'un utilisateur donné.
+        Permet de consulter l'inventaire de l'utilisateur.
 
         Parameters
         ----------
         id_utilisateur : int
-            Identifiant de l'utilisateur.
+            L'indentifiant associé a l'utilisateur.
 
         Returns
         -------
         list[Ingredient]
-            Ingrédients associés à cet utilisateur, triés par nom.
+            Renvoie l'ensemble des ingrédient de l'inventaire.
         """
         if not isinstance(id_utilisateur, int):
             return []
@@ -160,6 +186,18 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def recherche_ingredient(self, ingredient: str) -> Ingredient:
+        """Permet de chercher un ingrédient dans l'inventaire.
+
+        Parameters
+        ----------
+        ingredient : str
+            La chaîne de caractère désignent l'ingrédient.
+
+        Returns
+        -------
+        Ingredient
+            L'ingrédient recherché
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
