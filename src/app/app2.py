@@ -183,7 +183,7 @@ def inscription(data: UserCreate):
 
     Pour vous inscrire, remplissez les champs suivants :
 
-    - **pseudo** *(string)* → votre pseudo
+    - **pseudo** *(string)* → votre pseudo, doit contenir au moins 3 charactères
     - **mdp** *(string)* → Votre mot de passe. Il doit respecter les règles de sécurité suivantes :
         - Au moins 8 caractères
         - Au moins une lettre majuscule
@@ -215,6 +215,10 @@ def inscription(data: UserCreate):
                 status_code=400,
                 detail=f"L'âge '{data.age}' n'est pas valide. Il doit être compris entre 13 et 130 ans.",
             )
+        if len(data.pseudo) < 3:
+            raise HTTPException(
+                status_code=400,
+                detail="Le pseudo doit contenir au moins 3 charactères")
         # Appel de la méthode existante du service
         utilisateur = service_utilisateur.creer_utilisateur(
             pseudo=data.pseudo,
@@ -347,7 +351,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 
-    veuillez taper CONFIRMER pour valider la demande
+    Veuillez saisir 'CONFIRMER' pour valider la demande
     """
     try:
         # Récupérer l'ID avant suppression pour les logs
@@ -387,7 +391,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
 # ---------------------------
 @app.get("/inventaire/vue", tags=["Inventaire"])
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
-    """Montre l'inventaire de l'utilisateur"""
+    """**Montre l'inventaire de l'utilisateur**"""
     try:
         return service_inventaire.lister(utilisateur.id_utilisateur)
 
@@ -409,8 +413,9 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
 )
 def suggestion_ingredients(n: int = 5):
     """
-    Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.
-    Limité entre 1 et 10.
+    **Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.**
+
+    Limité entre 1 et 10 ingrédients.
     """
     suggestions = service_inventaire.suggerer_ingredients(n)
     return [ing.nom_ingredient for ing in suggestions]
@@ -420,7 +425,10 @@ def suggestion_ingredients(n: int = 5):
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """Ajoute un ingrédient à l'inventaire de l'utilisateur"""
+    """**Ajoute un ingrédient à l'inventaire de l'utilisateur**
+
+        Vous pouvez consulter les ingrédients disponibles via la méthode de suggestion d'ingrédients
+    """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         return service_inventaire.ajouter(utilisateur.id_utilisateur, requete)
@@ -437,7 +445,7 @@ def ajoute_ingredient(
 def supprime_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """Supprime un ingrédient à l'inventaire de l'utilisateur"""
+    """**Supprime un ingrédient à l'inventaire de l'utilisateur**"""
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         return service_inventaire.supprimer(utilisateur.id_utilisateur, requete.id_ingredient)

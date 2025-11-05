@@ -32,6 +32,7 @@ class UtilisateurService:
             sinon None
         """
         secu_mdp(mdp)
+
         if age >= 18:
             est_majeur = True
         else:
