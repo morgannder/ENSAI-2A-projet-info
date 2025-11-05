@@ -2,6 +2,8 @@
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from pydantic import BaseModel, Field, conint
+from typing import Literal
 
 import dotenv
 import jwt
@@ -111,10 +113,20 @@ LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
 class UserCreate(BaseModel):
-    pseudo: str
-    mdp: str
-    age: int
-    langue: str  # "FR", "EN", "ES"
+    pseudo: str = Field(..., description="Votre pseudo")
+    mdp: str = Field(..., description="Votre mot de passe")
+    age: conint(ge=13, le=130) = Field(
+        ...,
+        description="Votre âge (doit être compris entre 13 et 130 pour accéder à l'intégralité de l'application)"
+    )
+    langue: Literal["string", "FRA", "ESP", "ITA", "ENG", "GER"] = Field(
+        "string",
+        description=(
+            "Langue de l'utilisateur. Valeurs possibles : "
+            "'string' (anglais par défaut), 'FRA' (français), 'ESP' (espagnol), "
+            "'ITA' (italien), 'ENG' (anglais), 'GER' (allemand)"
+        )
+    )
 
 
 class Ingredient(BaseModel):
@@ -146,6 +158,22 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.post("/inscription", tags=["Visiteur"])
 def inscription(data: UserCreate):
+    """
+    **Créer un nouveau compte utilisateur**
+
+    Pour vous inscrire, remplissez les champs suivants :
+
+    - **pseudo** *(string)* → votre pseudo
+    - **mdp** *(string)* → votre mot de passe
+    - **age** *(int)* → votre âge (doit être compris entre **13 et 130** pour accéder à l'intégralité de notre application)
+    - **langue** *(string)* → langue de l’utilisateur, doit être l’une des valeurs suivantes :
+      - `"string"` (anglais par défaut)
+      - `"FRA"` (français)
+      - `"ESP"` (espagnol)
+      - `"ITA"` (italien)
+      - `"ENG"` (anglais)
+      - `"GER"` (allemand)
+    """
     print("DEBUG /register: données reçues:", data)
     print("DEBUG: langue reçue =", data.langue)
     print("DEBUG: langues valides =", LANGUES_VALIDES)
@@ -202,6 +230,15 @@ def inscription(data: UserCreate):
 
 @app.get("/mon_compte/informations", tags=["Utilisateur"])
 def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
+    """
+    **Visualiser les informations de votre compte**
+
+    Comprends les champs suivants :
+
+    - **pseudo** → votre pseudo
+    - **age** → votre âge
+    - **langue**  → langue choisie
+    """
     print("DEBUG /me appelé pour l'utilisateur:", utilisateur)
 
     return {
