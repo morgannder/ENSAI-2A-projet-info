@@ -1,15 +1,13 @@
 # app_test_api.py
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-from pydantic import BaseModel, Field, conint
-from typing import Literal
+from typing import Literal, Optional
 
 import dotenv
 import jwt
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, conint
 
 from business_object.utilisateur import Utilisateur
 from service.cocktail_service import CocktailService
@@ -53,6 +51,14 @@ class UserUpdate(BaseModel):
 
 class Filtres(BaseModel):
     Alcool: Optional[str] = None
+
+
+class CocktailFilter(BaseModel):
+    nom_cocktail: Optional[str] = None
+    categorie: Optional[str] = None
+    alcool: Optional[str] = None
+    verre: Optional[str] = None
+    ingredients: Optional[list[str]] = None
 
 
 # ---------------------------
@@ -117,7 +123,7 @@ class UserCreate(BaseModel):
     mdp: str = Field(..., description="Votre mot de passe")
     age: conint(ge=13, le=130) = Field(
         ...,
-        description="Votre âge (doit être compris entre 13 et 130 pour accéder à l'intégralité de l'application)"
+        description="Votre âge (doit être compris entre 13 et 130 pour accéder à l'intégralité de l'application)",
     )
     langue: Literal["string", "FRA", "ESP", "ITA", "ENG", "GER"] = Field(
         "string",
@@ -125,7 +131,7 @@ class UserCreate(BaseModel):
             "Langue de l'utilisateur. Valeurs possibles : "
             "'string' (anglais par défaut), 'FRA' (français), 'ESP' (espagnol), "
             "'ITA' (italien), 'ENG' (anglais), 'GER' (allemand)"
-        )
+        ),
     )
 
 
@@ -362,11 +368,15 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
             detail="Erreur interne lors de la visualisation de l'inventaire",
         )
 
-@app.get("/ingredients/suggestion", tags=["Inventaire"],
+
+@app.get(
+    "/ingredients/suggestion",
+    tags=["Inventaire"],
     responses={
         200: {"description": "Sélection aléatoire de cocktails."},
         400: {"description": "Paramètre invalide."},
-    })
+    },
+)
 def suggestion_ingredients(n: int = 5):
     """
     Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.
@@ -413,28 +423,228 @@ def supprime_ingredient(
 # ---------------------------
 # Cocktails
 # ---------------------------
-@app.get("/cocktail/recherche_filtre", tags=["Cocktail"])
-def recherche_par_filtre(data):
-    """
-    Recherche les cocktails via un filtre établi.
-    """
-    return
 
 
-@app.get("/cocktail/realisable", tags=["Cocktail"])
-def lister_cocktails_complets(data, utilisateur: Utilisateur = Depends(get_current_user)):
-    """
-    Recherche les cocktails via un filtre établi.
-    """
-    return
+def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme),
+) -> Optional[Utilisateur]:
+    """Retourne l'utilisateur courant s'il est authentifié, sinon est considéré comme visiteur."""
+    if not token:
+        print("DEBUG aucun token fourni → Visiteur")
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            return None
+        utilisateur = service_utilisateur.trouver_par_id(int(user_id_str))
+        print("DEBUG utilisateur optionnel trouvé:", utilisateur)
+        return utilisateur
+    except Exception as e:
+        print("DEBUG erreur token optionnel:", e)
+        return None
 
 
-@app.get("/cocktail/partiel", tags=["Cocktail"])
-def lister_cocktails_partiels(data, utilisateur: Utilisateur = Depends(get_current_user)):
+@app.post(
+    "/cocktails/recherche",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Liste de cocktails correspondant à vos critères."},
+        400: {"description": "Paramètres invalides."},
+        500: {"description": "Erreur serveur."},
+    },
+)
+def rechercher_cocktails(
+    filtres: CocktailFilter,
+    limit: int = 10,
+    offset: int = 0,
+    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
     """
-    Recherche les cocktails via un filtre établi.
+    **Rechercher des cocktails selon vos préférences**
+
+    Vous pouvez filtrer par :
+    - Nom du cocktail (ex: `"Margarita"`)
+    - Type d'alcool (ex: `"Alcoholic"` ou `"Non alcoholic"`)
+    - Catégorie (ex: `"Cocktail"`)
+    - Verre (ex: `"Highball glass"`)
+    - Ingrédients (ex: `["Tequila", "Citron"]`)
+
+    Si vous n'êtes pas connecté, la recherche se fera sans restrictions d'âge.
+    Si vous êtes mineur connecté, seuls les cocktails non alcoolisés seront affichés.
     """
-    return
+    try:
+        # Si pas connecté → pas de restriction (None)
+        est_majeur = utilisateur.est_majeur if utilisateur else None
+
+        cocktails = service_cocktail.rechercher_par_filtre(
+            est_majeur=est_majeur,
+            nom_cocktail=filtres.nom_cocktail,
+            categ=filtres.categorie,
+            alcool=filtres.alcool,
+            liste_ingredients=filtres.ingredients,
+            verre=filtres.verre,
+            limit=limit,
+            offset=offset,
+        )
+
+        if not cocktails:
+            raise HTTPException(
+                status_code=404,
+                detail="Désolé, aucun cocktail n'a pu être trouvé avec vos filtres.",
+            )
+
+        return {
+            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "resultats": [c.__dict__ for c in cocktails],
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+
+
+@app.get(
+    "/cocktails/complets",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Liste des cocktails réalisables à 100%."},
+        401: {"description": "Vous devez être connecté."},
+    },
+)
+def lister_cocktails_complets(
+    limit: int = 10,
+    offset: int = 0,
+    utilisateur: Utilisateur = Depends(get_current_user),
+):
+    """
+    **Lister les cocktails que vous pouvez réaliser complètement**
+
+    Nécessite d'être connecté pour accéder à votre inventaire.
+
+    ### Paramètres de requête
+    - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
+    - **offset** *(int, optionnel)* : Décalage pour la pagination.
+    """
+    try:
+        cocktails = service_cocktail.lister_cocktails_complets(
+            id_utilisateur=utilisateur.id_utilisateur,
+            est_majeur=utilisateur.est_majeur,
+            limit=limit,
+            offset=offset,
+        )
+        if not cocktails:
+            raise HTTPException(
+                status_code=404,
+                detail="Désolée, mais nous n'avons pas trouvé de cocktail en fonction de votre inventaire. "
+                "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
+            )
+        return {
+            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "resultats": [c.__dict__ for c in cocktails],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get(
+    "/cocktails/partiels",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Liste des cocktails presque réalisables."},
+        400: {"description": "Nombre d'ingrédients manquants invalide."},
+        401: {"description": "Vous devez être connecté."},
+    },
+)
+def lister_cocktails_partiels(
+    nb_manquants: int,
+    limit: int = 10,
+    offset: int = 0,
+    utilisateur: Utilisateur = Depends(get_current_user),
+):
+    """
+    **Lister les cocktails presque réalisables**
+
+    Nécessite d'être connecté pour accéder à votre inventaire.
+
+    ### Paramètres de requête
+    - **nb_manquants** *(int, requis)* : Nombre maximal d'ingrédients manquants autorisés (0-5).
+    - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
+    - **offset** *(int, optionnel)* : Pagination.
+    """
+    try:
+        cocktails = service_cocktail.lister_cocktails_partiels(
+            nb_manquants=nb_manquants,
+            id_utilisateur=utilisateur.id_utilisateur,
+            est_majeur=utilisateur.est_majeur,
+            limit=limit,
+            offset=offset,
+        )
+        return {
+            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "resultats": [c.__dict__ for c in cocktails],
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get(
+    "/cocktails/aleatoires",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Sélection aléatoire de cocktails."},
+        400: {"description": "Nombre invalide (1-5)."},
+    },
+)
+def cocktails_aleatoires(
+    nb: int = 5,
+    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
+    """
+    **Obtenir une sélection aléatoire de cocktails**
+
+    ### Paramètres
+    - **nb** *(int, optionnel)* : Nombre de cocktails à tirer aléatoirement (max 5, défaut 5).
+
+    ### Réponse
+    - Liste aléatoire de cocktails adaptés à l'âge de l'utilisateur si connecté.
+    """
+    try:
+        # Si pas connecté → pas de restriction (None)
+        est_majeur = utilisateur.est_majeur if utilisateur else None
+
+        cocktails = service_cocktail.cocktails_aleatoires(est_majeur=est_majeur, nb=nb)
+
+        return {
+            "total": len(cocktails),
+            "resultats": [c.__dict__ for c in cocktails],
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/cocktails/categories", tags=["Cocktails"])
+def lister_categories():
+    """
+    **Lister les catégories de cocktails**
+
+    Permet d'obtenir la liste complète des catégories présentes dans la base.
+    """
+    categories = service_cocktail.lister_categories()
+    return {"categories": categories}
+
+
+@app.get("/cocktails/verres", tags=["Cocktails"])
+def lister_verres():
+    """
+    **Lister les types de verres**
+
+    Permet d'obtenir la liste complète des types de verres présents dans la base.
+    """
+    verres = service_cocktail.lister_verres()
+    return {"verres": verres}
 
 
 # ---------------------------
