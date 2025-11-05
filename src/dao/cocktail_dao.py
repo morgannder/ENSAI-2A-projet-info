@@ -13,7 +13,7 @@ class CocktailDao(metaclass=Singleton):
 
     @log
     def cocktail_complet(
-        self, id_utilisateur: int, limit: int = 10, offset: int = 0
+        self, id_utilisateur: int, langue: str = "ENG", limit: int = 10, offset: int = 0
     ) -> list[Cocktail]:
         """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire.
 
@@ -21,6 +21,8 @@ class CocktailDao(metaclass=Singleton):
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur.
+        langue : str
+            Langue de l'utilisateur.
         limit : int, optional
             Nombre maximal de résultats retournés (pagination). Par défaut 10.
         offset : int, optional
@@ -31,6 +33,10 @@ class CocktailDao(metaclass=Singleton):
         list[Cocktail]
             Liste des cocktails préparables avec l'inventaire complet.
         """
+
+        # --- Choix de la colonne instructions selon la langue ---
+        col_instructions = self.instruction_column(langue)
+
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -40,7 +46,7 @@ class CocktailDao(metaclass=Singleton):
                     # 3) cocktail_matching_ingredients : nombre d'ingrédients disponibles pour chaque cocktail dans l'inventaire
                     # On sélectionne les cocktails dont total_ingredients == matching_ingredients
                     cursor.execute(
-                        """
+                        f"""
                         WITH user_ingredients AS (
                             SELECT id_ingredient
                             FROM inventaire_ingredient
@@ -57,7 +63,7 @@ class CocktailDao(metaclass=Singleton):
                             JOIN user_ingredients ui ON ci.id_ingredient = ui.id_ingredient
                             GROUP BY ci.id_cocktail
                         )
-                        SELECT c.*
+                        SELECT c.id_cocktail, c.nom_cocktail, c.categorie, c.alcool, c.image_url, c.verre, c.{col_instructions} AS instructions
                         FROM cocktail c
                         JOIN cocktail_ingredient_count cic ON c.id_cocktail = cic.id_cocktail
                         JOIN cocktail_matching_ingredients cmi ON c.id_cocktail = cmi.id_cocktail
@@ -93,7 +99,12 @@ class CocktailDao(metaclass=Singleton):
 
     @log
     def cocktail_partiel(
-        self, id_utilisateur: int, nb_manquants: int, limit: int = 10, offset: int = 0
+        self,
+        id_utilisateur: int,
+        nb_manquants: int,
+        langue: str = "ENG",
+        limit: int = 10,
+        offset: int = 0,
     ) -> list[Cocktail]:
         """Lister tous les cocktails préparables avec au plus nb_manquants ingrédients manquants.
 
@@ -103,11 +114,16 @@ class CocktailDao(metaclass=Singleton):
             Identifiant de l'utilisateur.
         nb_manquants : int
             Nombre maximal d'ingrédients manquants autorisés.
+        langue : str
+            Langue de l'utilisateur.
         limit : int, optional
             Pagination — nombre maximum de résultats.
         offset : int, optional
             décalage des résultats.
         """
+
+        # --- Choix de la colonne instructions selon la langue ---
+        col_instructions = self.instruction_column(langue)
 
         # On limite le nombre d'ingrédients manquants pour éviter des résultats trop larges et peu pertinents.
         nb_manquants = min(nb_manquants, 5)
@@ -122,7 +138,7 @@ class CocktailDao(metaclass=Singleton):
                     # 3) Sélection finale : cocktails avec <= nb_manquants ingrédients manquants, triés par nombre d'ingrédients manquants puis par nom, avec pagination LIMIT/OFFSET
 
                     cursor.execute(
-                        """
+                        f"""
                         WITH cocktail_ingredient_count AS (
                             SELECT id_cocktail, COUNT(*) AS total_ingredients
                             FROM cocktail_ingredient
@@ -137,11 +153,12 @@ class CocktailDao(metaclass=Singleton):
                                 AND ui.id_utilisateur = %(id_utilisateur)s
                             GROUP BY c.id_cocktail
                         )
-                        SELECT c.*, cic.total_ingredients, cmi.matching_ingredients
+                        SELECT c.id_cocktail, c.nom_cocktail, c.categorie, c.alcool, c.image_url, c.verre, c.{col_instructions} AS instructions, cic.total_ingredients, cmi.matching_ingredients
                         FROM cocktail c
                         JOIN cocktail_ingredient_count cic ON c.id_cocktail = cic.id_cocktail
                         JOIN cocktail_matching_ingredients cmi ON c.id_cocktail = cmi.id_cocktail
                         WHERE (cic.total_ingredients - cmi.matching_ingredients) <= %(nb_manquants)s
+                        AND (cic.total_ingredients - cmi.matching_ingredients) >= 1
                         ORDER BY
                             (cic.total_ingredients - cmi.matching_ingredients) ASC,
                             c.nom_cocktail
@@ -181,6 +198,7 @@ class CocktailDao(metaclass=Singleton):
         verre=None,
         alcool=None,
         ingredients=None,
+        langue: str = "ENG",
         limit: int = 10,
         offset: int = 0,
     ) -> list[Cocktail]:
@@ -198,6 +216,8 @@ class CocktailDao(metaclass=Singleton):
             Filtre sur le type d'alcool.
         ingredients : list[str], optional
             Liste d'ingrédients (le cocktail doit contenir TOUS ces ingrédients).
+        langue : str
+            Langue de l'utilisateur.
         limit : int, optional
             Nombre maximal de cocktails retournés
         offset : int, optional
@@ -208,15 +228,20 @@ class CocktailDao(metaclass=Singleton):
         list[Cocktail]
             Liste des cocktails correspondant aux filtres appliqués.
         """
+
+        # --- Choix de la colonne instructions selon la langue ---
+        col_instructions = self.instruction_column(langue)
+
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     params = {"limit": limit, "offset": offset}
+                    # Mapping entre la langue saisi de l'utilisateur et la bonne colonne
 
                     # On utilise une CTE pour filtrer par ingrédients si nécessaire
                     if ingredients and len(ingredients) > 0:
                         # CTE pour trouver les cocktails qui ont TOUS les ingrédients demandés
-                        query = """
+                        query = f"""
                             WITH cocktails_with_ingredients AS (
                                 SELECT c.id_cocktail
                                 FROM cocktail c
@@ -226,7 +251,7 @@ class CocktailDao(metaclass=Singleton):
                                 GROUP BY c.id_cocktail
                                 HAVING COUNT(DISTINCT i.id_ingredient) = %(nb_ingredients)s
                             )
-                            SELECT c.*
+                            SELECT c.id_cocktail, c.nom_cocktail, c.categorie, c.alcool, c.image_url, c.verre, c.{col_instructions} AS instructions
                             FROM cocktail c
                             JOIN cocktails_with_ingredients cwi ON c.id_cocktail = cwi.id_cocktail
                             WHERE 1=1
@@ -236,7 +261,10 @@ class CocktailDao(metaclass=Singleton):
                         params["nb_ingredients"] = len(ingredients)
                     else:
                         # Pas de filtre d'ingrédients, requête simple
-                        query = "SELECT * FROM cocktail WHERE 1=1"
+                        query = f"""
+                        SELECT c.id_cocktail, c.nom_cocktail, c.categorie, c.alcool, c.image_url, c.verre, c.{col_instructions} AS instructions
+                        FROM cocktail c WHERE 1=1
+                        """
 
                     if nom_cocktail is not None:
                         query += " AND nom_cocktail ILIKE %(nom_cocktail)s"
@@ -278,13 +306,19 @@ class CocktailDao(metaclass=Singleton):
     # ------------------- Méthode: cocktails_aleatoires -----------------------------
 
     @log
-    def cocktails_aleatoires(self, nombre: int = 5) -> list[Cocktail]:
+    def cocktails_aleatoires(
+        self,
+        nombre: int = 5,
+        langue: str = "ENG",
+    ) -> list[Cocktail]:
         """Propose une liste de cocktails choisis aléatoirement.
 
         Parameters
         ----------
         nombre : int, optional
             Nombre de cocktails à sélectionner (par défaut 5)
+        langue : str
+            Langue de l'utilisateur.
 
         Returns
         -------
@@ -292,13 +326,19 @@ class CocktailDao(metaclass=Singleton):
             Liste de cocktails aléatoires sélectionnés directement côté base de données.
 
         """
+        # --- Choix de la colonne instructions selon la langue ---
+        col_instructions = self.instruction_column(langue)
+
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     nombre_limite = min(max(1, nombre), 5)
 
                     cursor.execute(
-                        "SELECT * FROM cocktail ORDER BY RANDOM() LIMIT %(limit)s;",
+                        f"""SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions 
+                        FROM cocktail 
+                        ORDER BY RANDOM() 
+                        LIMIT %(limit)s;""",
                         {"limit": nombre_limite},
                     )
                     rows = cursor.fetchall()
@@ -373,3 +413,34 @@ class CocktailDao(metaclass=Singleton):
         except Exception:
             logging.exception("Erreur lister_verres")
             raise
+
+    # ------------------- Méthode: instruction_column -----------------------------
+
+    def instruction_column(self, langue: str) -> str:
+        """
+        Retourne le nom de la colonne SQL contenant les instructions
+        du cocktail, en fonction de la langue préférée de l'utilisateur.
+
+        Parameters
+        ----------
+        langue : str
+            Code de la langue (ex: "ENG", "FRA", "ESP", "GER", "ITA").
+
+        Returns
+        -------
+        str
+            Nom de la colonne instructions correspondant à la langue.
+            Par défaut, renvoie "instructions" (anglais).
+        """
+        # En base de données, chaque cocktail a plusieurs colonnes pour les instructions
+        # : instructions (anglais), instructions_fr, instructions_es, instructions_de, instructions_it.
+        # Cela permet de récupérer directement la bonne colonne selon la langue de l'utilisateur
+        langue_map = {
+            "ENG": "instructions",
+            "FRA": "instructions_fr",
+            "ESP": "instructions_es",
+            "GER": "instructions_de",
+            "ITA": "instructions_it",
+            "string": "instructions",  # Fallback par défaut
+        }
+        return langue_map.get(langue.upper(), "instructions")

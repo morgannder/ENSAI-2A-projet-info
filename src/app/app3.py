@@ -11,6 +11,7 @@ from pydantic import BaseModel
 
 from business_object.utilisateur import Utilisateur
 from service.cocktail_service import CocktailService
+from service.inventaire_service import InventaireService
 from service.utilisateur_service import UtilisateurService
 from utils.reset_database import ResetDatabase
 
@@ -29,13 +30,20 @@ SECRET_KEY = "sssecretkey"  # pas a stocker là
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60000
 
+
+#################### REMARQUE A rajouter dans APP FINALE
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+
+####################
 
 # ---------------------------
 # SERVICES
 # ---------------------------
 service = UtilisateurService()
 cocktail_service = CocktailService()
+service_utilisateur = UtilisateurService()
+service_inventaire = InventaireService()
 
 
 # ---------------------------
@@ -53,6 +61,20 @@ class UserCreate(BaseModel):
     langue: str  # "FR", "EN", "ES"
 
 
+class Ingredient(BaseModel):
+    nom_ingredient: str
+
+
+class Reponse(BaseModel):
+    confirmation: str
+
+
+class UserUpdate(BaseModel):
+    nouveau_pseudo: Optional[str] = None
+    nouveau_mdp: Optional[str] = None
+    langue: Optional[str] = None
+
+
 class CocktailFilter(BaseModel):
     nom_cocktail: Optional[str] = None
     categorie: Optional[str] = None
@@ -66,9 +88,7 @@ class CocktailFilter(BaseModel):
 # ---------------------------
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (
-        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     print("DEBUG token créé:", token)
@@ -99,8 +119,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
         print("DEBUG erreur lors du décodage du token:", e)
         raise HTTPException(
             status_code=401,
-            detail="Veuillez vous connecter pour pouvoir accéder à ces fonctionnalités.",
+            detail="Veuillez vous connecter pour pouvoir accéder à cette fonctionnalité.",
         )
+
+
+#################### REMARQUE A rajouter dans APP FINALE
 
 
 def get_current_user_optional(
@@ -123,6 +146,9 @@ def get_current_user_optional(
         return None
 
 
+####################
+
+
 @app.post("/token", response_model=Token, include_in_schema=False)
 def token(form_data: OAuth2PasswordRequestForm = Depends()):
     print("DEBUG /token: 22222 username =", form_data.username)
@@ -138,30 +164,34 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# ---------------------------
-# ROUTES UTILISATEUR
-# ---------------------------
+# --- Modèle de requête pour l'inscription ---
+LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
-@app.post("/register", tags=["Utilisateur"])
-def register(data: UserCreate):
-    """Route d'inscription"""
+@app.post("/inscription", tags=["Visiteur"])
+def inscription(data: UserCreate):
     print("DEBUG /register: données reçues:", data)
 
     try:
-        utilisateur = service.creer_utilisateur(
+        if data.langue not in LANGUES_VALIDES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+            )
+        # Appel de la méthode existante du service
+        utilisateur = service_utilisateur.creer_utilisateur(
             pseudo=data.pseudo,
-            mdp=data.mdp,
+            mdp=data.mdp,  # mot de passe en clair, la méthode hash
             age=data.age,
             langue=data.langue,
             est_majeur=None,  # sera recalculé dans la méthode
         )
         if not utilisateur:
+            print(utilisateur)
             print("DEBUG /register: pseudo déjà utilisé ou erreur création")
-            raise HTTPException(
-                status_code=400, detail="Pseudo déjà utilisé ou erreur création"
-            )
+            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
 
+        # Génération du token JWT pour l'utilisateur créé
         token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
         print("DEBUG /register: utilisateur créé, token =", token)
 
@@ -180,21 +210,25 @@ def register(data: UserCreate):
         )
 
 
-@app.post("/token", response_model=Token, include_in_schema=False)
-def token(form_data: OAuth2PasswordRequestForm = Depends()):
-    print("DEBUG /token: username =", form_data.username)
-    utilisateur = service.se_connecter(form_data.username, form_data.password)
-    if not utilisateur:
-        print("DEBUG échec connexion: identifiants incorrects")
-        raise HTTPException(status_code=401, detail="Identifiants incorrects")
-    print("DEBUG utilisateur connecté:", utilisateur)
-    access_token = create_access_token(data={"sub": str(utilisateur.id_utilisateur)})
-    return {"access_token": access_token, "token_type": "bearer"}
+@app.post("/connexion", tags=["Visiteur"])
+def connexion(data):
+    return
 
 
-@app.get("/me", tags=["Utilisateur"])
-def get_my_info(utilisateur: Utilisateur = Depends(get_current_user)):
+# ---------------------------
+# Utilisateur
+# ---------------------------
+
+
+@app.post("/mon_compte/deconnexion", tags=["Utilisateur"])
+def deconnexion(tilisateur: Utilisateur = Depends(get_current_user)):
+    return
+
+
+@app.get("/mon_compte/informations", tags=["Utilisateur"])
+def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     print("DEBUG /me appelé pour l'utilisateur:", utilisateur)
+
     return {
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
@@ -202,6 +236,76 @@ def get_my_info(utilisateur: Utilisateur = Depends(get_current_user)):
         "est_majeur": utilisateur.est_majeur,
     }
 
+
+@app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
+def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
+    """Met à jour le compte de l'utilisateur connecté"""
+    print("DEBUG /me/update: données reçues:", data)
+    print("DEBUG /me/update: utilisateur avant update:", utilisateur)
+
+    try:
+        if data.nouveau_pseudo:
+            succes = service_utilisateur.changer_pseudo(utilisateur, data.nouveau_pseudo)
+            print("DEBUG changement pseudo:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
+
+        if data.nouveau_mdp:
+            succes = service_utilisateur.changer_mdp(utilisateur, data.nouveau_mdp)
+            print("DEBUG changement mdp:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Erreur changement mot de passe")
+
+        if data.langue:
+            succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
+            print("DEBUG changement langue:", succes)
+            if not succes:
+                raise HTTPException(status_code=400, detail="Erreur changement langue")
+
+    except Exception as e:
+        print("DEBUG /register: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la création utilisateur"
+        )
+
+
+@app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
+def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
+    """
+    Supprime le compte de l'utilisateur connecté et le déconnecte
+    """
+    try:
+        # Récupérer l'ID avant suppression pour les logs
+        id_utilisateur = utilisateur.id_utilisateur
+        pseudo = utilisateur.pseudo
+
+        if reponse.confirmation == "CONFIRMER":
+            # Appeler le service pour supprimer le compte
+            suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
+
+            if not suppression_reussie:
+                raise HTTPException(
+                    status_code=500, detail="Erreur lors de la suppression du compte"
+                )
+
+            return {
+                "information": f"Le compte au nom de {pseudo}, associé à l'id {id_utilisateur} à été supprimé",
+                "message": "Compte supprimé avec succès. Vous avez été déconnecté.",
+                "supprime": True,
+            }
+        else:
+            raise HTTPException(
+                status_code=409,
+                detail="Erreur de conflit, vous devez taper CONFIRMER dans le champ de confirmation pour valider votre requête",
+            )
+    except Exception as e:
+        print("DEBUG /register: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la création utilisateur"
+        )
+
+
+#################### REMARQUE A rajouter dans APP FINALE
 
 # ===================  ENDPOINTS COCKTAILS  ==================================
 
@@ -224,6 +328,9 @@ def rechercher_cocktails(
     """
     **Rechercher des cocktails selon vos préférences**
 
+    ## ⚠️ L'abus d'alcool est dangereux pour la santé, à consommer avec modération
+
+
     Vous pouvez filtrer par :
     - Nom du cocktail (ex: `"Margarita"`)
     - Type d'alcool (ex: `"Alcoholic"` ou `"Non alcoholic"`)
@@ -233,10 +340,16 @@ def rechercher_cocktails(
 
     Si vous n'êtes pas connecté, la recherche se fera sans restrictions d'âge.
     Si vous êtes mineur connecté, seuls les cocktails non alcoolisés seront affichés.
+
     """
     try:
         # Si pas connecté → pas de restriction (None)
         est_majeur = utilisateur.est_majeur if utilisateur else None
+
+        if utilisateur:
+            langue = utilisateur.langue
+        else:
+            langue = "ENG"
 
         cocktails = cocktail_service.rechercher_par_filtre(
             est_majeur=est_majeur,
@@ -245,6 +358,7 @@ def rechercher_cocktails(
             alcool=filtres.alcool,
             liste_ingredients=filtres.ingredients,
             verre=filtres.verre,
+            langue=langue,
             limit=limit,
             offset=offset,
         )
@@ -288,10 +402,15 @@ def lister_cocktails_complets(
     - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
     - **offset** *(int, optionnel)* : Décalage pour la pagination.
     """
+    if utilisateur:
+        langue = utilisateur.langue
+    else:
+        langue = "ENG"
     try:
         cocktails = cocktail_service.lister_cocktails_complets(
             id_utilisateur=utilisateur.id_utilisateur,
             est_majeur=utilisateur.est_majeur,
+            langue=langue,
             limit=limit,
             offset=offset,
         )
@@ -334,14 +453,25 @@ def lister_cocktails_partiels(
     - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
     - **offset** *(int, optionnel)* : Pagination.
     """
+    if utilisateur:
+        langue = utilisateur.langue
+    else:
+        langue = "ENG"
     try:
         cocktails = cocktail_service.lister_cocktails_partiels(
             nb_manquants=nb_manquants,
             id_utilisateur=utilisateur.id_utilisateur,
             est_majeur=utilisateur.est_majeur,
+            langue=langue,
             limit=limit,
             offset=offset,
         )
+        if not cocktails:
+            raise HTTPException(
+                status_code=404,
+                detail="Désolée, aucun cocktail partiellement réalisable n'a été trouvé en fonction de votre inventaire. "
+                "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
+            )
         return {
             "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
             "resultats": [c.__dict__ for c in cocktails],
@@ -372,11 +502,19 @@ def cocktails_aleatoires(
     ### Réponse
     - Liste aléatoire de cocktails adaptés à l'âge de l'utilisateur si connecté.
     """
+
+    if utilisateur:
+        langue = utilisateur.langue
+    else:
+        langue = "ENG"
+
     try:
         # Si pas connecté → pas de restriction (None)
         est_majeur = utilisateur.est_majeur if utilisateur else None
 
-        cocktails = cocktail_service.cocktails_aleatoires(est_majeur=est_majeur, nb=nb)
+        cocktails = cocktail_service.cocktails_aleatoires(
+            est_majeur=est_majeur, nb=nb, langue=langue
+        )
 
         return {
             "total": len(cocktails),
