@@ -25,7 +25,7 @@ class UtilisateurDao(metaclass=Singleton):
         """
 
         res = None
-
+        created = False
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -39,17 +39,29 @@ class UtilisateurDao(metaclass=Singleton):
                             "age": utilisateur.age,
                             "langue": utilisateur.langue,
                             "est_majeur": utilisateur.est_majeur,
-                            "date_creation": utilisateur.date_creation
+                            "date_creation": utilisateur.date_creation,
                         },
                     )
                     res = cursor.fetchone()
+                    # on ajoute l'au par défaut dans l'inventaire
+                    if res:
+                        id_utilisateur = res["id_utilisateur"]
+                        utilisateur.id_utilisateur = id_utilisateur
+                        created = True
+                        with connection.cursor() as cursor:
+                            cursor.execute(
+                                """
+                                INSERT INTO inventaire_ingredient (id_utilisateur, id_ingredient)
+                                VALUES (%(id_utilisateur)s, %(id_ingredient)s)
+                                ON CONFLICT DO NOTHING;
+                                """,
+                                {
+                                    "id_utilisateur": utilisateur.id_utilisateur,
+                                    "id_ingredient": 408,
+                                },
+                            )
         except Exception as e:
             logging.info(e)
-
-        created = False
-        if res:
-            utilisateur.id_utilisateur = res["id_utilisateur"]
-            created = True
 
         return created
 
@@ -129,6 +141,42 @@ class UtilisateurDao(metaclass=Singleton):
             raise
 
         return res > 0
+
+    def supprimer_inventaire(self, id_utilisateur: int) -> bool:
+        """Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        created : bool
+            True si la création est un succès
+            False sinon
+        """
+        if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
+            return False
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        DELETE FROM inventaire_ingredient
+                        WHERE id_utilisateur = %(idu)s;
+                        """,
+                        {"idu": id_utilisateur},
+                    )
+                    deleted = cursor.rowcount
+        except Exception as e:
+            logging.exception(
+                "Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s",
+                e,
+            )
+            return False
+
+        return deleted > 0
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
@@ -302,103 +350,6 @@ class UtilisateurDao(metaclass=Singleton):
                         },
                     )
                     res = cursor.rowcount  # renvoie le nombre de lignes affectées
-        except Exception as e:
-            logging.info(e)
-        return res == 1
-
-    ## OPTION 2 : fonctions séparées pour la mmodif des elements
-
-    @log
-    def changer_mdp(self, utilisateur, nouveau_mdp) -> bool:
-        """
-        Changer le mot de passe d'un utilisateur.
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-        nouveau_mdp hashé : str
-
-        Returns
-        -------
-        bool
-            True si le changement a réussi
-            False sinon.
-        """
-        res = None
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "UPDATE utilisateur SET mdp = %(mdp)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "mdp": nouveau_mdp,
-                            "id_utilisateur": utilisateur.id_utilisateur,
-                        },
-                    )
-                    res = cursor.rowcount
-        except Exception as e:
-            logging.info(e)
-        return res == 1
-
-    @log
-    def choisir_langue(self, utilisateur, nouvelle_langue) -> bool:
-        """
-        Choisir la langue des instructions pour un utilisateur.
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-        langue : str
-            Langue d'instruction choisie par l'utilisateur
-
-        Returns
-        -------
-        bool
-            True si le changement a réussi, False sinon.
-        """
-        res = None
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "UPDATE utilisateur SET langue = %(langue)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "langue": nouvelle_langue,
-                            "id_utilisateur": utilisateur.id_utilisateur,
-                        },
-                    )
-                    res = cursor.rowcount
-        except Exception as e:
-            logging.info(e)
-        return res == 1
-
-    @log
-    def changer_pseudo(self, utilisateur: Utilisateur, nouveau_pseudo: str) -> bool:
-        """
-        Changer le pseudo d'un utilisateur.
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-        nouveau_pseudo : str
-
-        Returns
-        -------
-        bool
-            True si le changement a réussi, False sinon.
-        """
-        res = None
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "UPDATE utilisateur SET pseudo = %(pseudo)s WHERE id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "pseudo": nouveau_pseudo,
-                            "id_utilisateur": utilisateur.id_utilisateur,
-                        },
-                    )
-                    res = cursor.rowcount
         except Exception as e:
             logging.info(e)
         return res == 1

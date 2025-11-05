@@ -1,16 +1,16 @@
+from datetime import datetime
+
 from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
-from utils.securite import hash_password
-from datetime import datetime
-
+from utils.securite import hash_password, secu_mdp
 
 
 class UtilisateurService:
     """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer_utilisateur(self, pseudo, mdp, age, langue, est_majeur) -> Utilisateur:
+    def creer_utilisateur(self, pseudo, mdp, age, langue) -> Utilisateur:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 
@@ -31,10 +31,11 @@ class UtilisateurService:
             L'utilisateur créé si succès
             sinon None
         """
+        secu_mdp(mdp)
+        est_majeur = False
+
         if age >= 18:
             est_majeur = True
-        else:
-            est_majeur = False
 
         date_creation = datetime.now()
 
@@ -79,29 +80,30 @@ class UtilisateurService:
         utilisateur = self.trouver_par_pseudo(pseudo)
         if not utilisateur:
             return None
-        mdp = hash_password(mdp, str(utilisateur.date_creation)),
+        mdp = (hash_password(mdp, str(utilisateur.date_creation)),)
         return UtilisateurDao().se_connecter(pseudo, mdp)
 
     @log
-    def deconnecter(self, utilisateur) -> bool:
+    def supprimer_inventaire(self, utilisateur: Utilisateur) -> bool:
         """
-        Déconnecter un utilisateur de l'app.
+        Supprimer l'inventaire d'un utilisateur.
 
         Parameters
         ----------
         utilisateur : Utilisateur
-            Utilisateur souhaitant se déconnecter.
+            Utilisateur dont il faut supprimer l'inventaire
+
 
         Returns
         -------
         bool
-            True si la déconnexion a réussi
+            True si la suppression a réussie
             False sinon
         """
-        # TODO: Implémenter la déconnexion
+        return UtilisateurDao().supprimer_inventaire(utilisateur.id_utilisateur)
 
     @log
-    def supprimer_utilisateur(self, utilisateur) -> bool:
+    def supprimer_utilisateur(self, utilisateur: Utilisateur) -> bool:
         """
         Supprimer le compte d'un utilisateur.
 
@@ -117,6 +119,7 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
+        UtilisateurService().supprimer_inventaire(utilisateur)
         return UtilisateurDao().supprimer_utilisateur(utilisateur)
 
     @log
@@ -165,6 +168,7 @@ class UtilisateurService:
             success si changement réussi
             echec sinon
         """
+        secu_mdp(nouveau_mdp)
         if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=str(utilisateur.date_creation)):
             return "identique"
         utilisateur.mdp = hash_password(nouveau_mdp, str(utilisateur.date_creation))
