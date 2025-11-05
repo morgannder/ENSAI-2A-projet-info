@@ -29,11 +29,11 @@ liste_utilisateurs = [
 def test_creer_ok():
     """Création de Utilisateur réussie"""
     # GIVEN
-    pseudo, mdp, age, langue, est_majeur = "test", "Mdp1234!", 15, "English", True
+    pseudo, mdp, age, langue= "test", "Mdp1234!", 15, "English"
     UtilisateurDao().creer_compte = MagicMock(return_value=True)
 
     # WHEN
-    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue, est_majeur)
+    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue)
 
     # THEN
     assert utilisateur.pseudo == pseudo
@@ -44,11 +44,11 @@ def test_creer_ok():
 def test_creer_echec():
     """Création de Utilisateur échouée"""
     # GIVEN
-    pseudo, mdp, age, langue, est_majeur = "test", "Mdp1234!", 15, "English", True
+    pseudo, mdp, age, langue = "test", "Mdp1234!", 15, "English"
     UtilisateurDao().creer_compte = MagicMock(return_value=False)
 
     # WHEN
-    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue, est_majeur)
+    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue)
 
     # THEN
     assert utilisateur is None
