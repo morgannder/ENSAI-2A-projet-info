@@ -119,9 +119,8 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        if UtilisateurService().supprimer_inventaire(utilisateur):
-            return UtilisateurDao().supprimer_utilisateur(utilisateur)
-        return False
+        UtilisateurService().supprimer_inventaire(utilisateur)
+        return UtilisateurDao().supprimer_utilisateur(utilisateur)
 
     @log
     def pseudo_deja_utilise(self, pseudo: str, utilisateur_id=None) -> bool:

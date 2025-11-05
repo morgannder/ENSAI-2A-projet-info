@@ -50,7 +50,7 @@ class UserUpdate(BaseModel):
             "Nouveau pseudo souhaité pour votre compte. "
             "Doit contenir au moins 3 caractères. "
             "Le pseudo doit être unique."
-        )
+        ),
     )
 
     nouveau_mdp: Optional[str] = Field(
@@ -58,14 +58,13 @@ class UserUpdate(BaseModel):
         description=(
             "Nouveau mot de passe. Il doit respecter les règles de sécurité décrites lors de "
             "l'inscription"
-        )
+        ),
     )
 
     langue: Optional[str] = Field(
-        None,
-        description=(
-            "Nouvelle langue d’affichage préférée pour les recettes")
+        None, description=("Nouvelle langue d’affichage préférée pour les recettes")
     )
+
 
 class CocktailFilter(BaseModel):
     nom_cocktail: Optional[str] = None
@@ -121,6 +120,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
     except Exception as e:
         print("DEBUG erreur lors du décodage du token:", e)
         raise HTTPException(status_code=401, detail="Token invalide")
+
 
 def get_current_user_optional(
     token: Optional[str] = Depends(oauth2_scheme),
@@ -196,9 +196,10 @@ def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
 
 
 @app.post("/inscription", tags=["Visiteur"])
-def inscription(donnee: UserCreate,
-                utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional)
-                ):
+def inscription(
+    donnee: UserCreate,
+    utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
     """
     **Créer un nouveau compte utilisateur**
 
@@ -224,14 +225,13 @@ def inscription(donnee: UserCreate,
     if utilisateur_connecte:
         raise HTTPException(
             status_code=403,
-            detail="Vous êtes déjà connecté, vous ne pouvez pas créer un nouveau compte."
+            detail="Vous êtes déjà connecté, vous ne pouvez pas créer un nouveau compte.",
         )
 
     print("DEBUG /register: données reçues:", donnee)
     print("DEBUG: langue reçue =", donnee.langue)
     print("DEBUG: langues valides =", LANGUES_VALIDES)
     print("DEBUG: test langue valide =", donnee.langue in LANGUES_VALIDES)
-
 
     try:
         # Vérification de tous les cas d'erreurs (sauf du mdp qui ets géré dans le service)
@@ -247,15 +247,14 @@ def inscription(donnee: UserCreate,
             )
         if len(donnee.pseudo) < 3:
             raise HTTPException(
-                status_code=400,
-                detail="Le pseudo doit contenir au moins 3 charactères")
+                status_code=400, detail="Le pseudo doit contenir au moins 3 charactères"
+            )
         # Appel de la méthode existante du service
         utilisateur = service_utilisateur.creer_utilisateur(
             pseudo=donnee.pseudo,
             mdp=donnee.mdp,  # mot de passe en clair, la méthode hash
             age=donnee.age,
             langue=donnee.langue,
-            est_majeur=None,  # sera recalculé dans la méthode
         )
         if not utilisateur:
             print(utilisateur)
@@ -305,7 +304,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
         "langue": utilisateur.langue,
-        "date_creation": utilisateur.date_creation.strftime("%d/%m/%Y")
+        "date_creation": utilisateur.date_creation.strftime("%d/%m/%Y"),
     }
 
 
@@ -347,7 +346,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_cu
             else:
                 changements.append("mot de passe")
 
-        if donnee.langue :
+        if donnee.langue:
             if donnee.langue not in LANGUES_VALIDES:
                 raise HTTPException(
                     status_code=400,
@@ -456,7 +455,7 @@ def ajoute_ingredient(
 ):
     """**Ajoute un ingrédient à l'inventaire de l'utilisateur**
 
-        Vous pouvez consulter les ingrédients disponibles via la méthode de suggestion d'ingrédients
+    Vous pouvez consulter les ingrédients disponibles via la méthode de suggestion d'ingrédients
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
@@ -470,7 +469,7 @@ def ajoute_ingredient(
         )
 
 
-@app.delete("/inventaire/supprimer", tags=["Inventaire"])
+@app.delete("/inventaire/supprimer_ingredient", tags=["Inventaire"])
 def supprime_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -484,6 +483,43 @@ def supprime_ingredient(
         raise HTTPException(
             status_code=500,
             detail="Erreur interne lors de la suppression de l'inventaire",
+        )
+
+
+@app.delete("/Inventaire/supprimer_tout", tags=["Inventaire"])
+def supprimer_mon_inventaire(
+    reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
+):
+    """
+    Supprime l'inventaire de l'utilisateur
+
+    Veuillez saisir 'CONFIRMER' pour valider la demande
+    """
+    try:
+        if reponse.confirmation == "CONFIRMER":
+            # Appeler le service pour supprimer le compte
+            suppression_reussie = service_utilisateur.supprimer_inventaire(utilisateur)
+
+            if not suppression_reussie:
+                raise HTTPException(
+                    status_code=500, detail="Erreur lors de la suppression de l'inventaire"
+                )
+
+            return {
+                "message": "Inventaire supprimé avec succès.",
+                "supprime": True,
+            }
+        else:
+            raise HTTPException(
+                status_code=409,
+                detail="Erreur de conflit, vous devez taper CONFIRMER dans le champ de confirmation pour valider votre requête",
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DEBUG /register: exception", e)
+        raise HTTPException(
+            status_code=500, detail="Erreur interne lors de la suppression du compte"
         )
 
 
