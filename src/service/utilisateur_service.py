@@ -1,7 +1,7 @@
 from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
-from utils.securite import hash_password
+from utils.securite import hash_password, secu_mdp
 from datetime import datetime
 
 
@@ -31,6 +31,7 @@ class UtilisateurService:
             L'utilisateur créé si succès
             sinon None
         """
+        secu_mdp(mdp)
         if age >= 18:
             est_majeur = True
         else:
@@ -82,23 +83,6 @@ class UtilisateurService:
         mdp = hash_password(mdp, str(utilisateur.date_creation)),
         return UtilisateurDao().se_connecter(pseudo, mdp)
 
-    @log
-    def deconnecter(self, utilisateur) -> bool:
-        """
-        Déconnecter un utilisateur de l'app.
-
-        Parameters
-        ----------
-        utilisateur : Utilisateur
-            Utilisateur souhaitant se déconnecter.
-
-        Returns
-        -------
-        bool
-            True si la déconnexion a réussi
-            False sinon
-        """
-        # TODO: Implémenter la déconnexion
 
     @log
     def supprimer_utilisateur(self, utilisateur) -> bool:
@@ -165,6 +149,7 @@ class UtilisateurService:
             success si changement réussi
             echec sinon
         """
+        secu_mdp(nouveau_mdp)
         if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=str(utilisateur.date_creation)):
             return "identique"
         utilisateur.mdp = hash_password(nouveau_mdp, str(utilisateur.date_creation))

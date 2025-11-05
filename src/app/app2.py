@@ -48,11 +48,6 @@ class UserUpdate(BaseModel):
     nouveau_mdp: Optional[str] = None
     langue: Optional[str] = None
 
-
-class Filtres(BaseModel):
-    Alcool: Optional[str] = None
-
-
 class CocktailFilter(BaseModel):
     nom_cocktail: Optional[str] = None
     categorie: Optional[str] = None
@@ -108,6 +103,25 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
         print("DEBUG erreur lors du décodage du token:", e)
         raise HTTPException(status_code=401, detail="Token invalide")
 
+def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme),
+) -> Optional[Utilisateur]:
+    """Retourne l'utilisateur courant s'il est authentifié, sinon est considéré comme visiteur."""
+    if not token:
+        print("DEBUG aucun token fourni → Visiteur")
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id_str = payload.get("sub")
+        if not user_id_str:
+            return None
+        utilisateur = service_utilisateur.trouver_par_id(int(user_id_str))
+        print("DEBUG utilisateur optionnel trouvé:", utilisateur)
+        return utilisateur
+    except Exception as e:
+        print("DEBUG erreur token optionnel:", e)
+        return None
+
 
 # ---------------------------
 # ROUTES AVEC TRACE
@@ -126,7 +140,7 @@ class UserCreate(BaseModel):
         description="Votre âge (doit être compris entre 13 et 130 pour accéder à l'intégralité de l'application)",
     )
     langue: Literal["string", "FRA", "ESP", "ITA", "ENG", "GER"] = Field(
-        "string",
+        ...,
         description=(
             "Langue de l'utilisateur. Valeurs possibles : "
             "'string' (anglais par défaut), 'FRA' (français), 'ESP' (espagnol), "
@@ -170,9 +184,14 @@ def inscription(data: UserCreate):
     Pour vous inscrire, remplissez les champs suivants :
 
     - **pseudo** *(string)* → votre pseudo
-    - **mdp** *(string)* → votre mot de passe
+    - **mdp** *(string)* → Votre mot de passe. Il doit respecter les règles de sécurité suivantes :
+        - Au moins 8 caractères
+        - Au moins une lettre majuscule
+        - Au moins une lettre minuscule
+        - Au moins un chiffre
+        - Au moins un caractère spécial (ex: !@#$%^&*)
     - **age** *(int)* → votre âge (doit être compris entre **13 et 130** pour accéder à l'intégralité de notre application)
-    - **langue** *(string)* → langue de l’utilisateur, doit être l’une des valeurs suivantes :
+    - **langue** *(string)* → langue pour les recettes, doit être l’une des valeurs suivantes :
       - `"string"` (anglais par défaut)
       - `"FRA"` (français)
       - `"ESP"` (espagnol)
@@ -243,7 +262,8 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 
     - **pseudo** → votre pseudo
     - **age** → votre âge
-    - **langue**  → langue choisie
+    - **langue**  → langue pour les recettes
+    - **date_creation** → date de création de votre compte
     """
     print("DEBUG /me appelé pour l'utilisateur:", utilisateur)
 
@@ -251,12 +271,15 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
         "langue": utilisateur.langue,
-        "date_creation": utilisateur.date_creation.isoformat(),
+        "date_creation": utilisateur.date_creation.strftime("%d/%m/%Y")
     }
 
 
 @app.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
 def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
+    """
+    **Modifie certaines informations du compte**
+    """
     print("DEBUG /me/update: données reçues:", data)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
@@ -288,12 +311,17 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
             else:
                 changements.append("mot de passe")
 
-        if data.langue:
+        if data.langue not in LANGUES_VALIDES:
+            raise HTTPException(
+                    status_code=400,
+                    detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+                )
+        elif data.langue :
             succes = service_utilisateur.choisir_langue(utilisateur, data.langue)
             if not succes:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Langue '{data.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
+                    detail="Erreur interne lors de la modification de la langue",
                 )
             changements.append("langue")
 
@@ -310,14 +338,16 @@ def modifie_compte(data: UserUpdate, utilisateur: Utilisateur = Depends(get_curr
     except Exception as e:
         print("DEBUG /register: exception", e)
         raise HTTPException(
-            status_code=500, detail="Erreur interne lors de la mise à jour utilisateur"
+            status_code=500, detail="Erreur interne lors de la mise à jour du compte"
         )
 
 
 @app.delete("/mon_compte/supprimer", tags=["Utilisateur"])
 def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
     """
-    Supprime le compte de l'utilisateur connecté et le déconnecte
+    **Supprime le compte de l'utilisateur connecté et le déconnecte**
+
+    veuillez taper CONFIRMER pour valider la demande
     """
     try:
         # Récupérer l'ID avant suppression pour les logs
@@ -348,7 +378,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
     except Exception as e:
         print("DEBUG /register: exception", e)
         raise HTTPException(
-            status_code=500, detail="Erreur interne lors de la création utilisateur"
+            status_code=500, detail="Erreur interne lors de la suppression du compte"
         )
 
 
@@ -399,7 +429,7 @@ def ajoute_ingredient(
         print("DEBUG /inventaire/vue: exception", e)
         raise HTTPException(
             status_code=500,
-            detail="Erreur interne lors de la visualisation de l'inventaire",
+            detail="Erreur interne lors de l'ajout de l'inventaire",
         )
 
 
@@ -416,33 +446,13 @@ def supprime_ingredient(
         print("DEBUG /inventaire/vue: exception", e)
         raise HTTPException(
             status_code=500,
-            detail="Erreur interne lors de la visualisation de l'inventaire",
+            detail="Erreur interne lors de la suppression de l'inventaire",
         )
 
 
 # ---------------------------
 # Cocktails
 # ---------------------------
-
-
-def get_current_user_optional(
-    token: Optional[str] = Depends(oauth2_scheme),
-) -> Optional[Utilisateur]:
-    """Retourne l'utilisateur courant s'il est authentifié, sinon est considéré comme visiteur."""
-    if not token:
-        print("DEBUG aucun token fourni → Visiteur")
-        return None
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id_str = payload.get("sub")
-        if not user_id_str:
-            return None
-        utilisateur = service_utilisateur.trouver_par_id(int(user_id_str))
-        print("DEBUG utilisateur optionnel trouvé:", utilisateur)
-        return utilisateur
-    except Exception as e:
-        print("DEBUG erreur token optionnel:", e)
-        return None
 
 
 @app.post(
