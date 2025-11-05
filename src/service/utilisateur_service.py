@@ -1,16 +1,16 @@
+from datetime import datetime
+
 from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
 from utils.securite import hash_password, secu_mdp
-from datetime import datetime
-
 
 
 class UtilisateurService:
     """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer_utilisateur(self, pseudo, mdp, age, langue, est_majeur) -> Utilisateur:
+    def creer_utilisateur(self, pseudo, mdp, age, langue) -> Utilisateur:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 
@@ -32,11 +32,10 @@ class UtilisateurService:
             sinon None
         """
         secu_mdp(mdp)
+        est_majeur = False
 
         if age >= 18:
             est_majeur = True
-        else:
-            est_majeur = False
 
         date_creation = datetime.now()
 
@@ -81,12 +80,30 @@ class UtilisateurService:
         utilisateur = self.trouver_par_pseudo(pseudo)
         if not utilisateur:
             return None
-        mdp = hash_password(mdp, str(utilisateur.date_creation)),
+        mdp = (hash_password(mdp, str(utilisateur.date_creation)),)
         return UtilisateurDao().se_connecter(pseudo, mdp)
 
+    @log
+    def supprimer_inventaire(self, utilisateur: Utilisateur) -> bool:
+        """
+        Supprimer l'inventaire d'un utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+            Utilisateur dont il faut supprimer l'inventaire
+
+
+        Returns
+        -------
+        bool
+            True si la suppression a réussie
+            False sinon
+        """
+        return UtilisateurDao().supprimer_inventaire(utilisateur.id_utilisateur)
 
     @log
-    def supprimer_utilisateur(self, utilisateur) -> bool:
+    def supprimer_utilisateur(self, utilisateur: Utilisateur) -> bool:
         """
         Supprimer le compte d'un utilisateur.
 
@@ -102,7 +119,9 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        return UtilisateurDao().supprimer_utilisateur(utilisateur)
+        if UtilisateurService().supprimer_inventaire(utilisateur):
+            return UtilisateurDao().supprimer_utilisateur(utilisateur)
+        return False
 
     @log
     def pseudo_deja_utilise(self, pseudo: str, utilisateur_id=None) -> bool:

@@ -1,11 +1,11 @@
 import os
-import pytest
 from unittest.mock import patch
 
-from utils.reset_database import ResetDatabase
+import pytest
 
-from dao.inventaire_dao import InventaireDao
 from business_object.ingredient import Ingredient
+from dao.inventaire_dao import InventaireDao
+from utils.reset_database import ResetDatabase
 
 
 # ----------------------------------------------------------------------
@@ -48,7 +48,6 @@ def test_ajouter_ingredient_inventaire_cree_nouveau():
     assert ok is False
 
 
-
 def test_ajouter_ingredient_inventaire_existant_par_nom():
     """Ingrédient sans id mais déjà présent (par nom) -> uniquement lien inventaire."""
     # GIVEN
@@ -87,13 +86,16 @@ def test_ajouter_ingredient_inventaire_avec_id_deja_renseigne():
     assert ing_base.id_ingredient is None
 
     # On réutilise le même id pour un nouvel ajout
-    ing2 = Ingredient(id_ingredient=ing_base.id_ingredient, nom_ingredient=nom_test, desc_ingredient="d2")
+    ing2 = Ingredient(
+        id_ingredient=ing_base.id_ingredient, nom_ingredient=nom_test, desc_ingredient="d2"
+    )
 
     # WHEN
     ok = InventaireDao().ajouter_ingredient_inventaire(id_user, ing2)
 
     # THEN
     assert ok is True
+
 
 @pytest.mark.parametrize(
     "user_id, ing, expected",
@@ -115,7 +117,10 @@ def test_ajouter_ingredient_inventaire_exception_gracefully():
     Cas d'erreur difficile à simuler sans mock.
     On vérifie au moins qu'une entrée invalide renvoie False (déjà couvert ci-dessus).
     """
-    assert InventaireDao().ajouter_ingredient_inventaire("not_an_int", Ingredient(None, "x", None)) is False
+    assert (
+        InventaireDao().ajouter_ingredient_inventaire("not_an_int", Ingredient(None, "x", None))
+        is False
+    )
 
 
 # ----------------------------------------------------------------------
@@ -199,8 +204,43 @@ def test_consulter_inventaire_aucun_resultat_sur_user_sans_ingredients():
 
 
 # ----------------------------------------------------------------------
+# Tests rechercher_ingrédients
+# ----------------------------------------------------------------------
+
+
+def test_rechercher_ingredient_ok(setup_test_environment):
+    """La méthode retourne un ingrédient de type ingrédient non vide"""
+
+    # GIVEN
+    ingredient_a_chercher = "lemon"
+
+    # WHEN
+    ingredient = InventaireDao().recherche_ingredient(ingredient_a_chercher)
+
+    # THEN
+    assert isinstance(ingredient, Ingredient)
+    assert ingredient.desc_ingredient
+    assert ingredient.id_ingredient == 240
+    assert ingredient.nom_ingredient == "Lemon"
+
+
+def test_rechercher_ingredient_ko(setup_test_environment):
+    """La méthode ne retourne pas d'ingrédient car le nom rentré est une erreur"""
+
+    # GIVEN
+    ingredient_a_chercher = "blublub"
+
+    # WHEN
+    ingredient = InventaireDao().recherche_ingredient(ingredient_a_chercher)
+
+    # THEN
+    assert not isinstance(ingredient, Ingredient)
+
+
+# ----------------------------------------------------------------------
 # Tests ingredients_aléatoires
 # ----------------------------------------------------------------------
+
 
 def test_ingredients_aleatoires(setup_test_environment):
     """La méthode doit retourner entre 1 et 10 ingrédients"""
@@ -227,4 +267,5 @@ def test_ingredients_aleatoires_limite(setup_test_environment):
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__, "-v"])

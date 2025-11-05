@@ -146,6 +146,7 @@ def test_supprimer_utilisateur_ok():
         date_creation="2025-04-11 16:46:03",
     )
     UtilisateurDao().creer_compte(utilisateur)
+    UtilisateurDao().supprimer_inventaire(utilisateur.id_utilisateur)
     suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
     assert suppression_ok
 

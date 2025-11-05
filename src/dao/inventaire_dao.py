@@ -170,10 +170,6 @@ class InventaireDao(metaclass=Singleton):
                 _id = r["id_ingredient"]
                 _nom = r["nom_ingredient"]
                 _desc: Optional[str] = r["desc_ingredient"]
-            else:
-                _id = r[0]
-                _nom = r[1]
-                _desc = r[2] if len(r) > 2 else None
 
             ingredient = Ingredient(
                 id_ingredient=int(_id) if _id is not None else None,

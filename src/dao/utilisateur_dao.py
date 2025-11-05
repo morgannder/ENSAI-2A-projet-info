@@ -39,11 +39,11 @@ class UtilisateurDao(metaclass=Singleton):
                             "age": utilisateur.age,
                             "langue": utilisateur.langue,
                             "est_majeur": utilisateur.est_majeur,
-                            "date_creation": utilisateur.date_creation
+                            "date_creation": utilisateur.date_creation,
                         },
                     )
                     res = cursor.fetchone()
-                    # on ajoute l'au par défaut dans l'inventaire 
+                    # on ajoute l'au par défaut dans l'inventaire
                     if res:
                         id_utilisateur = res["id_utilisateur"]
                         utilisateur.id_utilisateur = id_utilisateur
@@ -55,7 +55,10 @@ class UtilisateurDao(metaclass=Singleton):
                                 VALUES (%(id_utilisateur)s, %(id_ingredient)s)
                                 ON CONFLICT DO NOTHING;
                                 """,
-                                {"id_utilisateur": utilisateur.id_utilisateur, "id_ingredient": 408},
+                                {
+                                    "id_utilisateur": utilisateur.id_utilisateur,
+                                    "id_ingredient": 408,
+                                },
                             )
         except Exception as e:
             logging.info(e)
@@ -138,6 +141,42 @@ class UtilisateurDao(metaclass=Singleton):
             raise
 
         return res > 0
+
+    def supprimer_inventaire(self, id_utilisateur: int) -> bool:
+        """Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        created : bool
+            True si la création est un succès
+            False sinon
+        """
+        if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
+            return False
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        DELETE FROM inventaire_ingredient
+                        WHERE id_utilisateur = %(idu)s;
+                        """,
+                        {"idu": id_utilisateur},
+                    )
+                    deleted = cursor.rowcount
+        except Exception as e:
+            logging.exception(
+                "Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s",
+                e,
+            )
+            return False
+
+        return deleted > 0
 
     @log
     def trouver_par_id(self, id_utilisateur) -> Utilisateur:
