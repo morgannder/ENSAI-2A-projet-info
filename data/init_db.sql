@@ -15,6 +15,7 @@ CREATE TABLE utilisateur(
     age          INTEGER,
     langue       VARCHAR(50),
     est_majeur  BOOLEAN,
+    cocktails_realises  INTEGER,
     date_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

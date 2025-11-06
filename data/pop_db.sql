@@ -1,10 +1,10 @@
-INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation) VALUES
-(1, 'admin',    hash_password('0000', '2025-04-11 14:30:00'),   1,  'FRA',   false,  '2025-04-11 14:30:00'),
-(2, 'a',        hash_password('a', '2025-04-11 16:00:00'),      20, 'FRA',   true,   '2025-04-11 16:00:00'),
-(3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'ENG',   true,   '2025-04-11 16:03:00'),
-(4, 'batricia', hash_password('9876', '2025-04-11 16:34:00'),   15, 'ITA',   false,  '2025-04-11 16:34:00'),
-(5, 'Gilbert',  hash_password('abcd', '2025-04-11 16:42:10'),   23, 'GER',   true,   '2025-04-11 16:42:10'),
-(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ESP',   false,  '2025-04-11 16:43:00')
+INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation, cocktails_realises) VALUES
+(1, 'admin',    hash_password('0000', '2025-04-11 14:30:00'),   1,  'FRA',   false,  '2025-04-11 14:30:00', 0),
+(2, 'a',        hash_password('a', '2025-04-11 16:00:00'),      20, 'FRA',   true,   '2025-04-11 16:00:00', 12),
+(3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'ENG',   true,   '2025-04-11 16:03:00', 2500),
+(4, 'batricia', hash_password('9876', '2025-04-11 16:34:00'),   15, 'ITA',   false,  '2025-04-11 16:34:00', 30),
+(5, 'Gilbert',  hash_password('abcd', '2025-04-11 16:42:10'),   23, 'GER',   true,   '2025-04-11 16:42:10', 2),
+(6, 'miguel',   hash_password('toto', '2025-04-11 16:43:00'),   11, 'ESP',   false,  '2025-04-11 16:43:00', 0)
 ;
 
 SELECT setval('utilisateur_id_utilisateur_seq', (SELECT MAX(id_utilisateur) FROM utilisateur));
