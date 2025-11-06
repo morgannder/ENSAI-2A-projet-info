@@ -23,7 +23,7 @@ class CocktailFilter(BaseModel):
 
 
 @router.post(
-    "/cocktails/details",
+    "/realiser_cocktail",
     tags=["Cocktails"],
     responses={
         200: {"description": "Détails complets du cocktail 🍹"},
@@ -31,7 +31,7 @@ class CocktailFilter(BaseModel):
         404: {"description": "Cocktail introuvable"},
     },
 )
-def details_cocktail(
+def realiser_cocktail(
     id_cocktail: Optional[int] = None,
     nom_cocktail: Optional[str] = None,
     utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
@@ -71,6 +71,7 @@ def details_cocktail(
         )
 
         if cocktail:
+            utilisateur.cocktails_realises += 1
             # Séparer les ingrédients et quantités
             ingredients_liste = cocktail.ingredients.split(", ")
             quantites_liste = cocktail.quantites.split(", ")
@@ -109,7 +110,7 @@ def details_cocktail(
 
 
 @router.post(
-    "/cocktails/recherche",
+    "/recherche",
     responses={
         200: {"description": "Liste de cocktails correspondant à vos critères."},
         400: {"description": "Paramètres invalides."},
@@ -181,7 +182,7 @@ def rechercher_cocktails(
 
 
 @router.get(
-    "/cocktails/complets",
+    "/complets",
     responses={
         200: {"description": "Liste des cocktails réalisables à 100%."},
         401: {"description": "Vous devez être connecté."},
@@ -231,7 +232,7 @@ def lister_cocktails_complets(
 
 
 @router.get(
-    "/cocktails/partiels",
+    "/partiels",
     responses={
         200: {"description": "Liste des cocktails presque réalisables."},
         400: {"description": "Nombre d'ingrédients manquants invalide."},
@@ -286,7 +287,7 @@ def lister_cocktails_partiels(
 
 
 @router.get(
-    "/cocktails/aleatoires",
+    "/aleatoires",
     responses={
         200: {"description": "Sélection aléatoire de cocktails."},
         400: {"description": "Nombre invalide (1-5)."},
@@ -330,7 +331,7 @@ def cocktails_aleatoires(
 # ------------------- Endpoint: /cocktails/categories -----------------------------
 
 
-@router.get("/cocktails/categories")
+@router.get("/categories")
 def lister_categories():
     """
     **Lister les catégories de cocktails**
@@ -344,7 +345,7 @@ def lister_categories():
 # ------------------- Endpoint: /cocktails/verres -----------------------------
 
 
-@router.get("/cocktails/verres")
+@router.get("/verres")
 def lister_verres():
     """
     **Lister les types de verres**

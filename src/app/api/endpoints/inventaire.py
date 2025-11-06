@@ -15,7 +15,7 @@ class Reponse(BaseModel):
     confirmation: str
 
 
-@router.get("/inventaire/vue")
+@router.get("/vue")
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     """**Montre l'inventaire de l'utilisateur**"""
     try:
@@ -32,7 +32,7 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
 
 
 @router.get(
-    "/ingredients/suggestion",
+    "/suggestion",
     responses={
         200: {"description": "Sélection aléatoire de cocktails."},
         400: {"description": "Paramètre invalide."},

@@ -42,7 +42,7 @@ class Reponse(BaseModel):
 LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
-@router.get("/mon_compte/informations", tags=["Utilisateur"])
+@router.get("/informations", tags=["Utilisateur"])
 def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Visualiser les informations de votre compte**
@@ -65,7 +65,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
     }
 
 
-@router.put("/mon_compte/mettre_a_jour", tags=["Utilisateur"])
+@router.put("/mettre_a_jour", tags=["Utilisateur"])
 def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Modifie certaines informations du compte**
@@ -131,7 +131,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_cu
         )
 
 
-@router.delete("/mon_compte/supprimer", tags=["Utilisateur"])
+@router.delete("/supprimer", tags=["Utilisateur"])
 def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
