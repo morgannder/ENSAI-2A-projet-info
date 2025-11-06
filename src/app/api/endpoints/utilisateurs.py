@@ -1,26 +1,16 @@
 # app/api/endpoints/utilisateurs.py
-import os
-from datetime import datetime, timedelta, timezone
-from typing import Literal, Optional
+from typing import Optional
 
-import dotenv
-import jwt
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, Field
 
-from business_object.utilisateur import Utilisateur
-from service.cocktail_service import CocktailService
-from service.inventaire_service import InventaireService
-from service.utilisateur_service import UtilisateurService
-from utils.reset_database import ResetDatabase
 from app.core.security import get_current_user
-
-
-
+from business_object.utilisateur import Utilisateur
+from service.utilisateur_service import UtilisateurService
 
 router = APIRouter(tags=["Utilisateur"])
 service_utilisateur = UtilisateurService()
+
 
 class UserUpdate(BaseModel):
     nouveau_pseudo: Optional[str] = Field(
@@ -48,7 +38,9 @@ class UserUpdate(BaseModel):
 class Reponse(BaseModel):
     confirmation: str
 
+
 LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
+
 
 @router.get("/mon_compte/informations", tags=["Utilisateur"])
 def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
