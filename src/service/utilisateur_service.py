@@ -10,7 +10,7 @@ class UtilisateurService:
     """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer_utilisateur(self, pseudo, mdp, age, langue) -> Utilisateur:
+    def creer_utilisateur(self, pseudo, mdp, age, langue, cocktails_realises) -> Utilisateur:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 
@@ -47,6 +47,7 @@ class UtilisateurService:
             langue=langue,
             est_majeur=est_majeur,
             date_creation=date_creation,
+            cocktails_realises=cocktails_realises,
         )
 
         if UtilisateurDao().creer_compte(utilisateur):

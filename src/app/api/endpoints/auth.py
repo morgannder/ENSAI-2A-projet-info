@@ -1,12 +1,16 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
-from typing import Literal, Optional
+
 from app.core.security import create_access_token, get_current_user_optional
-from service.utilisateur_service import UtilisateurService
 from business_object.utilisateur import Utilisateur
+from service.utilisateur_service import UtilisateurService
+
 router = APIRouter(tags=["Authentification"])
 service_utilisateur = UtilisateurService()
+
 
 class UserCreate(BaseModel):
     pseudo: str = Field(..., description="Votre pseudo (doit être unique)")
@@ -16,18 +20,19 @@ class UserCreate(BaseModel):
         description="Votre âge (doit être compris entre 13 et 130 pour accéder à l'intégralité de l'application)",
     )
     langue: str = Field(
-    ...,
-    description=(
-        "Langue de l'utilisateur. Valeurs possibles : "
-        "'string' (anglais par défaut), 'FRA' (français), 'ESP' (espagnol), "
-        "'ITA' (italien), 'ENG' (anglais), 'GER' (allemand)"
-    ),
+        ...,
+        description=(
+            "Langue de l'utilisateur. Valeurs possibles : "
+            "'string' (anglais par défaut), 'FRA' (français), 'ESP' (espagnol), "
+            "'ITA' (italien), 'ENG' (anglais), 'GER' (allemand)"
+        ),
     )
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
@@ -108,6 +113,7 @@ def inscription(
             mdp=donnee.mdp,  # mot de passe en clair, la méthode hash
             age=donnee.age,
             langue=donnee.langue,
+            cocktails_realises=0,
         )
         if not utilisateur:
             print(utilisateur)
