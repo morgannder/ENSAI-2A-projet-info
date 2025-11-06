@@ -6,8 +6,11 @@ from pydantic import BaseModel
 from app.core.security import get_current_user, get_current_user_optional
 from business_object.utilisateur import Utilisateur
 from service.cocktail_service import CocktailService
+from service.utilisateur_service import UtilisateurService
 
 service_cocktail = CocktailService()
+service_utilisateur = UtilisateurService()
+
 router = APIRouter(tags=["Cocktails"])
 
 
@@ -71,7 +74,7 @@ def realiser_cocktail(
         )
 
         if cocktail:
-            utilisateur.cocktails_realises += 1
+            service_utilisateur.ajout_cocktail_realise(utilisateur)
             # Séparer les ingrédients et quantités
             ingredients_liste = cocktail.ingredients.split(", ")
             quantites_liste = cocktail.quantites.split(", ")

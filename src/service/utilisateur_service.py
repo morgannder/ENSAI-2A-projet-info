@@ -219,3 +219,7 @@ class UtilisateurService:
             return False
         utilisateur.pseudo = nouveau_pseudo
         return UtilisateurDao().modifier(utilisateur)
+
+    @log
+    def ajout_cocktail_realise(self, utilisateur: Utilisateur):
+        return UtilisateurDao().ajout_cocktail_realise(utilisateur)

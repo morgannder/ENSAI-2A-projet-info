@@ -313,7 +313,6 @@ class UtilisateurDao(metaclass=Singleton):
 
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------
 
-    ## OPTION 1 : fonction commune pour la mmodif des elements
     @log
     def modifier(self, utilisateur: Utilisateur) -> bool:
         """
@@ -360,3 +359,36 @@ class UtilisateurDao(metaclass=Singleton):
         except Exception as e:
             logging.info(e)
         return res == 1
+
+    @log
+    def ajout_cocktail_realise(self, utilisateur: Utilisateur) -> bool:
+        """
+        Incrémente le nombre de cocktails réalisés par l'utilisateur dans la base de données
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        bool
+            True si l'incrémentation est un succès
+            False sinon
+        """
+        res = None
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    # Utilisation de l'incrémentation SQL directement
+                    cursor.execute(
+                        """
+                        UPDATE utilisateur
+                        SET cocktails_realises = COALESCE(cocktails_realises, 0) + 1
+                        WHERE id_utilisateur = %(id_utilisateur)s;
+                        """,
+                        {"id_utilisateur": utilisateur.id_utilisateur},
+                    )
+                    res = cursor.rowcount
+        except Exception as e:
+            logging.info(e)
+        return res
