@@ -30,8 +30,8 @@ class UtilisateurDao(metaclass=Singleton):
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO utilisateur(pseudo, mdp, age, langue, est_majeur, date_creation) VALUES        "
-                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s, %(est_majeur)s, %(date_creation)s)                    "
+                        "INSERT INTO utilisateur(pseudo, mdp, age, langue, est_majeur, date_creation, cocktails_realises) VALUES        "
+                        "(%(pseudo)s, %(mdp)s, %(age)s, %(langue)s, %(est_majeur)s, %(date_creation)s, %(cocktails_realises)s)                    "
                         "  RETURNING id_utilisateur;                                                ",
                         {
                             "pseudo": utilisateur.pseudo,
@@ -40,6 +40,7 @@ class UtilisateurDao(metaclass=Singleton):
                             "langue": utilisateur.langue,
                             "est_majeur": utilisateur.est_majeur,
                             "date_creation": utilisateur.date_creation,
+                            "cocktails_realises": utilisateur.cocktails_realises,
                         },
                     )
                     res = cursor.fetchone()
@@ -108,6 +109,7 @@ class UtilisateurDao(metaclass=Singleton):
                 est_majeur=res["est_majeur"],
                 date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
+                cocktails_realises=res["cocktails_realises"],
             )
 
         return utilisateur
@@ -216,6 +218,7 @@ class UtilisateurDao(metaclass=Singleton):
                 est_majeur=res["est_majeur"],
                 date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
+                cocktails_realises=res["cocktails_realises"],
             )
 
         return utilisateur
@@ -258,6 +261,7 @@ class UtilisateurDao(metaclass=Singleton):
                 est_majeur=res["est_majeur"],
                 date_creation=res["date_creation"],
                 id_utilisateur=res["id_utilisateur"],
+                cocktails_realises=res["cocktails_realises"],
             )
 
         return utilisateur
@@ -337,7 +341,8 @@ class UtilisateurDao(metaclass=Singleton):
                             mdp = %(mdp)s,
                             age = %(age)s,
                             langue = %(langue)s,
-                            est_majeur = %(est_majeur)s
+                            est_majeur = %(est_majeur)s,
+                            cocktails_realises = %(cocktails_realises)s
                         WHERE id_utilisateur = %(id_utilisateur)s;
                         """,
                         {
@@ -347,6 +352,7 @@ class UtilisateurDao(metaclass=Singleton):
                             "langue": utilisateur.langue,
                             "est_majeur": utilisateur.est_majeur,
                             "id_utilisateur": utilisateur.id_utilisateur,
+                            "cocktails_realises": utilisateur.cocktails_realises,
                         },
                     )
                     res = cursor.rowcount  # renvoie le nombre de lignes affectées
