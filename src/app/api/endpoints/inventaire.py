@@ -6,7 +6,7 @@ from business_object.utilisateur import Utilisateur
 from service.inventaire_service import InventaireService
 from service.utilisateur_service import UtilisateurService
 
-router = APIRouter(tags=["Authentification"])
+router = APIRouter(tags=["Inventaire"])
 service_inventaire = InventaireService()
 service_utilisateur = UtilisateurService()
 
@@ -15,7 +15,7 @@ class Reponse(BaseModel):
     confirmation: str
 
 
-@router.get("/inventaire/vue", tags=["Inventaire"])
+@router.get("/inventaire/vue")
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
     """**Montre l'inventaire de l'utilisateur**"""
     try:
@@ -33,7 +33,6 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
 
 @router.get(
     "/ingredients/suggestion",
-    tags=["Inventaire"],
     responses={
         200: {"description": "Sélection aléatoire de cocktails."},
         400: {"description": "Paramètre invalide."},
@@ -49,7 +48,7 @@ def suggestion_ingredients(n: int = 5):
     return [ing.nom_ingredient for ing in suggestions]
 
 
-@router.put("/inventaire/ajouter", tags=["Inventaire"])
+@router.put("/inventaire/ajouter")
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -69,7 +68,7 @@ def ajoute_ingredient(
         )
 
 
-@router.delete("/inventaire/supprimer_ingredient", tags=["Inventaire"])
+@router.delete("/inventaire/supprimer_ingredient")
 def supprime_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -86,7 +85,7 @@ def supprime_ingredient(
         )
 
 
-@router.delete("/Inventaire/supprimer_tout", tags=["Inventaire"])
+@router.delete("/Inventaire/supprimer_tout")
 def supprimer_mon_inventaire(
     reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
 ):
