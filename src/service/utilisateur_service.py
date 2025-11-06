@@ -120,7 +120,6 @@ class UtilisateurService:
             True si la suppression a réussie
             False sinon
         """
-        UtilisateurService().supprimer_inventaire(utilisateur)
         return UtilisateurDao().supprimer_utilisateur(utilisateur)
 
     @log
