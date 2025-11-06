@@ -57,7 +57,7 @@ class CocktailDao(metaclass=Singleton):
 
                     cursor.execute(
                         f"""
-                            SELECT 
+                            SELECT
                                 c.id_cocktail,
                                 c.nom_cocktail,
                                 c.categorie,
@@ -71,8 +71,8 @@ class CocktailDao(metaclass=Singleton):
                             JOIN cocktail_ingredient ci ON c.id_cocktail = ci.id_cocktail
                             JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
                             {where_clause}
-                            GROUP BY 
-                                c.id_cocktail, c.nom_cocktail, c.categorie, 
+                            GROUP BY
+                                c.id_cocktail, c.nom_cocktail, c.categorie,
                                 c.alcool, c.image_url, c.verre, c.{col_instructions}
                             """,
                         params,
@@ -242,7 +242,7 @@ class CocktailDao(metaclass=Singleton):
                             SELECT c.id_cocktail, COUNT(ui.id_ingredient) AS matching_ingredients
                             FROM cocktail c
                             LEFT JOIN cocktail_ingredient ci ON c.id_cocktail = ci.id_cocktail
-                            LEFT JOIN inventaire_ingredient ui 
+                            LEFT JOIN inventaire_ingredient ui
                                 ON ci.id_ingredient = ui.id_ingredient
                                 AND ui.id_utilisateur = %(id_utilisateur)s
                             GROUP BY c.id_cocktail
@@ -431,9 +431,9 @@ class CocktailDao(metaclass=Singleton):
                     nombre_limite = min(max(1, nombre), 5)
 
                     cursor.execute(
-                        f"""SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions 
-                        FROM cocktail 
-                        ORDER BY RANDOM() 
+                        f"""SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions
+                        FROM cocktail
+                        ORDER BY RANDOM()
                         LIMIT %(limit)s;""",
                         {"limit": nombre_limite},
                     )
@@ -471,8 +471,8 @@ class CocktailDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        SELECT DISTINCT categorie 
-                        FROM cocktail 
+                        SELECT DISTINCT categorie
+                        FROM cocktail
                         WHERE categorie IS NOT NULL
                         ORDER BY categorie;
                         """
@@ -499,8 +499,8 @@ class CocktailDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         """
-                        SELECT DISTINCT verre 
-                        FROM cocktail 
+                        SELECT DISTINCT verre
+                        FROM cocktail
                         WHERE verre IS NOT NULL
                         ORDER BY verre;
                         """
@@ -544,9 +544,9 @@ class CocktailDao(metaclass=Singleton):
 
         # ------------------- Méthode: trouver_par_id -----------------------------
 
-        @log
-        def trouver_par_id(self, id_cocktail: int) -> Cocktail:
-            """
+    @log
+    def trouver_par_id(self, id_cocktail: int) -> Cocktail:
+        """
             Trouver un cocktail par son ID.
 
             Parameters
@@ -559,25 +559,23 @@ class CocktailDao(metaclass=Singleton):
             Cocktail
                 Le cocktail trouvé ou None
             """
-            try:
-                with DBConnection().connection as connection:
-                    with connection.cursor() as cursor:
-                        cursor.execute(
-                            "SELECT * FROM cocktail WHERE id_cocktail = %(id_cocktail)s;",
-                            {"id_cocktail": id_cocktail},
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT * FROM cocktail WHERE id_cocktail = %(id_cocktail)s;",
+                        {"id_cocktail": id_cocktail},
+                    )
+                    row = cursor.fetchone()
+                    if row:
+                        return Cocktail(
+                            id_cocktail=row["id_cocktail"],
+                            nom_cocktail=row["nom_cocktail"],
+                            categ_cocktail=row["categorie"],
+                            image_cocktail=row.get("image_url"),
+                            alcoolise_cocktail=row.get("alcool"),
+                            instruc_cocktail=row.get("instructions"),
                         )
-                        row = cursor.fetchone()
-                        if row:
-                            return Cocktail(
-                                id_cocktail=row["id_cocktail"],
-                                nom_cocktail=row["nom_cocktail"],
-                                categ_cocktail=row["categorie"],
-                                image_cocktail=row.get("image_url"),
-                                alcoolise_cocktail=row.get("alcool"),
-                                instruc_cocktail=row.get("instructions"),
-                            )
-                        return None
-            except Exception as e:
-                print(f"Erreur recherche cocktail par ID: {e}")
-
-        return None
+                    return None
+        except Exception as e:
+            print(f"Erreur recherche cocktail par ID: {e}")

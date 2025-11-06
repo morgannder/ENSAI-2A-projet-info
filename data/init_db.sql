@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS inventaire_ingredient CASCADE ;
 DROP TABLE IF EXISTS cocktail_ingredient CASCADE ;
+DROP TABLE IF EXISTS commentaire CASCADE;
 DROP TABLE IF EXISTS cocktail CASCADE ;
 DROP TABLE IF EXISTS ingredient CASCADE ;
 DROP TABLE IF EXISTS utilisateur CASCADE ;
@@ -71,6 +72,27 @@ CREATE TABLE cocktail_ingredient (
         FOREIGN KEY (id_cocktail) REFERENCES cocktail(id_cocktail),
     CONSTRAINT fk_ingredient
         FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
+);
+
+
+-----------------------------------------------------
+-- Commentaire
+-----------------------------------------------------
+CREATE TABLE commentaire (
+    id_commentaire SERIAL PRIMARY KEY,
+    id_utilisateur INT NOT NULL,
+    id_cocktail INT NOT NULL,
+    texte TEXT NOT NULL,
+    note INTEGER CHECK (note >= 1 AND note <= 5),
+    date_creation TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_commentaire_utilisateur
+    FOREIGN KEY (id_utilisateur)
+    REFERENCES utilisateur(id_utilisateur)
+    ON DELETE CASCADE,
+    CONSTRAINT fk_commentaire_cocktail
+    FOREIGN KEY (id_cocktail)
+    REFERENCES cocktail(id_cocktail),
+    CONSTRAINT unique_commentaire_par_utilisateur UNIQUE (id_utilisateur, id_cocktail)
 );
 
 

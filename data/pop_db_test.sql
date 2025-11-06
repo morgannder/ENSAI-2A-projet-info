@@ -67,6 +67,24 @@ INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES
 (6, 379),
 (6, 273),
 (6, 65),
-(6, 18)
+(6, 18);
 -- (6, 379)
+
+INSERT INTO commentaire (id_utilisateur, id_cocktail, texte, note, date_creation) VALUES
+-- Commentaires pour le Mojito (id_cocktail = 0)
+(3, 0, 'Super rafraîchissant ! Parfait pour l''été.', 5, '2025-04-11 17:00:00'),
+(5, 0, 'Trop sucré à mon goût, mais bon cocktail.', 3, '2025-04-11 17:15:00'),
+(7, 0, 'Mon cocktail préféré ! La menthe est excellente.', 5, '2025-04-11 17:30:00'),
+
+-- Commentaires pour l''Old Fashioned (id_cocktail = 1)
+(2, 1, 'Classique et élégant. Parfait pour une soirée.', 4, '2025-04-11 18:00:00'),
+(5, 1, 'Un peu trop fort pour moi, mais les connaisseurs apprécieront.', 2, '2025-04-11 18:10:00'),
+
+-- Commentaires pour le Long Island Tea (id_cocktail = 2)
+(3, 2, 'Attention, très fort ! Mais délicieux.', 4, '2025-04-11 19:00:00'),
+(7, 2, 'Parfait pour les fêtes, mais à consommer avec modération.', 4, '2025-04-11 19:15:00')
+;
+
+-- Reset de la séquence pour les commentaires
+SELECT setval('commentaire_id_commentaire_seq', (SELECT MAX(id_commentaire) FROM commentaire));
 ;
