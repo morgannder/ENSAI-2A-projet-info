@@ -48,7 +48,7 @@ def suggestion_ingredients(n: int = 5):
     return [ing.nom_ingredient for ing in suggestions]
 
 
-@router.put("/inventaire/ajouter")
+@router.put("/ajouter")
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -68,7 +68,7 @@ def ajoute_ingredient(
         )
 
 
-@router.delete("/inventaire/supprimer_ingredient")
+@router.delete("/supprimer_ingredient")
 def supprime_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -85,7 +85,7 @@ def supprime_ingredient(
         )
 
 
-@router.delete("/Inventaire/supprimer_tout")
+@router.delete("/supprimer_tout")
 def supprimer_mon_inventaire(
     reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
 ):
