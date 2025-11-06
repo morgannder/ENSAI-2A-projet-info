@@ -1,6 +1,8 @@
 import hashlib
 import re
+
 from fastapi import HTTPException
+
 
 def hash_password(password, sel=""):
     """Hachage du mot de passe"""
@@ -21,12 +23,22 @@ def secu_mdp(mdp: str):
     if not mdp:
         raise HTTPException(status_code=400, detail="Le mot de passe ne peut pas être vide")
     if len(mdp) < 8:
-        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins 8 caractères")
+        raise HTTPException(
+            status_code=400, detail="Le mot de passe doit contenir au moins 8 caractères"
+        )
     if not re.search(r"[A-Z]", mdp):
-        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins une majuscule")
+        raise HTTPException(
+            status_code=400, detail="Le mot de passe doit contenir au moins une majuscule"
+        )
     if not re.search(r"[a-z]", mdp):
-        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins une minuscule")
+        raise HTTPException(
+            status_code=400, detail="Le mot de passe doit contenir au moins une minuscule"
+        )
     if not re.search(r"[0-9]", mdp):
-        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins un chiffre")
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", mdp):
-        raise HTTPException(status_code=400, detail="Le mot de passe doit contenir au moins un caractère spécial")
+        raise HTTPException(
+            status_code=400, detail="Le mot de passe doit contenir au moins un chiffre"
+        )
+    if not re.search(r"[¤~²°£µ§;`!@#$%^&*(),.?\":{}|<>]", mdp):
+        raise HTTPException(
+            status_code=400, detail="Le mot de passe doit contenir au moins un caractère spécial"
+        )
