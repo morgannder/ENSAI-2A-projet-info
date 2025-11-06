@@ -26,6 +26,7 @@ class Cocktail:
         image_cocktail,
         alcoolise_cocktail,
         instruc_cocktail,
+        verre=None,
     ):
         """Constructeur"""
         self.id_cocktail = id_cocktail
@@ -34,3 +35,4 @@ class Cocktail:
         self.image_cocktail = image_cocktail
         self.alcoolise_cocktail = alcoolise_cocktail
         self.instruc_cocktail = instruc_cocktail
+        self.verre = verre

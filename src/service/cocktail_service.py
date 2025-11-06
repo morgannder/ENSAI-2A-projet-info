@@ -11,6 +11,29 @@ class CocktailService:
         return [c for c in cocktails if c.alcoolise_cocktail == "Non alcoholic"]
 
     @log
+    def realiser_cocktail(
+        self, id_cocktail: int = None, nom_cocktail: str = None, langue: str = "ENG"
+    ) -> Cocktail:
+        """Obtenir les détails d'un cocktail par ID ou nom.
+
+        Parameters
+        ----------
+        id_cocktail : int, optional
+            Identifiant du cocktail.
+        nom_cocktail : str, optional
+            Nom du cocktail (insensible à la casse).
+        langue : str
+            Langue des instructions.
+
+        """
+
+        cocktail = CocktailDao().realiser_cocktail(
+            id_cocktail=id_cocktail, nom_cocktail=nom_cocktail, langue=langue
+        )
+
+        return cocktail
+
+    @log
     def rechercher_par_filtre(
         self,
         est_majeur=None,
@@ -59,22 +82,20 @@ class CocktailService:
             Si l'utilisateur mineur veut appliquer un filtre Alcoholic.
         """
 
-        # Traitement de la réponse du type d'alcool pour avoir "Alcoholic", "Non alcoholic", "Optional alcohol"
-
-        if alcool:
-            alcool = alcool[0].upper() + alcool[1:].lower()
-            print(alcool)
-
-            # Validation du type d'alcool
-            if alcool not in ["Alcoholic", "Non alcoholic", "Optional alcohol"]:
-                raise ValueError(
-                    "Le type d'alcool doit être 'Alcoholic', 'Non alcoholic' ou 'Optional alcohol'"
-                )
+        # Validation du type d'alcool
+        alcool_liste = ["Alcoholic", "Non alcoholic", "Optional alcohol"]
+        alcool_valide = [alcool.lower() for alcool in alcool_liste]
+        if alcool and alcool.lower() not in alcool_valide:
+            raise ValueError(
+                "Le type d'alcool doit être 'Alcoholic', 'Non alcoholic' ou 'Optional alcohol'"
+            )
 
         # Validation catégories
         if categ:
-            categories_valides = CocktailDao().lister_categories()
-            if categ not in categories_valides:
+            categories_valides = [
+                categorie.lower() for categorie in CocktailDao().lister_categories()
+            ]
+            if categ.lower() not in categories_valides:
                 raise ValueError(
                     f"La catégorie '{categ}' n'existe pas. "
                     f"Utilisez GET /cocktails/categories pour voir les catégories disponibles."
@@ -82,8 +103,8 @@ class CocktailService:
 
         # Validation du type de verre
         if verre:
-            verres_valides = CocktailDao().lister_verres()
-            if verre not in verres_valides:
+            verres_valides = [verre.lower() for verre in CocktailDao().lister_verres()]
+            if verre.lower() not in verres_valides:
                 raise ValueError(
                     f"Le verre '{verre}' n'existe pas. "
                     f"Utilisez GET /cocktails/verres pour voir les verres disponibles."
@@ -98,6 +119,11 @@ class CocktailService:
         cocktails = CocktailDao().rechercher_cocktails(
             nom_cocktail, categ, verre, alcool, liste_ingredients, langue, limit, offset
         )
+
+        # Filtrer si mineur
+        if est_majeur is False:
+            cocktails = self._filter_cocktails_for_minor(cocktails)
+
         return cocktails if cocktails else []
 
     @log

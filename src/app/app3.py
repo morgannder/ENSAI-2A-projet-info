@@ -22,7 +22,7 @@ dotenv.load_dotenv()
 os.environ["POSTGRES_SCHEMA"] = "projet_test_dao"  # utilisation de la bdd test
 
 # Mettre test_dao à false si tes avec la vrai bd
-ResetDatabase().lancer(test_dao=True)
+ResetDatabase().lancer(test_dao=False)
 
 app = FastAPI(title="User Test API", version="1.0")
 
@@ -310,6 +310,76 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
 # ===================  ENDPOINTS COCKTAILS  ==================================
 
 
+@app.get(
+    "/cocktails/details",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Détails complets du cocktail 🍹"},
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Cocktail introuvable"},
+    },
+)
+def details_cocktail(
+    id_cocktail: Optional[int] = None,
+    nom_cocktail: Optional[str] = None,
+    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
+    """
+    ## 🍸 Obtenir la recette complète d'un cocktail
+
+    Retrouvez toutes les informations d'un cocktail : instructions détaillées,
+    catégorie, type de verre, et plus encore !
+
+    ### ⚠️ L'abus d'alcool est dangereux pour la santé, à consommer avec modération
+
+
+    ### 🔍 Comment Trouver votre cocktail ?
+    Vous pouvez rechercher un cocktail de deux façons :
+    - Par **ID** : `id_cocktail=123`
+    - Ou par **nom** : `nom_cocktail=Margarita`
+
+    ### 🌍 Langues disponibles
+    Les instructions sont automatiquement affichées dans votre langue préférée
+    si vous êtes connecté.
+
+    """
+
+    if not id_cocktail and not nom_cocktail:
+        raise HTTPException(
+            status_code=400,
+            detail="Veuillez fournir soit un 'id_cocktail' (nombre entier), soit un 'nom_cocktail' pour rechercher un cocktail.",
+        )
+
+    # Déterminer la langue
+    langue = utilisateur.langue if utilisateur else "ENG"
+
+    try:
+        cocktail = cocktail_service.realiser_cocktail(
+            id_cocktail=id_cocktail, nom_cocktail=nom_cocktail, langue=langue
+        )
+
+        return {
+            "cocktail": {
+                "id": cocktail.id_cocktail,
+                "nom": cocktail.nom_cocktail,
+                "instructions": cocktail.instruc_cocktail,
+                "categorie": cocktail.categ_cocktail,
+                "verre": cocktail.verre,
+                "alcoolise": cocktail.alcoolise_cocktail,
+                "image": cocktail.image_cocktail,
+            },
+            "message": f"🍹 Voici comment préparer un délicieux {cocktail.nom_cocktail} ☝️🤤!",
+        }
+
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="😔 Désolé, nous n'avons pas trouvé ce cocktail. Vérifiez l'orthographe ou essayez un autre nom !",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+
+
 @app.post(
     "/cocktails/recherche",
     tags=["Cocktails"],
@@ -336,7 +406,7 @@ def rechercher_cocktails(
     - Type d'alcool (ex: `"Alcoholic"` ou `"Non alcoholic"`)
     - Catégorie (ex: `"Cocktail"`)
     - Verre (ex: `"Highball glass"`)
-    - Ingrédients (ex: `["Tequila", "Citron"]`)
+    - Ingrédients (ex: `["Lemon", "Water"]`)
 
     Si vous n'êtes pas connecté, la recherche se fera sans restrictions d'âge.
     Si vous êtes mineur connecté, seuls les cocktails non alcoolisés seront affichés.

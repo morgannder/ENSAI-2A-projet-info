@@ -9,6 +9,81 @@ from utils.singleton import Singleton
 class CocktailDao(metaclass=Singleton):
     """Classe contenant les méthodes pour accéder aux Cocktails de la base de données."""
 
+    # --------------------------  Méthode realiser_cocktail   ---------------------------------
+
+    @log
+    def realiser_cocktail(
+        self, id_cocktail: int = None, nom_cocktail: str = None, langue: str = "ENG"
+    ) -> Cocktail:
+        """Récupérer les détails complets d'un cocktail par son ID ou son nom.
+
+        Parameters
+        ----------
+        id_cocktail : int, optional
+            Identifiant du cocktail.
+        nom_cocktail : str, optional
+            Nom du cocktail (insensible à la casse).
+        langue : str
+            Langue des instructions.
+
+        Returns
+        -------
+        Cocktail
+            Le cocktail trouvé avec toutes ses informations.
+
+        Raises
+        ------
+        ValueError
+            Si aucun identifiant n'est fourni ou si le cocktail n'existe pas.
+        """
+        if not id_cocktail and not nom_cocktail:
+            raise ValueError("Vous devez fournir soit un ID, soit un nom de cocktail")
+
+        col_instructions = self.instruction_column(langue)
+
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    if id_cocktail:
+                        cursor.execute(
+                            f"""
+                            SELECT id_cocktail, nom_cocktail, categorie, alcool, 
+                                image_url, verre, {col_instructions} AS instructions
+                            FROM cocktail
+                            WHERE id_cocktail = %(id_cocktail)s;
+                            """,
+                            {"id_cocktail": id_cocktail},
+                        )
+                    else:
+                        cursor.execute(
+                            f"""
+                            SELECT id_cocktail, nom_cocktail, categorie, alcool, 
+                                image_url, verre, {col_instructions} AS instructions
+                            FROM cocktail
+                            WHERE LOWER(nom_cocktail) = LOWER(%(nom_cocktail)s);
+                            """,
+                            {"nom_cocktail": nom_cocktail},
+                        )
+                    # On ne renvoi qu'un seul
+                    row = cursor.fetchone()
+
+                    if not row:
+                        return None
+
+                    return Cocktail(
+                        id_cocktail=row["id_cocktail"],
+                        nom_cocktail=row["nom_cocktail"],
+                        categ_cocktail=row["categorie"],
+                        image_cocktail=row.get("image_url"),
+                        alcoolise_cocktail=row.get("alcool"),
+                        instruc_cocktail=row.get("instructions"),
+                        verre=row.get("verre"),
+                    )
+
+        except Exception:
+            logging.exception("Erreur lors dde la récupération du cocktail")
+            raise
+
     # --------------------------  Méthode cocktail_partiel   ---------------------------------
 
     @log
@@ -87,6 +162,7 @@ class CocktailDao(metaclass=Singleton):
                             image_cocktail=row.get("image_url"),
                             alcoolise_cocktail=row.get("alcool"),
                             instruc_cocktail=row.get("instructions"),
+                            verre=row.get("verre"),
                         )
                         for row in rows
                     ]
@@ -181,6 +257,7 @@ class CocktailDao(metaclass=Singleton):
                             image_cocktail=row.get("image_url"),
                             alcoolise_cocktail=row.get("alcool"),
                             instruc_cocktail=row.get("instructions"),
+                            verre=row.get("verre"),
                         )
                         for row in rows
                     ]
@@ -271,16 +348,16 @@ class CocktailDao(metaclass=Singleton):
                         params["nom_cocktail"] = f"%{nom_cocktail}%"
 
                     if categorie is not None:
-                        query += " AND categorie = %(categorie)s"
-                        params["categorie"] = categorie
+                        query += " AND LOWER(categorie) = LOWER(%(categorie)s)"
+                        params["categorie"] = categorie.lower()
 
                     if verre is not None:
-                        query += " AND verre = %(verre)s"
-                        params["verre"] = verre
+                        query += " AND LOWER(verre) = LOWER(%(verre)s)"
+                        params["verre"] = verre.lower()
 
                     if alcool is not None:
-                        query += " AND alcool = %(alcool)s"
-                        params["alcool"] = alcool
+                        query += " AND LOWER(alcool)= LOWER( %(alcool)s)"
+                        params["alcool"] = alcool.lower()
 
                     # Tri et pagination
                     query += " ORDER BY nom_cocktail LIMIT %(limit)s OFFSET %(offset)s;"
@@ -296,6 +373,7 @@ class CocktailDao(metaclass=Singleton):
                             image_cocktail=row.get("image_url"),
                             alcoolise_cocktail=row.get("alcool"),
                             instruc_cocktail=row.get("instructions"),
+                            verre=row.get("verre"),
                         )
                         for row in rows
                     ]
@@ -351,6 +429,7 @@ class CocktailDao(metaclass=Singleton):
                             image_cocktail=row.get("image_url"),
                             alcoolise_cocktail=row.get("alcool"),
                             instruc_cocktail=row.get("instructions"),
+                            verre=row.get("verre"),
                         )
                         for row in rows
                     ]
