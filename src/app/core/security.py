@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-import jwt
-from service.utilisateur_service import UtilisateurService
+
 from business_object.utilisateur import Utilisateur
-from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from typing import Literal, Optional
+from service.utilisateur_service import UtilisateurService
+
+from .config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 service_utilisateur = UtilisateurService()
