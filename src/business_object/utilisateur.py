@@ -24,7 +24,7 @@ class Utilisateur:
         mdp,
         age,
         langue,
-        cocktails_recherches,
+        cocktails_realises,
         est_majeur=False,
         date_creation=None,
         id_utilisateur=None,
@@ -38,7 +38,7 @@ class Utilisateur:
         self.est_majeur = est_majeur
         self.date_creation = date_creation
         self.id_utilisateur = id_utilisateur
-        self.cocktails_recherches = cocktails_recherches
+        self.cocktails_realises = cocktails_realises
 
     def __str__(self):
         """Permet d'afficher les informations de l'utilisateur"""
