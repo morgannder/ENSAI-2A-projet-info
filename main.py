@@ -1,6 +1,7 @@
 import dotenv
-from app.api.v1.api import api_router
 from fastapi import FastAPI
+
+from app.api.api import api_router
 
 dotenv.load_dotenv()
 
@@ -9,7 +10,7 @@ app = FastAPI(
 )
 
 # Inclusion des routes
-app.include_router(api_router, prefix="src/app/api")
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/")
