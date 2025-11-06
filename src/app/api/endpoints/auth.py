@@ -19,17 +19,26 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
+
 
 @router.post("/token", response_model=Token, include_in_schema=False)
 def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
+    print("DEBUG /token: username =", form_donnee.username)
     utilisateur = service_utilisateur.se_connecter(form_donnee.username, form_donnee.password)
+
     if not utilisateur:
+        print("DEBUG échec connexion: identifiants incorrects")
         raise HTTPException(status_code=401, detail="Identifiants incorrects")
-    access_token = create_access_token({"sub": str(utilisateur.id_utilisateur)})
+
+    print("DEBUG utilisateur connecté:", utilisateur)
+    print("DEBUG /token: pseudo =", form_donnee.username, "mdp =", form_donnee.password)
+    access_token = create_access_token(donnee={"sub": str(utilisateur.id_utilisateur)})
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/inscription", tags=["Visiteur"])
+@router.post("/inscription")
 def inscription(
     donnee: UserCreate,
     utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional),

@@ -5,18 +5,22 @@ import jwt
 from service.utilisateur_service import UtilisateurService
 from business_object.utilisateur import Utilisateur
 from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from typing import Literal, Optional
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 service_utilisateur = UtilisateurService()
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
+def create_access_token(donnee: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = donnee.copy()
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    print("DEBUG token créé:", token)
+    return token
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
