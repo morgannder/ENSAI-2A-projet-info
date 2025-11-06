@@ -1,4 +1,5 @@
 from business_object.cocktail import Cocktail
+from business_object.cocktail_complet import CocktailComplet
 from dao.cocktail_dao import CocktailDao
 from utils.log_decorator import log
 
@@ -13,7 +14,7 @@ class CocktailService:
     @log
     def realiser_cocktail(
         self, id_cocktail: int = None, nom_cocktail: str = None, langue: str = "ENG"
-    ) -> Cocktail:
+    ) -> CocktailComplet:
         """Obtenir les détails d'un cocktail par ID ou nom.
 
         Parameters
@@ -30,6 +31,9 @@ class CocktailService:
         cocktail = CocktailDao().realiser_cocktail(
             id_cocktail=id_cocktail, nom_cocktail=nom_cocktail, langue=langue
         )
+
+        if not cocktail:
+            raise ValueError(" Zéro cocktail trouvé")
 
         return cocktail
 
