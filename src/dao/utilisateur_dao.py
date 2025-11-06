@@ -10,7 +10,7 @@ class UtilisateurDao(metaclass=Singleton):
     """Classe contenant les méthodes pour accéder aux Utlilisateurs de la base de données"""
 
     @log
-    def creer_compte(self, utilisateur) -> bool:
+    def creer_compte(self, utilisateur: Utilisateur) -> bool:
         """Creation d'un Utilisateur dans la base de données
 
         Parameters
@@ -66,7 +66,7 @@ class UtilisateurDao(metaclass=Singleton):
         return created
 
     @log
-    def se_connecter(self, pseudo, mdp) -> Utilisateur:
+    def se_connecter(self, pseudo: str, mdp: str) -> Utilisateur:
         """
         Se connecter avec un pseudo et un mot de passe.
 
@@ -75,12 +75,12 @@ class UtilisateurDao(metaclass=Singleton):
         pseudo : str
             Pseudo de l'utilisateur.
         mdp : str
-            Mot de passe hashé.
+            Mot de passe de l'utilisateur
 
         Returns
         -------
         Utilisateur
-            Renvoie l'utilisateur que l'on souhaite chercher
+            Renvoie l'utilisateur qui se connecte
         """
         res = None
         try:
@@ -124,7 +124,7 @@ class UtilisateurDao(metaclass=Singleton):
         Returns
         -------
         bool
-            True si la suppression a réussi
+            True si la suppression est un succès
             False sinon
         """
         try:
@@ -143,7 +143,7 @@ class UtilisateurDao(metaclass=Singleton):
         return res > 0
 
     def supprimer_inventaire(self, id_utilisateur: int) -> bool:
-        """Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
+        """Supprime l'inventaire de l'utilisateur.
 
         Parameters
         ----------
@@ -151,8 +151,8 @@ class UtilisateurDao(metaclass=Singleton):
 
         Returns
         -------
-        created : bool
-            True si la création est un succès
+        deleted : bool
+            True si la suppression est un succès
             False sinon
         """
         if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
@@ -171,7 +171,7 @@ class UtilisateurDao(metaclass=Singleton):
                     deleted = cursor.rowcount
         except Exception as e:
             logging.exception(
-                "Erreur lors de la suppression d'un ingrédient de l'inventaire utilisateur: %s",
+                "Erreur lors de la suppression de l'inventaire de l'utilisateur: %s",
                 e,
             )
             return False
@@ -179,7 +179,7 @@ class UtilisateurDao(metaclass=Singleton):
         return deleted > 0
 
     @log
-    def trouver_par_id(self, id_utilisateur) -> Utilisateur:
+    def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
         """trouver un utilisateur grace à son id
 
         Parameters
@@ -221,18 +221,18 @@ class UtilisateurDao(metaclass=Singleton):
         return utilisateur
 
     @log
-    def trouver_par_pseudo(self, pseudo) -> Utilisateur:
-        """trouver un utilisateur grace à son id
+    def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
+        """trouver un utilisateur grace à son pseudo
 
         Parameters
         ----------
-        id_utilisateur : int
-            numéro id de l'utilisateur que l'on souhaite trouver
+        pseudo : str
+            pseudo de l'utilisateur que l'on souhaite trouver
 
         Returns
         -------
         utilisateur : Utilisateur
-            renvoie l'utilisateur que l'on cherche par id
+            renvoie l'utilisateur que l'on cherche
         """
         try:
             with DBConnection().connection as connection:
@@ -310,7 +310,7 @@ class UtilisateurDao(metaclass=Singleton):
 
     ## OPTION 1 : fonction commune pour la mmodif des elements
     @log
-    def modifier(self, utilisateur) -> bool:
+    def modifier(self, utilisateur: Utilisateur) -> bool:
         """
         Modification d'un utilisateur dans la base de données
 

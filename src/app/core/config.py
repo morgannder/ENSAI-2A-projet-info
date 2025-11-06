@@ -1,16 +1,14 @@
 import os
+import dotenv
+from datetime import timedelta
+from utils.reset_database import ResetDatabase
 
-from pydantic_settings import BaseSettings
+dotenv.load_dotenv()
+os.environ["POSTGRES_SCHEMA"] = "projet_test_dao"
 
-
-class Settings(BaseSettings):
-    API_STR: str = "/api/"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key")
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-
-    class Config:
-        case_sensitive = True
+SECRET_KEY = "sssecretkey"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60000
 
 
-settings = Settings()
+ResetDatabase().lancer(test_dao=True)

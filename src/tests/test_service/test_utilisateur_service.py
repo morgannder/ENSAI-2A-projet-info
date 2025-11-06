@@ -1,4 +1,3 @@
-# src/tests/test_service/test_utilisateur_service.py
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 

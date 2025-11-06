@@ -91,12 +91,15 @@ class InventaireDao(metaclass=Singleton):
 
         Parameters
         ----------
-        utilisateur : Utilisateur
+        id_utilisateur : int
+            id de l'utilisateur qui veut supprimer l'ingrédient
+        id_ingredient : int
+            id de l'ingredient à supprimer
 
         Returns
         -------
-        created : bool
-            True si la création est un succès
+        deleted : bool
+            True si la suppression est un succès
             False sinon
         """
         if not isinstance(id_utilisateur, int) or id_utilisateur <= 0:
@@ -182,12 +185,12 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def recherche_ingredient(self, ingredient: str) -> Ingredient:
-        """Permet de chercher un ingrédient dans l'inventaire.
+        """Permet de chercher un ingrédient avec son nom.
 
         Parameters
         ----------
         ingredient : str
-            La chaîne de caractère désignent l'ingrédient.
+            nom de l'ingrédient.
 
         Returns
         -------
@@ -217,7 +220,7 @@ class InventaireDao(metaclass=Singleton):
             return e
 
     @log
-    def ingredients_aleatoires(self, nb) -> list[Ingredient]:
+    def ingredients_aleatoires(self, nb: int) -> list[Ingredient]:
         """
         Propose une liste d'ingrédients choisis aléatoirement.
 
