@@ -61,7 +61,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "age": utilisateur.age,
         "langue": utilisateur.langue,
         "date_creation": utilisateur.date_creation.strftime("%d/%m/%Y"),
-        "cocktails_realises": utilisateur.cocktails_realises,
+        "cocktails_recherches": utilisateur.cocktails_recherches,
     }
 
 
