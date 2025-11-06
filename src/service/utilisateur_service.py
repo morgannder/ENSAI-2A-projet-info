@@ -218,5 +218,3 @@ class UtilisateurService:
             return False
         utilisateur.pseudo = nouveau_pseudo
         return UtilisateurDao().modifier(utilisateur)
-
-        # ou alors avec les ofncitons specifiques

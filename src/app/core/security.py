@@ -1,43 +1,44 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional
-
-import jwt
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
+import jwt
+from service.utilisateur_service import UtilisateurService
+from business_object.utilisateur import Utilisateur
+from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
-from app.core.config import settings
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
+service_utilisateur = UtilisateurService()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def verify_token(token: str):
+def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        return payload
-    except jwt.PyJWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-        )
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload.get("sub"))
+        utilisateur = service_utilisateur.trouver_par_id(user_id)
+        if not utilisateur:
+            raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+        return utilisateur
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expiré")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+
+def get_current_user_optional(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload.get("sub"))
+        return service_utilisateur.trouver_par_id(user_id)
+    except Exception:
+        return None
