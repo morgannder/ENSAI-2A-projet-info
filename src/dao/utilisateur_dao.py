@@ -304,6 +304,7 @@ class UtilisateurDao(metaclass=Singleton):
                     est_majeur=row["est_majeur"],
                     date_creation=row["date_creation"],
                     id_utilisateur=row["id_utilisateur"],
+                    cocktails_realises=row["cocktails_realises"],
                 )
 
                 liste_utilisateurs.append(utilisateur)

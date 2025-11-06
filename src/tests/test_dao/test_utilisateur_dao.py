@@ -80,6 +80,7 @@ def test_creer_compte_ok():
         langue="FRA",
         est_majeur=True,
         date_creation="2025-04-11 16:46:03",
+        cocktails_realises=10,
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert creation_ok
@@ -95,6 +96,7 @@ def test_creer_compte_ko():
         langue=123,
         est_majeur="oui",
         date_creation="2025-04-11 16:46:03",
+        cocktails_realises=10,
     )
     creation_ok = UtilisateurDao().creer_compte(utilisateur)
     assert not creation_ok
@@ -113,6 +115,7 @@ def test_modifier_ok():
         langue="GER",
         est_majeur=True,
         date_creation="2025-04-11 16:46:03",
+        cocktails_realises=10,
     )
     modification_ok = UtilisateurDao().modifier(utilisateur)
     assert modification_ok
@@ -127,6 +130,7 @@ def test_modifier_ko():
         age=99,
         langue="Deutsch",
         est_majeur=True,
+        cocktails_realises=10,
     )
     modification_ok = UtilisateurDao().modifier(utilisateur)
     assert not modification_ok
@@ -144,6 +148,7 @@ def test_supprimer_utilisateur_ok():
         langue="Français",
         est_majeur=True,
         date_creation="2025-04-11 16:46:03",
+        cocktails_realises=10,
     )
     UtilisateurDao().creer_compte(utilisateur)
     UtilisateurDao().supprimer_inventaire(utilisateur.id_utilisateur)
@@ -160,6 +165,7 @@ def test_supprimer_utilisateur_ko():
         langue="Français",
         est_majeur=False,
         id_utilisateur=9999,
+        cocktails_realises=10,
     )
     suppression_ok = UtilisateurDao().supprimer_utilisateur(utilisateur)
     assert not suppression_ok

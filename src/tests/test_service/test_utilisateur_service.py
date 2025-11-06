@@ -17,10 +17,24 @@ liste_utilisateurs = [
         langue="Français",
         est_majeur=False,
         date_creation=DATE_TEST,
+        cocktails_realises=12,
     ),
-    Utilisateur(pseudo="Atty", mdp="0000Abc", age=25, langue="Italiano", date_creation=DATE_TEST),
     Utilisateur(
-        pseudo="gg", mdp="abcd", age=18, langue="Italiano", est_majeur=True, date_creation=DATE_TEST
+        pseudo="Atty",
+        mdp="0000Abc",
+        age=25,
+        langue="Italiano",
+        date_creation=DATE_TEST,
+        cocktails_realises=13,
+    ),
+    Utilisateur(
+        pseudo="gg",
+        mdp="abcd",
+        age=18,
+        langue="Italiano",
+        est_majeur=True,
+        date_creation=DATE_TEST,
+        cocktails_realises=14,
     ),
 ]
 
@@ -28,11 +42,13 @@ liste_utilisateurs = [
 def test_creer_ok():
     """Création de Utilisateur réussie"""
     # GIVEN
-    pseudo, mdp, age, langue= "test", "Mdp1234!", 15, "English"
+    pseudo, mdp, age, langue, cocktails_realises = "test", "Mdp1234!", 15, "English", 0
     UtilisateurDao().creer_compte = MagicMock(return_value=True)
 
     # WHEN
-    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue)
+    utilisateur = UtilisateurService().creer_utilisateur(
+        pseudo, mdp, age, langue, cocktails_realises
+    )
 
     # THEN
     assert utilisateur.pseudo == pseudo
@@ -43,11 +59,13 @@ def test_creer_ok():
 def test_creer_echec():
     """Création de Utilisateur échouée"""
     # GIVEN
-    pseudo, mdp, age, langue = "test", "Mdp1234!", 15, "English"
+    pseudo, mdp, age, langue, cocktails_realises = "test", "Mdp1234!", 15, "English", 0
     UtilisateurDao().creer_compte = MagicMock(return_value=False)
 
     # WHEN
-    utilisateur = UtilisateurService().creer_utilisateur(pseudo, mdp, age, langue)
+    utilisateur = UtilisateurService().creer_utilisateur(
+        pseudo, mdp, age, langue, cocktails_realises
+    )
 
     # THEN
     assert utilisateur is None
@@ -103,6 +121,7 @@ def test_se_connecter_oui():
         age=25,
         langue="Italiano",
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
 
     # WHEN
@@ -147,6 +166,7 @@ def test_supprimer_compte_oui():
         age=25,
         langue="Italiano",
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -172,6 +192,7 @@ def test_supprimer_compte_non():
         age=25,
         langue="Italiano",
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -229,6 +250,7 @@ def test_changer_mdp_identique():
         age=20,
         langue="Français",
         date_creation=DATE_TEST,  # ⬅️ IMPORTANT : même date pour le sel
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -248,6 +270,7 @@ def test_changer_mdp_success():
         age=20,
         langue="Français",
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     nouveau_mdp = "nvMDP12!"
     service = UtilisateurService()
@@ -275,6 +298,7 @@ def test_changer_mdp_echec_dao():
         age=20,
         langue="Français",
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     nouveau_mdp = "nvMDP12!"
     service = UtilisateurService()
@@ -297,7 +321,13 @@ def test_choisir_langue_ok():
     """Changer langue avec succès"""
     # GIVEN
     utilisateur = Utilisateur(
-        pseudo="gg", mdp="abcd", age=18, langue="Italiano", est_majeur=True, date_creation=DATE_TEST
+        pseudo="gg",
+        mdp="abcd",
+        age=18,
+        langue="Italiano",
+        est_majeur=True,
+        date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -318,7 +348,13 @@ def test_choisir_langue_echec():
     """Changer langue avec échec"""
     # GIVEN
     utilisateur = Utilisateur(
-        pseudo="gg", mdp="abcd", age=18, langue="Italiano", est_majeur=True, date_creation=DATE_TEST
+        pseudo="gg",
+        mdp="abcd",
+        age=18,
+        langue="Italiano",
+        est_majeur=True,
+        date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -345,6 +381,7 @@ def test_changer_pseudo_ok():
         langue="Français",
         est_majeur=False,
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -372,6 +409,7 @@ def test_changer_pseudo_deja_pris():
         langue="Français",
         est_majeur=False,
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 
@@ -394,6 +432,7 @@ def test_changer_pseudo_echec_dao():
         langue="Français",
         est_majeur=False,
         date_creation=DATE_TEST,
+        cocktails_realises=0,
     )
     service = UtilisateurService()
 

@@ -24,6 +24,8 @@ class InventaireService:
             Si l'inventaire est vide
 
         """
+        if not isinstance(id_utilisateur, int):
+            raise TypeError("L'id rentré n'est pas valide")
         inventaire = InventaireDao().consulter_inventaire(id_utilisateur)
         if inventaire == []:
             raise ValueError("Votre inventaire est vide, allez le remplir au plus vite !!")

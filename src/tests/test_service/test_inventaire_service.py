@@ -1,10 +1,10 @@
 from unittest.mock import MagicMock
+
 import pytest
 
-from service.inventaire_service import InventaireService
-from dao.inventaire_dao import InventaireDao
 from business_object.ingredient import Ingredient
-
+from dao.inventaire_dao import InventaireDao
+from service.inventaire_service import InventaireService
 
 # -----------------------------
 # Jeux de données de base
@@ -36,15 +36,17 @@ def test_lister_ok():
 
 
 def test_lister_id_invalide():
-    """Id utilisateur invalide -> [] sans appeler la DAO."""
+    """Id utilisateur invalide -> TypeError sans appeler la DAO."""
     # GIVEN
     InventaireDao().consulter_inventaire = MagicMock(return_value=ING_LISTE)
 
-    # WHEN
-    res = InventaireService().lister("x")
+    # WHEN & THEN
+    try:
+        InventaireService().lister("x")
+        assert False, "Une TypeError aurait dû être levée"
+    except TypeError as e:
+        assert str(e) == "L'id rentré n'est pas valide"
 
-    # THEN
-    assert res == []
     InventaireDao().consulter_inventaire.assert_not_called()
 
 
@@ -109,6 +111,7 @@ def test_supprimer_echec():
     # THEN
     assert not res
 
+
 # -----------------------------
 # Tests de suggestions d'ingrédients
 # -----------------------------
@@ -165,7 +168,6 @@ def test_suggerer_ingredients_type_invalide():
         assert False
     except ValueError:
         assert True
-
 
 
 if __name__ == "__main__":

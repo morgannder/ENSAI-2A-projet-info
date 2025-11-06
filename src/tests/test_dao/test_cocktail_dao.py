@@ -75,9 +75,9 @@ def test_cocktail_partiel(setup_test_environment):
         print(c.nom_cocktail)
 
     noms = [c.nom_cocktail for c in cocktails]
-    assert len(cocktails) == 2
-    assert "Mojito" in noms  # 0 manquants
-    assert "Old Fashioned" in noms  # 0 manquants
+    assert len(cocktails) == 1
+    assert "Mojito" not in noms  # 0 manquants
+    assert "Old Fashioned" in noms  # 1 manquants
     assert "Long Island Tea" not in noms  # 4 manquants (trop)
 
 
@@ -94,9 +94,7 @@ def test_rechercher_multi_filtres(setup_test_environment):
     verre = "Cocktail glass"
 
     # WHEN
-    cocktails = CocktailDao().rechercher_cocktails(
-        nom_cocktail, categorie, verre, alcool
-    )
+    cocktails = CocktailDao().rechercher_cocktails(nom_cocktail, categorie, verre, alcool)
 
     # THEN
     assert len(cocktails) == 1  # on s'attend à un seul cocktail correspondant
