@@ -24,7 +24,7 @@ def ajouter_commentaire(
     """
     **Ajouter un commentaire sur un cocktail**
 
-    - Un seul commentaire par cocktail est autorisé
+    - Un seul commentaire par cocktail est autorisé par utilisateur
     """
     try:
         succes = commentaire_service.ajouter_commentaire(
