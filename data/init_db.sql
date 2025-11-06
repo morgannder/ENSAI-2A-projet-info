@@ -55,7 +55,10 @@ CREATE TABLE inventaire_ingredient (
     id_utilisateur  INT NOT NULL,
     id_ingredient   INT NOT NULL,
     PRIMARY KEY (id_utilisateur, id_ingredient),
-    CONSTRAINT fk_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur),
+    CONSTRAINT fk_utilisateur
+    FOREIGN KEY (id_utilisateur)
+    REFERENCES utilisateur(id_utilisateur)
+    ON DELETE CASCADE,
     CONSTRAINT fk_ingredient FOREIGN KEY (id_ingredient) REFERENCES ingredient(id_ingredient)
 );
 
