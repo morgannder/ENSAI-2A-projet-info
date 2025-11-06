@@ -37,7 +37,10 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expiré")
     except Exception:
-        raise HTTPException(status_code=401, detail="Token invalide")
+        raise HTTPException(
+            status_code=401,
+            detail="Veuillez vous connecter pour pouvoir accéder à cette fonctionnalité.",
+        )
 
 
 def get_current_user_optional(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:

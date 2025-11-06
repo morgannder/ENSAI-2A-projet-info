@@ -1,6 +1,7 @@
 import logging
 
 from business_object.cocktail import Cocktail
+from business_object.cocktail_complet import CocktailComplet
 from dao.db_connection import DBConnection
 from utils.log_decorator import log
 from utils.singleton import Singleton
@@ -14,7 +15,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def realiser_cocktail(
         self, id_cocktail: int = None, nom_cocktail: str = None, langue: str = "ENG"
-    ) -> Cocktail:
+    ) -> CocktailComplet:
         """Récupérer les détails complets d'un cocktail par son ID ou son nom.
 
         Parameters
@@ -44,33 +45,46 @@ class CocktailDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
+                    where_clause = ""
+                    params = {}
+
                     if id_cocktail:
-                        cursor.execute(
-                            f"""
-                            SELECT id_cocktail, nom_cocktail, categorie, alcool, 
-                                image_url, verre, {col_instructions} AS instructions
-                            FROM cocktail
-                            WHERE id_cocktail = %(id_cocktail)s;
-                            """,
-                            {"id_cocktail": id_cocktail},
-                        )
+                        where_clause = "WHERE c.id_cocktail = %(id_cocktail)s"
+                        params["id_cocktail"] = id_cocktail
                     else:
-                        cursor.execute(
-                            f"""
-                            SELECT id_cocktail, nom_cocktail, categorie, alcool, 
-                                image_url, verre, {col_instructions} AS instructions
-                            FROM cocktail
-                            WHERE LOWER(nom_cocktail) = LOWER(%(nom_cocktail)s);
+                        where_clause = "WHERE LOWER(c.nom_cocktail) = LOWER(%(nom_cocktail)s)"
+                        params["nom_cocktail"] = nom_cocktail
+
+                    cursor.execute(
+                        f"""
+                            SELECT 
+                                c.id_cocktail,
+                                c.nom_cocktail,
+                                c.categorie,
+                                c.alcool,
+                                c.image_url,
+                                c.verre,
+                                c.{col_instructions} AS instructions,
+                                STRING_AGG(i.nom_ingredient, ', ' ORDER BY i.nom_ingredient) AS ingredients,
+                                STRING_AGG(ci.quantite, ', ' ORDER BY i.nom_ingredient) AS quantites
+                            FROM cocktail c
+                            JOIN cocktail_ingredient ci ON c.id_cocktail = ci.id_cocktail
+                            JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
+                            {where_clause}
+                            GROUP BY 
+                                c.id_cocktail, c.nom_cocktail, c.categorie, 
+                                c.alcool, c.image_url, c.verre, c.{col_instructions}
                             """,
-                            {"nom_cocktail": nom_cocktail},
-                        )
+                        params,
+                    )
+
                     # On ne renvoi qu'un seul
                     row = cursor.fetchone()
 
                     if not row:
                         return None
 
-                    return Cocktail(
+                    cocktail = CocktailComplet(
                         id_cocktail=row["id_cocktail"],
                         nom_cocktail=row["nom_cocktail"],
                         categ_cocktail=row["categorie"],
@@ -78,7 +92,11 @@ class CocktailDao(metaclass=Singleton):
                         alcoolise_cocktail=row.get("alcool"),
                         instruc_cocktail=row.get("instructions"),
                         verre=row.get("verre"),
+                        ingredients=row.get("ingredients"),
+                        quantites=row.get("quantites"),
                     )
+
+                    return cocktail
 
         except Exception:
             logging.exception("Erreur lors dde la récupération du cocktail")

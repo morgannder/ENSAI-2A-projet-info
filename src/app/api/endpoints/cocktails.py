@@ -19,6 +19,95 @@ class CocktailFilter(BaseModel):
     ingredients: Optional[list[str]] = None
 
 
+# ------------------- Endpoint: /cocktails/details -----------------------------
+
+
+@router.post(
+    "/cocktails/details",
+    tags=["Cocktails"],
+    responses={
+        200: {"description": "Détails complets du cocktail 🍹"},
+        400: {"description": "Paramètres invalides"},
+        404: {"description": "Cocktail introuvable"},
+    },
+)
+def details_cocktail(
+    id_cocktail: Optional[int] = None,
+    nom_cocktail: Optional[str] = None,
+    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
+    """
+    ## 🍸 Obtenir la recette complète d'un cocktail
+
+    Retrouvez toutes les informations d'un cocktail : instructions détaillées,
+    catégorie, type de verre, et plus encore !
+
+    ### ⚠️ L'abus d'alcool est dangereux pour la santé, à consommer avec modération
+
+
+    ### 🔍 Comment Trouver votre cocktail ?
+    Vous pouvez rechercher un cocktail de deux façons :
+    - Par **ID** : `id_cocktail=123`
+    - Ou par **nom** : `nom_cocktail=Margarita`
+
+    ### 🌍 Langues disponibles
+    Les instructions sont automatiquement affichées dans votre langue préférée
+    si vous êtes connecté.
+
+    """
+
+    if not id_cocktail and not nom_cocktail:
+        raise HTTPException(
+            status_code=400,
+            detail="Veuillez fournir soit un 'id_cocktail' (nombre entier), soit un 'nom_cocktail' pour rechercher un cocktail.",
+        )
+
+    # Déterminer la langue
+    langue = utilisateur.langue if utilisateur else "ENG"
+
+    try:
+        cocktail = service_cocktail.realiser_cocktail(
+            id_cocktail=id_cocktail, nom_cocktail=nom_cocktail, langue=langue
+        )
+
+        if cocktail:
+            # Séparer les ingrédients et quantités
+            ingredients_liste = cocktail.ingredients.split(", ")
+            quantites_liste = cocktail.quantites.split(", ")
+
+            ingredients_detailles = [
+                {"ingredient": ing, "quantite": qty}
+                for ing, qty in zip(ingredients_liste, quantites_liste)
+            ]
+        else:
+            ingredients_detailles = []
+
+        return {
+            "cocktail": {
+                "id": cocktail.id_cocktail,
+                "nom": cocktail.nom_cocktail,
+                "ingredients": ingredients_detailles,
+                "instructions": cocktail.instruc_cocktail,
+                "categorie": cocktail.categ_cocktail,
+                "verre": cocktail.verre,
+                "alcoolise": cocktail.alcoolise_cocktail,
+                "image": cocktail.image_cocktail,
+            },
+            "message": f"🍹 Voici comment préparer un délicieux {cocktail.nom_cocktail} ☝️🤤!",
+        }
+
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail="😔 Désolé, nous n'avons pas trouvé ce cocktail. Vérifiez l'id , l'orthographe du nom ou essayez un autre chose !",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
+
+
+# ------------------- Endpoint: /cocktails/recherche -----------------------------
+
+
 @router.post(
     "/cocktails/recherche",
     responses={
@@ -36,7 +125,7 @@ def rechercher_cocktails(
     """
     **Rechercher des cocktails selon vos préférences**
 
-    ## ⚠️ L'abus d'alcool est dangereux pour la santé, à consommer avec modération
+    ### ⚠️ L'abus d'alcool est dangereux pour la santé, à consommer avec modération
 
 
     Vous pouvez filtrer par :
@@ -88,6 +177,9 @@ def rechercher_cocktails(
         raise HTTPException(status_code=500, detail=f"Erreur interne : {str(e)}")
 
 
+# ------------------- Endpoint: /cocktails/complets -----------------------------
+
+
 @router.get(
     "/cocktails/complets",
     responses={
@@ -133,6 +225,9 @@ def lister_cocktails_complets(
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# ------------------- Endpoint: /cocktails/partiels -----------------------------
 
 
 @router.get(
@@ -187,6 +282,9 @@ def lister_cocktails_partiels(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# ------------------- Endpoint: /cocktails/aleatoires -----------------------------
+
+
 @router.get(
     "/cocktails/aleatoires",
     responses={
@@ -229,6 +327,9 @@ def cocktails_aleatoires(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# ------------------- Endpoint: /cocktails/categories -----------------------------
+
+
 @router.get("/cocktails/categories")
 def lister_categories():
     """
@@ -238,6 +339,9 @@ def lister_categories():
     """
     categories = service_cocktail.lister_categories()
     return {"categories": categories}
+
+
+# ------------------- Endpoint: /cocktails/verres -----------------------------
 
 
 @router.get("/cocktails/verres")
