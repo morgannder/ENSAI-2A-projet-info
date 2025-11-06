@@ -278,7 +278,7 @@ class CocktailService:
         ValueError
             Si l'ID du cocktail est invalide.
         """
-        if not isinstance(id_cocktail, int) or id_cocktail <= 0:
+        if not isinstance(id_cocktail, int) or id_cocktail < 0:
             raise ValueError("L'ID du cocktail doit être un entier positif")
 
         cocktail = CocktailDao().trouver_par_id(id_cocktail)

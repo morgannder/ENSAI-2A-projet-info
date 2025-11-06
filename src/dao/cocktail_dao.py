@@ -541,3 +541,43 @@ class CocktailDao(metaclass=Singleton):
             "string": "instructions",  # Fallback par défaut
         }
         return langue_map.get(langue.upper(), "instructions")
+
+        # ------------------- Méthode: trouver_par_id -----------------------------
+
+        @log
+        def trouver_par_id(self, id_cocktail: int) -> Cocktail:
+            """
+            Trouver un cocktail par son ID.
+
+            Parameters
+            ----------
+            id_cocktail : int
+                ID du cocktail recherché
+
+            Returns
+            -------
+            Cocktail
+                Le cocktail trouvé ou None
+            """
+            try:
+                with DBConnection().connection as connection:
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            "SELECT * FROM cocktail WHERE id_cocktail = %(id_cocktail)s;",
+                            {"id_cocktail": id_cocktail},
+                        )
+                        row = cursor.fetchone()
+                        if row:
+                            return Cocktail(
+                                id_cocktail=row["id_cocktail"],
+                                nom_cocktail=row["nom_cocktail"],
+                                categ_cocktail=row["categorie"],
+                                image_cocktail=row.get("image_url"),
+                                alcoolise_cocktail=row.get("alcool"),
+                                instruc_cocktail=row.get("instructions"),
+                            )
+                        return None
+            except Exception as e:
+                print(f"Erreur recherche cocktail par ID: {e}")
+
+        return None
