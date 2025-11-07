@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from typing import Literal
 from app.core.security import get_current_user
 from business_object.utilisateur import Utilisateur
 from service.inventaire_service import InventaireService
@@ -11,9 +12,7 @@ service_inventaire = InventaireService()
 service_utilisateur = UtilisateurService()
 
 
-class Reponse(BaseModel):
-    confirmation: str
-
+Number = Literal["1","2","3","4","5","6","7","8","9","10"]
 
 @router.get("/vue")
 def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
@@ -38,13 +37,13 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
         400: {"description": "Paramètre invalide."},
     },
 )
-def suggestion_ingredients(n: int = 5):
+def suggestion_ingredients(n: Number):
     """
     **Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.**
 
     Limité entre 1 et 10 ingrédients.
     """
-    suggestions = service_inventaire.suggerer_ingredients(n)
+    suggestions = service_inventaire.suggerer_ingredients(int(n))
     return [ing.nom_ingredient for ing in suggestions]
 
 
@@ -58,7 +57,8 @@ def ajoute_ingredient(
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
-        return service_inventaire.ajouter(utilisateur.id_utilisateur, requete)
+        if service_inventaire.ajouter(utilisateur.id_utilisateur, requete):
+            return {"Information": f"L'ingrédient a été ajouté à l'inventaire !"} 
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
@@ -87,7 +87,7 @@ def supprime_ingredient(
 
 @router.delete("/supprimer_tout")
 def supprimer_mon_inventaire(
-    reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)
+    reponse: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
     """
     Supprime l'inventaire de l'utilisateur
@@ -95,7 +95,7 @@ def supprimer_mon_inventaire(
     Veuillez saisir 'CONFIRMER' pour valider la demande
     """
     try:
-        if reponse.confirmation == "CONFIRMER":
+        if reponse == "CONFIRMER":
             # Appeler le service pour supprimer le compte
             suppression_reussie = service_utilisateur.supprimer_inventaire(utilisateur)
 

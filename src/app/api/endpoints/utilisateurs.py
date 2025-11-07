@@ -60,8 +60,8 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
         "pseudo": utilisateur.pseudo,
         "age": utilisateur.age,
         "langue": utilisateur.langue,
-        "date_creation": utilisateur.date_creation.strftime("%d/%m/%Y"),
-        "cocktails_realises": utilisateur.cocktails_realises,
+        "date_création": utilisateur.date_creation.strftime("%d/%m/%Y"),
+        "cocktails_recherchés": utilisateur.cocktails_recherches,
     }
 
 
@@ -132,7 +132,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_cu
 
 
 @router.delete("/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(get_current_user)):
+def supprimer_mon_compte(reponse: str, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 
@@ -143,7 +143,7 @@ def supprimer_mon_compte(reponse: Reponse, utilisateur: Utilisateur = Depends(ge
         id_utilisateur = utilisateur.id_utilisateur
         pseudo = utilisateur.pseudo
 
-        if reponse.confirmation == "CONFIRMER":
+        if reponse == "CONFIRMER":
             # Appeler le service pour supprimer le compte
             suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
 

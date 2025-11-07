@@ -1,4 +1,4 @@
-INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation, cocktails_realises) VALUES
+INSERT INTO utilisateur(id_utilisateur, pseudo, mdp, age, langue, est_majeur, date_creation, cocktails_recherches) VALUES
 (1, 'admin',    hash_password('0000', '2025-04-11 14:30:00'),   1,  'FRA',   false,  '2025-04-11 14:30:00', 0),
 (2, 'a',        hash_password('a', '2025-04-11 16:00:00'),      20, 'FRA',   true,   '2025-04-11 16:00:00', 12),
 (3, 'John',     hash_password('1234', '2025-04-11 16:03:00'),   20, 'ENG',   true,   '2025-04-11 16:03:00', 2500),

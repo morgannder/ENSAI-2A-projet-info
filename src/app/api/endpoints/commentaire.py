@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 from business_object.utilisateur import Utilisateur
 from service.commentaire_service import CommentaireService
 from service.cocktail_service import CocktailService
@@ -12,12 +12,15 @@ commentaire_service = CommentaireService()
 cocktail_service = CocktailService()
 
 class CommentaireCreate(BaseModel):
-    texte: str = Field(..., min_length=1, max_length=1000)
-    note: int = Field(..., ge=1, le=5)
+    commentaire: str = Field(..., min_length=1, max_length=1000)
+
+Number = Literal["1","2","3","4","5"]
+
 
 @router.post("/ajouter_com/{id_cocktail}")
 def ajouter_commentaire(
     id_cocktail: int,
+    note: Number,
     donnee: CommentaireCreate,
     utilisateur: Utilisateur = Depends(get_current_user)
 ):
@@ -30,8 +33,8 @@ def ajouter_commentaire(
         succes = commentaire_service.ajouter_commentaire(
             id_utilisateur=utilisateur.id_utilisateur,
             id_cocktail=id_cocktail,
-            texte=donnee.texte,
-            note=donnee.note
+            texte=donnee.commentaire,
+            note=note
         )
         if succes:
             return {"message": "Commentaire ajouté avec succès"}

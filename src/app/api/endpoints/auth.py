@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from app.core.security import create_access_token, get_current_user_optional
 from business_object.utilisateur import Utilisateur
 from service.utilisateur_service import UtilisateurService
+from utils.reset_database import ResetDatabase
 
 router = APIRouter(tags=["Authentification"])
 service_utilisateur = UtilisateurService()
@@ -33,7 +34,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
+Base = Literal["Test", "Prod"]
 LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
@@ -113,7 +114,7 @@ def inscription(
             mdp=donnee.mdp,  # mot de passe en clair, la méthode hash
             age=donnee.age,
             langue=donnee.langue,
-            cocktails_realises=0,
+            cocktail_recherches=0,
         )
         if not utilisateur:
             print(utilisateur)
@@ -138,3 +139,29 @@ def inscription(
         raise HTTPException(
             status_code=500, detail="Erreur interne lors de la création utilisateur"
         )
+
+
+@router.post("/changement_base")
+def changement_base(
+    base_test:Base,
+    utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional),
+):
+    """
+    **Permet à un administrateur (ici les comptes "a" et "admin") de changer de base de données, 
+    cette fonctionnalité permet de passer d'une base à l'autre facilement sans avoir à redémarrer 
+    main.py et changer le fichier config.py**
+
+    - **Base_test** *Literal* à choisir parmi Test ou Prod 
+
+    """
+
+
+    if utilisateur_connecte != None and utilisateur_connecte.pseudo in ["a", "admin"]:
+        if base_test == "Test":
+            ResetDatabase().lancer(test_dao=True)
+            return {"message" : f"Tu es sur la base test"}
+        else:
+            ResetDatabase().lancer(test_dao=False)
+            return {"message" : f"Tu es sur la base prod"}
+    else:
+        return {"message" : f"Tu n'as pas les permissions nécessaires"}

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -20,6 +20,70 @@ class CocktailFilter(BaseModel):
     alcool: Optional[str] = None
     verre: Optional[str] = None
     ingredients: Optional[list[str]] = None
+
+
+Alcool = Literal[
+    "Alcoholic",
+    "Non alcoholic",
+    "Optional Alcohol"
+]
+Number = Literal["1","2","3","4","5"]
+Categories = Literal[
+    "Beer",
+    "Cocktail",
+    "Cocoa",
+    "Coffee / Tea",
+    "Homemade Liqueur",
+    "Ordinary Drink",
+    "Other / Unknown",
+    "Punch / Party Drink",
+    "Shake",
+    "Shot",
+    "Soft Drink"
+  ]
+
+Verres = Literal[
+    "Balloon Glass",
+    "Beer Glass",
+    "Beer mug",
+    "Beer pilsner",
+    "Brandy snifter",
+    "Champagne flute",
+    "Champagne Flute",
+    "Cocktail glass",
+    "Cocktail Glass",
+    "Coffee mug",
+    "Coffee Mug",
+    "Collins glass",
+    "Collins Glass",
+    "Copper Mug",
+    "Cordial glass",
+    "Coupe Glass",
+    "Highball glass",
+    "Highball Glass",
+    "Hurricane glass",
+    "Irish coffee cup",
+    "Jar",
+    "Margarita glass",
+    "Margarita/Coupette glass",
+    "Martini Glass",
+    "Mason jar",
+    "Nick and Nora Glass",
+    "Old-fashioned glass",
+    "Old-Fashioned glass",
+    "Parfait glass",
+    "Pint glass",
+    "Pitcher",
+    "Pousse cafe glass",
+    "Punch bowl",
+    "Punch Bowl",
+    "Shot glass",
+    "Shot Glass",
+    "Whiskey Glass",
+    "Whiskey sour glass",
+    "White wine glass",
+    "Wine Glass"
+  ]
 
 
 # ------------------- Endpoint: /cocktails/details -----------------------------
@@ -121,9 +185,13 @@ def realiser_cocktail(
     },
 )
 def rechercher_cocktails(
-    filtres: CocktailFilter,
     limit: int = 10,
     offset: int = 0,
+    nom_cocktail: Optional[str] = None,
+    categorie: Optional[Categories] = None,
+    alcool: Optional[Alcool] = None,
+    verre: Optional[Verres] = None,
+    ingredients: Optional[list[str]] = None,
     utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
 ):
     """
@@ -133,11 +201,11 @@ def rechercher_cocktails(
 
 
     Vous pouvez filtrer par :
-    - Nom du cocktail (ex: `"Margarita"`)
-    - Type d'alcool (ex: `"Alcoholic"` ou `"Non alcoholic"`)
-    - Catégorie (ex: `"Cocktail"`)
-    - Verre (ex: `"Highball glass"`)
-    - Ingrédients (ex: `["Tequila", "Citron"]`)
+    - Nom du cocktail   (ex: `"Margarita"`)
+    - Type d'alcool     *Literal* Sélectionnable ou None
+    - Catégorie         *Literal* Sélectionnable ou None
+    - Verre             *Literal* Sélectionnable ou None
+    - Ingrédients       (ex: `["Tequila", "Citron"]`)
 
     Si vous n'êtes pas connecté, la recherche se fera sans restrictions d'âge.
     Si vous êtes mineur connecté, seuls les cocktails non alcoolisés seront affichés.
@@ -154,11 +222,11 @@ def rechercher_cocktails(
 
         cocktails = service_cocktail.rechercher_par_filtre(
             est_majeur=est_majeur,
-            nom_cocktail=filtres.nom_cocktail,
-            categ=filtres.categorie,
-            alcool=filtres.alcool,
-            liste_ingredients=filtres.ingredients,
-            verre=filtres.verre,
+            nom_cocktail=nom_cocktail,
+            categ=categorie,
+            alcool=alcool,
+            liste_ingredients=ingredients,
+            verre=verre,
             langue=langue,
             limit=limit,
             offset=offset,
@@ -202,8 +270,8 @@ def lister_cocktails_complets(
     Nécessite d'être connecté pour accéder à votre inventaire.
 
     ### Paramètres de requête
-    - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
-    - **offset** *(int, optionnel)* : Décalage pour la pagination.
+    - **limit**     *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
+    - **offset**    *(int, optionnel)* : Décalage pour la pagination.
     """
     if utilisateur:
         langue = utilisateur.langue
@@ -243,7 +311,7 @@ def lister_cocktails_complets(
     },
 )
 def lister_cocktails_partiels(
-    nb_manquants: int,
+    nb_manquants: Number,
     limit: int = 10,
     offset: int = 0,
     utilisateur: Utilisateur = Depends(get_current_user),
@@ -254,9 +322,9 @@ def lister_cocktails_partiels(
     Nécessite d'être connecté pour accéder à votre inventaire.
 
     ### Paramètres de requête
-    - **nb_manquants** *(int, requis)* : Nombre maximal d'ingrédients manquants autorisés (0-5).
-    - **limit** *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
-    - **offset** *(int, optionnel)* : Pagination.
+    - **nb_manquants**  *Literal* : Nombre maximal d'ingrédients manquants autorisés (1-5).
+    - **limit**         *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
+    - **offset**        *(int, optionnel)* : Pagination.
     """
     if utilisateur:
         langue = utilisateur.langue
@@ -264,7 +332,7 @@ def lister_cocktails_partiels(
         langue = "ENG"
     try:
         cocktails = service_cocktail.lister_cocktails_partiels(
-            nb_manquants=nb_manquants,
+            nb_manquants=int(nb_manquants),
             id_utilisateur=utilisateur.id_utilisateur,
             est_majeur=utilisateur.est_majeur,
             langue=langue,
@@ -297,14 +365,14 @@ def lister_cocktails_partiels(
     },
 )
 def cocktails_aleatoires(
-    nb: int = 5,
+    nb: Number,
     utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
 ):
     """
     **Obtenir une sélection aléatoire de cocktails**
 
     ### Paramètres
-    - **nb** *(int, optionnel)* : Nombre de cocktails à tirer aléatoirement (max 5, défaut 5).
+    - **nb** *Literal* : Nombre de cocktails à tirer aléatoirement (entre 1 et 5).
 
     ### Réponse
     - Liste aléatoire de cocktails adaptés à l'âge de l'utilisateur si connecté.
@@ -320,7 +388,7 @@ def cocktails_aleatoires(
         est_majeur = utilisateur.est_majeur if utilisateur else None
 
         cocktails = service_cocktail.cocktails_aleatoires(
-            est_majeur=est_majeur, nb=nb, langue=langue
+            est_majeur=est_majeur, nb=int(nb), langue=langue
         )
 
         return {
