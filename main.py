@@ -10,7 +10,7 @@ app = FastAPI(
 )
 
 # Inclusion des routes
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router)
 
 
 if __name__ == "__main__":
