@@ -114,7 +114,7 @@ def inscription(
             mdp=donnee.mdp,  # mot de passe en clair, la méthode hash
             age=donnee.age,
             langue=donnee.langue,
-            cocktail_recherches=0,
+            cocktails_recherches=0,
         )
         if not utilisateur:
             print(utilisateur)

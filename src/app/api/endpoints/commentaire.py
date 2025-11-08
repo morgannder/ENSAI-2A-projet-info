@@ -34,7 +34,7 @@ def ajouter_commentaire(
             id_utilisateur=utilisateur.id_utilisateur,
             id_cocktail=id_cocktail,
             texte=donnee.commentaire,
-            note=note
+            note=int(note)
         )
         if succes:
             return {"message": "Commentaire ajouté avec succès"}
