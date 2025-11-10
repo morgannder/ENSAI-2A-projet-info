@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional
+import textwrap
 
 from business_object.ingredient import Ingredient
 from dao.db_connection import DBConnection
@@ -177,7 +178,7 @@ class InventaireDao(metaclass=Singleton):
             ingredient = Ingredient(
                 id_ingredient=int(_id) if _id is not None else None,
                 nom_ingredient=_nom,
-                desc_ingredient=_desc,
+                desc_ingredient=textwrap.shorten(_desc, width=150, placeholder="..."),
             )
             result.append(ingredient)
 

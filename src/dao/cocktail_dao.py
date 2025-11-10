@@ -65,8 +65,8 @@ class CocktailDao(metaclass=Singleton):
                                 c.image_url,
                                 c.verre,
                                 c.{col_instructions} AS instructions,
-                                STRING_AGG(i.nom_ingredient, ', ' ORDER BY i.nom_ingredient) AS ingredients,
-                                STRING_AGG(ci.quantite, ', ' ORDER BY i.nom_ingredient) AS quantites
+                                STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients,
+                                STRING_AGG(COALESCE(ci.quantite, 'NULL'), '|||' ORDER BY i.nom_ingredient) AS quantites
                             FROM cocktail c
                             JOIN cocktail_ingredient ci ON c.id_cocktail = ci.id_cocktail
                             JOIN ingredient i ON ci.id_ingredient = i.id_ingredient

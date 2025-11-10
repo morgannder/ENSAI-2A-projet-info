@@ -139,9 +139,9 @@ def realiser_cocktail(
 
         if cocktail:
             service_utilisateur.ajout_cocktail_realise(utilisateur)
-            # Séparer les ingrédients et quantités
-            ingredients_liste = cocktail.ingredients.split(", ")
-            quantites_liste = cocktail.quantites.split(", ")
+
+            ingredients_liste = cocktail.ingredients.split("|||") if cocktail.ingredients else []
+            quantites_liste = cocktail.quantites.split("|||") if cocktail.quantites else []
 
             ingredients_detailles = [
                 {"ingredient": ing, "quantite": qty}
