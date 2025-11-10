@@ -579,3 +579,36 @@ class CocktailDao(metaclass=Singleton):
                     return None
         except Exception as e:
             print(f"Erreur recherche cocktail par ID: {e}")
+
+
+        # ------------------- Méthode: trouver_les_ingrédients -----------------------------
+
+    @log
+    def obtenir_ingredients_par_cocktails(self, ids_cocktails: list[int]) -> dict[int, list[str]]:
+        """Récupère tous les ingrédients pour une liste de cocktails"""
+        if not ids_cocktails:
+            return {}
+        
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT 
+                            ci.id_cocktail,
+                            STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients
+                        FROM cocktail_ingredient ci
+                        JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
+                        WHERE ci.id_cocktail = ANY(%(ids_cocktails)s)
+                        GROUP BY ci.id_cocktail
+                    """, {"ids_cocktails": ids_cocktails})
+                    
+                    rows = cursor.fetchall()
+                    
+                    # Créer un dictionnaire {id_cocktail: [ingrédients]}
+                    return {
+                        row["id_cocktail"]: row["ingredients"].split("|||") 
+                        for row in rows
+                    }
+        except Exception:
+            logging.exception("Erreur get_ingredients_par_cocktails")
+            return {}

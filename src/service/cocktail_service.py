@@ -326,3 +326,18 @@ class CocktailService:
         """
         verres = CocktailDao().lister_verres()
         return verres if verres else []
+
+    @log
+    def obtenir_ingredients_par_cocktails(self, ids_cocktails: list[int]) -> dict[int, list[str]]:
+        """
+        Récupère tous les ingrédients pour une liste de cocktails
+        (Couche service qui appelle le DAO)
+        """
+        if not ids_cocktails:
+            return {}
+        
+        try:
+            return CocktailDao().obtenir_ingredients_par_cocktails(ids_cocktails)
+        except Exception as e:
+            logging.error(f"Erreur dans get_ingredients_par_cocktails: {str(e)}")
+            return {}
