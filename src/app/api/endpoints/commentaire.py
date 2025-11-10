@@ -27,7 +27,13 @@ def ajouter_commentaire(
     """
     **Ajouter un commentaire sur un cocktail**
 
-    - Un seul commentaire par cocktail est autorisé
+    ### Paramètres
+    - **id** *int* : id du cocktail
+    - **note** *Literal* : Notation sur 5 du cocktail (de 1 à 5)
+    - **donnee** *str* : Commentaire de l'utilisateur
+
+    ### Réponse
+    - Message de confirmation ou d'erreur
     """
     try:
         succes = commentaire_service.ajouter_commentaire(
@@ -50,7 +56,11 @@ def supprimer_mon_commentaire(
     """
     **Supprimer votre commentaire sur un cocktail**
 
-    - Supprime automatiquement votre commentaire sur ce cocktail
+    ### Paramètre
+    - **id** *int* : id du cocktail
+
+    ### Réponse
+    - Supprime votre commentaire sur ce cocktail
     """
     try:
 
@@ -96,6 +106,10 @@ def lister_commentaires_cocktail(
     """
     **Lister tous les commentaires d'un cocktail**
 
+    ### Paramètre
+    - **id** *int* : id du cocktail
+
+    ### Réponse
     - Inclut le nom du cocktail, la note moyenne et tous les commentaires des autres utilisateurs
 
     """
@@ -159,7 +173,11 @@ def lister_mes_commentaires(
     """
     **Lister tous mes commentaires**
 
-    - Retourne tous les commentaires que j'ai postés sur différents cocktails
+      ### Paramètre
+    - Aucun
+
+    ### Réponse
+    - Retourne tous les commentaires que l'utilisateur connecté a posté sur différents cocktails
     - Inclut les informations des cocktails associés
     """
     try:

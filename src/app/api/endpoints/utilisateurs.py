@@ -69,6 +69,14 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Modifie certaines informations du compte**
+
+    ### Paramètre
+    - **donnee** *dict* saisir les informations pour valider la modification du compte,
+            supprimer la clé pour ne pas la modifier
+    
+    ### Réponse
+    Message de confirmation ou d'erreur
+        si réussite -> affiche les champs modifiés
     """
     print("DEBUG /me/update: données reçues:", donnee)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
@@ -132,18 +140,22 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_cu
 
 
 @router.delete("/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(reponse: str, utilisateur: Utilisateur = Depends(get_current_user)):
+def supprimer_mon_compte(confirmation: str, utilisateur: Utilisateur = Depends(get_current_user)):
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 
-    Veuillez saisir 'CONFIRMER' pour valider la demande
+    ### Paramètre
+    - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression du compte
+    
+    ### Réponse
+    Message de confirmation ou d'erreur
     """
     try:
         # Récupérer l'ID avant suppression pour les logs
         id_utilisateur = utilisateur.id_utilisateur
         pseudo = utilisateur.pseudo
 
-        if reponse == "CONFIRMER":
+        if confirmation == "CONFIRMER":
             # Appeler le service pour supprimer le compte
             suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
 

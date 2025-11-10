@@ -233,10 +233,10 @@ def rechercher_cocktails(
             offset=offset,
         )
 
-        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
         
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
         # Construire la réponse avec les ingrédients
         resultats = []
@@ -299,10 +299,10 @@ def lister_cocktails_complets(
                 detail="Désolée, mais nous n'avons pas trouvé de cocktail en fonction de votre inventaire. "
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
-        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
         
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
         # Construire la réponse avec les ingrédients
         resultats = []
@@ -366,15 +366,15 @@ def lister_cocktails_partiels(
                 detail="Désolée, aucun cocktail partiellement réalisable n'a été trouvé en fonction de votre inventaire. "
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
-        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
         
         # Récupérer tous les ingrédients des cocktails
-        tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+        tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
         
         # Récupérer les ingrédients possédés par l'utilisateur depuis l'inventaire
         ingredients_possedes_par_cocktail = service_cocktail.obtenir_ingredients_possedes_par_cocktails(
             id_utilisateur=utilisateur.id_utilisateur, 
-            ids_cocktails=ids_cocktails
+            id_cocktails=id_cocktails
         )
 
         # Construire la réponse avec les deux listes
@@ -442,10 +442,10 @@ def cocktails_aleatoires(
             est_majeur=est_majeur, nb=int(nb), langue=langue
         )
 
-        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
         
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
         # Construire la réponse avec les ingrédients
         resultats = []
@@ -462,29 +462,3 @@ def cocktails_aleatoires(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# ------------------- Endpoint: /cocktails/categories -----------------------------
-
-
-@router.get("/categories")
-def lister_categories():
-    """
-    **Lister les catégories de cocktails**
-
-    Permet d'obtenir la liste complète des catégories présentes dans la base.
-    """
-    categories = service_cocktail.lister_categories()
-    return {"categories": categories}
-
-
-# ------------------- Endpoint: /cocktails/verres -----------------------------
-
-
-@router.get("/verres")
-def lister_verres():
-    """
-    **Lister les types de verres**
-
-    Permet d'obtenir la liste complète des types de verres présents dans la base.
-    """
-    verres = service_cocktail.lister_verres()
-    return {"verres": verres}

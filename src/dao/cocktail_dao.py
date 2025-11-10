@@ -584,9 +584,9 @@ class CocktailDao(metaclass=Singleton):
         # ------------------- Méthode: trouver_les_ingrédients -----------------------------
 
     @log
-    def obtenir_ingredients_par_cocktails(self, ids_cocktails: list[int]) -> dict[int, list[str]]:
+    def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
         """Récupère tous les ingrédients pour une liste de cocktails"""
-        if not ids_cocktails:
+        if not id_cocktails:
             return {}
         
         try:
@@ -598,9 +598,9 @@ class CocktailDao(metaclass=Singleton):
                             STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients
                         FROM cocktail_ingredient ci
                         JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
-                        WHERE ci.id_cocktail = ANY(%(ids_cocktails)s)
+                        WHERE ci.id_cocktail = ANY(%(id_cocktails)s)
                         GROUP BY ci.id_cocktail
-                    """, {"ids_cocktails": ids_cocktails})
+                    """, {"id_cocktails": id_cocktails})
                     
                     rows = cursor.fetchall()
                     
@@ -617,10 +617,10 @@ class CocktailDao(metaclass=Singleton):
     def obtenir_ingredients_possedes_par_cocktails(
         self, 
         id_utilisateur: int, 
-        ids_cocktails: list[int]
+        id_cocktails: list[int]
     ) -> dict[int, list[str]]:
         """Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis l'inventaire (DAO)"""
-        if not ids_cocktails:
+        if not id_cocktails:
             return {}
         
         try:
@@ -633,11 +633,11 @@ class CocktailDao(metaclass=Singleton):
                         FROM cocktail_ingredient ci
                         JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
                         JOIN inventaire_ingredient inv ON i.id_ingredient = inv.id_ingredient
-                        WHERE ci.id_cocktail = ANY(%(ids_cocktails)s)
+                        WHERE ci.id_cocktail = ANY(%(id_cocktails)s)
                         AND inv.id_utilisateur = %(id_utilisateur)s
                         GROUP BY ci.id_cocktail
                     """, {
-                        "ids_cocktails": ids_cocktails,
+                        "id_cocktails": id_cocktails,
                         "id_utilisateur": id_utilisateur
                     })
                     

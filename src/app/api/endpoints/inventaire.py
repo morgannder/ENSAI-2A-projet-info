@@ -37,13 +37,16 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
         400: {"description": "Paramètre invalide."},
     },
 )
-def suggestion_ingredients(n: Number):
+def suggestion_ingredients(nombre: Number):
     """
     **Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.**
-
-    Limité entre 1 et 10 ingrédients.
+    ### Paramètre
+    - **n** *Literal* : Nombre d'ingrédients à suggérer
+    
+    ### Réponse
+    Liste de nom d'ingrédient
     """
-    suggestions = service_inventaire.suggerer_ingredients(int(n))
+    suggestions = service_inventaire.suggerer_ingredients(int(nombre))
     return [ing.nom_ingredient for ing in suggestions]
 
 
@@ -51,9 +54,14 @@ def suggestion_ingredients(n: Number):
 def ajoute_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """**Ajoute un ingrédient à l'inventaire de l'utilisateur**
+    """
+    **Ajoute un ingrédient à l'inventaire de l'utilisateur**
 
-    Vous pouvez consulter les ingrédients disponibles via la méthode de suggestion d'ingrédients
+    ### Paramètre
+    - **demande_ingredient** *str* : ingrédient à ajouter à l'inventaire
+    
+    ### Réponse
+    Message de confirmation ou d'erreur
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
@@ -72,7 +80,15 @@ def ajoute_ingredient(
 def supprime_ingredient(
     demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
-    """**Supprime un ingrédient à l'inventaire de l'utilisateur**"""
+    """
+    **Supprime un ingrédient à l'inventaire de l'utilisateur**
+    
+    ### Paramètre
+    - **demande_ingredient** *str* : ingrédient à supprimer de l'inventaire
+    
+    ### Réponse
+    Message de confirmation ou d'erreur    
+    """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         return service_inventaire.supprimer(utilisateur.id_utilisateur, requete.id_ingredient)
@@ -90,9 +106,14 @@ def supprimer_mon_inventaire(
     reponse: str, utilisateur: Utilisateur = Depends(get_current_user)
 ):
     """
-    Supprime l'inventaire de l'utilisateur
+    **Supprime l'inventaire de l'utilisateur**
 
-    Veuillez saisir 'CONFIRMER' pour valider la demande
+    ### Paramètre
+    - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression 
+            de l'inventaire
+    
+    ### Réponse
+    Message de confirmation ou d'erreur
     """
     try:
         if reponse == "CONFIRMER":
