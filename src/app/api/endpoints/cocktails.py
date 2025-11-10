@@ -441,9 +441,21 @@ def cocktails_aleatoires(
             est_majeur=est_majeur, nb=int(nb), langue=langue
         )
 
+        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        
+        # Récupérer les ingrédients en une seule requête
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+
+        # Construire la réponse avec les ingrédients
+        resultats = []
+        for cocktail in cocktails:
+            cocktail_dict = cocktail.__dict__
+            # Ajouter les ingrédients au résultat
+            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(cocktail.id_cocktail, [])
+            resultats.append(cocktail_dict)
+
         return {
-            "total": len(cocktails),
-            "resultats": [c.__dict__ for c in cocktails],
+            "resultats": resultats,
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
