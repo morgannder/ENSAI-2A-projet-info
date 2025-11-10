@@ -24,6 +24,7 @@ INSERT INTO ingredient (id_ingredient, nom_ingredient, desc_ingredient) VALUES
 (18, 'Angostura Bitters', 'desc'),
 (65, 'Bourbon', 'desc'),
 (105, 'Coca-cola', 'desc'),
+(234, 'Lemon Juice', ''),
 (240, 'Lemon', 'desc'),
 (244, 'Light Rum', 'desc'),
 (251, 'Lime', 'desc'),
@@ -48,7 +49,9 @@ INSERT INTO cocktail_ingredient (id_cocktail, id_ingredient, quantite) VALUES
 (2, 1, '1/2 oz'),
 (2, 3, '1/2 oz'),
 (2, 240, 'Juice of 1/2'),
-(2, 105, '1 splash')
+(2, 105, '1 splash'),
+(3, 105, '1 dl'),
+(3, 234, '7 drops')
 ;
 
 INSERT INTO inventaire_ingredient(id_utilisateur, id_ingredient) VALUES

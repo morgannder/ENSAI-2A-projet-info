@@ -37,7 +37,7 @@ class CocktailDao(metaclass=Singleton):
         ValueError
             Si aucun identifiant n'est fourni ou si le cocktail n'existe pas.
         """
-        if not id_cocktail and not nom_cocktail:
+        if id_cocktail is None and not nom_cocktail:
             raise ValueError("Vous devez fournir soit un ID, soit un nom de cocktail")
 
         col_instructions = self.instruction_column(langue)
@@ -48,7 +48,7 @@ class CocktailDao(metaclass=Singleton):
                     where_clause = ""
                     params = {}
 
-                    if id_cocktail:
+                    if id_cocktail is not None:
                         where_clause = "WHERE c.id_cocktail = %(id_cocktail)s"
                         params["id_cocktail"] = id_cocktail
                     else:

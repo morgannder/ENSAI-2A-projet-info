@@ -123,7 +123,7 @@ def realiser_cocktail(
 
     """
 
-    if not id_cocktail and not nom_cocktail:
+    if id_cocktail is None and not nom_cocktail:
         raise HTTPException(
             status_code=400,
             detail="Veuillez fournir soit un 'id_cocktail' (nombre entier), soit un 'nom_cocktail' pour rechercher un cocktail.",
@@ -217,6 +217,7 @@ def rechercher_cocktails(
 
         if utilisateur:
             langue = utilisateur.langue
+            service_utilisateur.ajout_cocktail_realise(utilisateur)
         else:
             langue = "ENG"
 
