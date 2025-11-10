@@ -298,9 +298,22 @@ def lister_cocktails_complets(
                 detail="Désolée, mais nous n'avons pas trouvé de cocktail en fonction de votre inventaire. "
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
+        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        
+        # Récupérer les ingrédients en une seule requête
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+
+        # Construire la réponse avec les ingrédients
+        resultats = []
+        for cocktail in cocktails:
+            cocktail_dict = cocktail.__dict__
+            # Ajouter les ingrédients au résultat
+            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(cocktail.id_cocktail, [])
+            resultats.append(cocktail_dict)
+
         return {
             "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
-            "resultats": [c.__dict__ for c in cocktails],
+            "resultats": resultats,
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -352,9 +365,39 @@ def lister_cocktails_partiels(
                 detail="Désolée, aucun cocktail partiellement réalisable n'a été trouvé en fonction de votre inventaire. "
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
+        ids_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
+        
+        # Récupérer tous les ingrédients des cocktails
+        tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(ids_cocktails)
+        
+        # Récupérer les ingrédients possédés par l'utilisateur depuis l'inventaire
+        ingredients_possedes_par_cocktail = service_cocktail.obtenir_ingredients_possedes_par_cocktails(
+            id_utilisateur=utilisateur.id_utilisateur, 
+            ids_cocktails=ids_cocktails
+        )
+
+        # Construire la réponse avec les deux listes
+        resultats = []
+        for cocktail in cocktails:
+            cocktail_dict = cocktail.__dict__
+            id_cocktail = cocktail.id_cocktail
+            
+            # Tous les ingrédients du cocktail
+            tous_ingredients_cocktail = tous_ingredients.get(id_cocktail, [])
+            # Ingrédients que l'utilisateur possède (depuis l'inventaire)
+            ingredients_possedes = ingredients_possedes_par_cocktail.get(id_cocktail, [])
+            # Ingrédients manquants
+            ingredients_manquants = [ing for ing in tous_ingredients_cocktail if ing not in ingredients_possedes]
+            
+            # Ajouter les deux listes au résultat
+            cocktail_dict["ingredients_possedes"] = ingredients_possedes
+            cocktail_dict["ingredients_manquants"] = ingredients_manquants
+            
+            resultats.append(cocktail_dict)
+
         return {
             "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
-            "resultats": [c.__dict__ for c in cocktails],
+            "resultats": resultats,
         }
 
     except ValueError as e:

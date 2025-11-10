@@ -612,3 +612,42 @@ class CocktailDao(metaclass=Singleton):
         except Exception:
             logging.exception("Erreur get_ingredients_par_cocktails")
             return {}
+
+    @log
+    def obtenir_ingredients_possedes_par_cocktails(
+        self, 
+        id_utilisateur: int, 
+        ids_cocktails: list[int]
+    ) -> dict[int, list[str]]:
+        """Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis l'inventaire (DAO)"""
+        if not ids_cocktails:
+            return {}
+        
+        try:
+            with DBConnection().connection as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT 
+                            ci.id_cocktail,
+                            STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients_possedes
+                        FROM cocktail_ingredient ci
+                        JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
+                        JOIN inventaire_ingredient inv ON i.id_ingredient = inv.id_ingredient
+                        WHERE ci.id_cocktail = ANY(%(ids_cocktails)s)
+                        AND inv.id_utilisateur = %(id_utilisateur)s
+                        GROUP BY ci.id_cocktail
+                    """, {
+                        "ids_cocktails": ids_cocktails,
+                        "id_utilisateur": id_utilisateur
+                    })
+                    
+                    rows = cursor.fetchall()
+                    
+                    # Créer un dictionnaire {id_cocktail: [ingrédients_possedes]}
+                    return {
+                        row["id_cocktail"]: row["ingredients_possedes"].split("|||") 
+                        for row in rows
+                    }
+        except Exception:
+            logging.exception("Erreur obtenir_ingredients_possedes_par_cocktails")
+            return {}
