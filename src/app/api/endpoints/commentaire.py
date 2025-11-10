@@ -134,7 +134,7 @@ def lister_commentaires_cocktail(
 
             commentaire_data = {
                 "pseudo_utilisateur": commentaire.pseudo_utilisateur,
-                "date_creation": commentaire.date_creation.strftime("%d/%m/%Y"),
+                "date_commentaire": commentaire.date_creation.strftime("%d/%m/%Y"),
                 "note": commentaire.note,
                 "texte": commentaire.texte
             }
@@ -193,7 +193,7 @@ def lister_mes_commentaires(
                     "id_cocktail": cocktail.id_cocktail if cocktail else None,
                     "nom_cocktail": cocktail.nom_cocktail if cocktail else "Cocktail inconnu"
                 },
-                "date_creation": commentaire.date_creation.strftime("%d/%m/%Y"),
+                "date_commentaire": commentaire.date_creation.strftime("%d/%m/%Y"),
                 "note": commentaire.note,
                 "texte": commentaire.texte
             }
