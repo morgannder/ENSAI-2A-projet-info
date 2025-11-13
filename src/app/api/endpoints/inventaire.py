@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from typing import Literal
-from app.core.security import get_current_user
+from app.core.security import obtenir_utilisateur
 from business_object.utilisateur import Utilisateur
 from service.inventaire_service import InventaireService
 from service.utilisateur_service import UtilisateurService
@@ -15,7 +15,7 @@ service_utilisateur = UtilisateurService()
 Number = Literal["1","2","3","4","5","6","7","8","9","10"]
 
 @router.get("/vue")
-def consulte_inventaire(utilisateur: Utilisateur = Depends(get_current_user)):
+def consulte_inventaire(utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
     """**Montre l'inventaire de l'utilisateur**"""
     try:
         return service_inventaire.lister(utilisateur.id_utilisateur)
@@ -52,7 +52,7 @@ def suggestion_ingredients(nombre: Number):
 
 @router.put("/ajouter")
 def ajoute_ingredient(
-    demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
+    demande_ingredient: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Ajoute un ingrédient à l'inventaire de l'utilisateur**
@@ -78,7 +78,7 @@ def ajoute_ingredient(
 
 @router.delete("/supprimer_ingredient")
 def supprime_ingredient(
-    demande_ingredient: str, utilisateur: Utilisateur = Depends(get_current_user)
+    demande_ingredient: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Supprime un ingrédient à l'inventaire de l'utilisateur**
@@ -103,7 +103,7 @@ def supprime_ingredient(
 
 @router.delete("/supprimer_tout")
 def supprimer_mon_inventaire(
-    reponse: str, utilisateur: Utilisateur = Depends(get_current_user)
+    reponse: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Supprime l'inventaire de l'utilisateur**

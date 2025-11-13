@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app.core.security import get_current_user
+from app.core.security import obtenir_utilisateur
 from business_object.utilisateur import Utilisateur
 from service.utilisateur_service import UtilisateurService
 
@@ -43,7 +43,7 @@ LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 
 
 @router.get("/informations", tags=["Utilisateur"])
-def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
+def mes_informations(utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
     """
     **Visualiser les informations de votre compte**
 
@@ -66,7 +66,7 @@ def mes_informations(utilisateur: Utilisateur = Depends(get_current_user)):
 
 
 @router.put("/mettre_a_jour", tags=["Utilisateur"])
-def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_current_user)):
+def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
     """
     **Modifie certaines informations du compte**
 
@@ -140,7 +140,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(get_cu
 
 
 @router.delete("/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(confirmation: str, utilisateur: Utilisateur = Depends(get_current_user)):
+def supprimer_mon_compte(confirmation: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 

@@ -14,6 +14,8 @@ class Utilisateur:
         age de l'utilisateur
     langue : str
         langue souhaité par l'utilisateur pour les recettes de cocktail
+    cocktails_recherches : int
+        Nombre de recherches de cocktail
     date_creation : str
         la date de création du compte de l'utilisateur
     """

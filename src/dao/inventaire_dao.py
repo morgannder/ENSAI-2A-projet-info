@@ -13,7 +13,8 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def ajouter_ingredient_inventaire(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
-        """Ajout d'un ingrédient dans l'inventaire personnel d'un utilisateur
+        """
+        Ajout d'un ingrédient dans l'inventaire personnel d'un utilisateur
 
         Parameters
         ----------
@@ -88,7 +89,8 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def supprimer_ingredient(self, id_utilisateur: int, id_ingredient: int) -> bool:
-        """Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
+        """
+        Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
 
         Parameters
         ----------
@@ -186,7 +188,8 @@ class InventaireDao(metaclass=Singleton):
 
     @log
     def recherche_ingredient(self, ingredient: str) -> Ingredient:
-        """Permet de chercher un ingrédient avec son nom.
+        """
+        Permet de chercher un ingrédient avec son nom.
 
         Parameters
         ----------

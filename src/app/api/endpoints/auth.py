@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
-from app.core.security import create_access_token, get_current_user_optional
+from app.core.security import creation_token_d_acces, obtenir_utilisateur_optionnel
 from business_object.utilisateur import Utilisateur
 from service.utilisateur_service import UtilisateurService
 from utils.reset_database import ResetDatabase
@@ -49,7 +49,7 @@ def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
 
     print("DEBUG utilisateur connecté:", utilisateur)
     print("DEBUG /token: pseudo =", form_donnee.username, "mdp =", form_donnee.password)
-    access_token = create_access_token(donnee={"sub": str(utilisateur.id_utilisateur)})
+    access_token = creation_token_d_acces(donnee={"sub": str(utilisateur.id_utilisateur)})
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -57,7 +57,7 @@ def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
 @router.post("/inscription")
 def inscription(
     donnee: UserCreate,
-    utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional),
+    utilisateur_connecte: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
     **Créer un nouveau compte utilisateur**
@@ -122,7 +122,7 @@ def inscription(
             raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
 
         # Génération du token JWT pour l'utilisateur créé
-        token = create_access_token(donnee={"sub": str(utilisateur.id_utilisateur)})
+        token = creation_token_d_acces(donnee={"sub": str(utilisateur.id_utilisateur)})
         print("DEBUG /register: utilisateur créé, token =", token)
 
         return {
@@ -144,7 +144,7 @@ def inscription(
 @router.post("/changement_base")
 def changement_base(
     base_test:Base,
-    utilisateur_connecte: Optional[Utilisateur] = Depends(get_current_user_optional),
+    utilisateur_connecte: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
     **Permet à un administrateur (ici les comptes "a" et "admin") de changer de base de données, 

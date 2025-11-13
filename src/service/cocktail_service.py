@@ -8,8 +8,11 @@ import logging
 class CocktailService:
     """Classe contenant les méthodes de service pour les cocktails."""
 
-    def _filter_cocktails_for_minor(self, cocktails):
-        """Filtre les cocktails pour ne garder que les non alcoolisés."""
+    def _filter_cocktails_pour_mineurs(self, cocktails):
+        """
+        Filtre les cocktails pour ne garder que les non alcoolisés.
+
+        """
         return [c for c in cocktails if c.alcoolise_cocktail == "Non alcoholic"]
 
     @log
@@ -48,8 +51,8 @@ class CocktailService:
         liste_ingredients=None,
         verre=None,
         langue=None,
-        limit=10,
-        offset=0,
+        limite=10,
+        decalage=0,
     ) -> list[Cocktail]:
         """
         Recherche les cocktails selon différents filtres.
@@ -70,9 +73,9 @@ class CocktailService:
             Verre utilisé.
         langue : str
            Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Nombre maximum de résultats (défaut: 10).
-        offset : int, optional
+        decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
         Returns
@@ -122,18 +125,18 @@ class CocktailService:
             )
 
         cocktails = CocktailDao().rechercher_cocktails(
-            nom_cocktail, categ, verre, alcool, liste_ingredients, langue, limit, offset
+            nom_cocktail, categ, verre, alcool, liste_ingredients, langue, limite, decalage
         )
 
         # Filtrer si mineur
         if est_majeur is False:
-            cocktails = self._filter_cocktails_for_minor(cocktails)
+            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
     @log
     def lister_cocktails_complets(
-        self, id_utilisateur, est_majeur, langue=None, limit=10, offset=0
+        self, id_utilisateur, est_majeur, langue=None, limite=10, decalage=0
     ) -> list[Cocktail]:
         """
         Liste tous les cocktails que l'utilisateur peut préparer
@@ -147,9 +150,9 @@ class CocktailService:
             Si majeur ou pas, filtre automatiquement les cocktails non alcoolisés.
         langue : str
            Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Nombre maximum de résultats (défaut: 10).
-        offset : int, optional
+        decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
         Returns
@@ -165,17 +168,17 @@ class CocktailService:
         if not id_utilisateur:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
-        cocktails = CocktailDao().cocktail_complet(id_utilisateur, langue, limit, offset)
+        cocktails = CocktailDao().cocktail_complet(id_utilisateur, langue, limite, decalage)
 
         # Filtrer si mineur
         if est_majeur is False:
-            cocktails = self._filter_cocktails_for_minor(cocktails)
+            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
     @log
     def lister_cocktails_partiels(
-        self, nb_manquants, id_utilisateur, est_majeur, langue=None, limit=10, offset=0
+        self, nb_manquants, id_utilisateur, est_majeur, langue=None, limite=10, decalage=0
     ) -> list[Cocktail]:
         """
         Liste tous les cocktails que l'utilisateur peut préparer avec au plus
@@ -191,9 +194,9 @@ class CocktailService:
             Si majeur ou pas, filtre automatiquement les cocktails non alcoolisés.
         langue : str
            Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Nombre maximum de résultats (défaut: 10).
-        offset : int, optional
+        decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
         Returns
@@ -213,12 +216,12 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_partiel(
-            id_utilisateur, nb_manquants, langue, limit, offset
+            id_utilisateur, nb_manquants, langue, limite, decalage
         )
 
         # Filtrer si mineur
         if est_majeur is False:
-            cocktails = self._filter_cocktails_for_minor(cocktails)
+            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
@@ -255,7 +258,7 @@ class CocktailService:
 
         # Filtrer si mineur
         if est_majeur is False:
-            cocktails = self._filter_cocktails_for_minor(cocktails)
+            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
@@ -302,37 +305,22 @@ class CocktailService:
         cocktails = CocktailDao().lister_tous()
         return cocktails if cocktails else []
 
-    @log
-    def lister_categories(self) -> list[str]:
-        """
-        Liste toutes les catégories de cocktails disponibles.
-
-        Returns
-        -------
-        list[str]
-            Liste des catégories uniques, triées alphabétiquement.
-        """
-        categories = CocktailDao().lister_categories()
-        return categories if categories else []
-
-    @log
-    def lister_verres(self) -> list[str]:
-        """
-        Liste tous les types de verres disponibles.
-
-        Returns
-        -------
-        list[str]
-            Liste des types de verres uniques, triés alphabétiquement.
-        """
-        verres = CocktailDao().lister_verres()
-        return verres if verres else []
 
     @log
     def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
         """
         Récupère tous les ingrédients pour une liste de cocktails
         (Couche service qui appelle le DAO)
+
+        Parameters
+        ----------
+        id_cocktails : list[int]
+            ID des cocktails recherchés
+
+        Returns
+        -------
+        dict { int : list[str] }
+            Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
         """
         if not id_cocktails:
             return {}
@@ -353,6 +341,18 @@ class CocktailService:
         """
         Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail
         (Couche service qui appelle le DAO)
+        
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur
+        id_cocktails : list[int]
+            ID des cocktails recherchés
+
+        Returns
+        -------
+        dict { int : list[str] }
+            Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
         """
         if not id_cocktails:
             return {}

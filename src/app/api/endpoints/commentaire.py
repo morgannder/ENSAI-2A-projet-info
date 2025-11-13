@@ -4,7 +4,7 @@ from typing import Optional, Literal
 from business_object.utilisateur import Utilisateur
 from service.commentaire_service import CommentaireService
 from service.cocktail_service import CocktailService
-from app.core.security import get_current_user
+from app.core.security import obtenir_utilisateur
 
 router = APIRouter(tags=["Commentaires"])
 
@@ -22,7 +22,7 @@ def ajouter_commentaire(
     id_cocktail: int,
     note: Number,
     donnee: CommentaireCreate,
-    utilisateur: Utilisateur = Depends(get_current_user)
+    utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Ajouter un commentaire sur un cocktail**
@@ -51,7 +51,7 @@ def ajouter_commentaire(
 @router.delete("/supprimer_com/{id_cocktail}")
 def supprimer_mon_commentaire(
     id_cocktail: int,
-    utilisateur: Utilisateur = Depends(get_current_user)
+    utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Supprimer votre commentaire sur un cocktail**
@@ -168,7 +168,7 @@ def lister_commentaires_cocktail(
 
 @router.get("/mes_commentaires")
 def lister_mes_commentaires(
-    utilisateur: Utilisateur = Depends(get_current_user)
+    utilisateur: Utilisateur = Depends(obtenir_utilisateur)
 ):
     """
     **Lister tous mes commentaires**

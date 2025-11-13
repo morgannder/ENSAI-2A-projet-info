@@ -16,6 +16,8 @@ class CocktailComplet:
         indiqque si le cocktail est alcoolisé ou non ou optionnel
     instruc_cocktail : str
         instruction pour la réalisation du cocktail
+    verre : str
+        Type de verre du cocktail
     ingredients : str, optional
         liste des ingrédients (séparés par des virgules)
     quantites : str, optional

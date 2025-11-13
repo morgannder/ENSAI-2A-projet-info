@@ -106,7 +106,7 @@ class CocktailDao(metaclass=Singleton):
 
     @log
     def cocktail_complet(
-        self, id_utilisateur: int, langue: str = "ENG", limit: int = 10, offset: int = 0
+        self, id_utilisateur: int, langue: str = "ENG", limite: int = 10, decalage: int = 0
     ) -> list[Cocktail]:
         """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire.
 
@@ -116,9 +116,9 @@ class CocktailDao(metaclass=Singleton):
             Identifiant de l'utilisateur.
         langue : str
             Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Nombre maximal de résultats retournés (pagination). Par défaut 10.
-        offset : int, optional
+        decalage : int, optional
             Décalage pour la pagination. Par défaut 0.
 
         Returns
@@ -162,12 +162,12 @@ class CocktailDao(metaclass=Singleton):
                         JOIN cocktail_matching_ingredients cmi ON c.id_cocktail = cmi.id_cocktail
                         WHERE cic.total_ingredients = cmi.matching_ingredients
                         ORDER BY c.nom_cocktail
-                        LIMIT %(limit)s OFFSET %(offset)s;
+                        LIMIT %(limite)s OFFSET %(decalage)s;
                         """,
                         {
                             "id_utilisateur": id_utilisateur,
-                            "limit": limit,
-                            "offset": offset,
+                            "limite": limite,
+                            "decalage": decalage,
                         },
                     )
                     rows = cursor.fetchall()
@@ -197,8 +197,8 @@ class CocktailDao(metaclass=Singleton):
         id_utilisateur: int,
         nb_manquants: int,
         langue: str = "ENG",
-        limit: int = 10,
-        offset: int = 0,
+        limite: int = 10,
+        decalage: int = 0,
     ) -> list[Cocktail]:
         """Lister tous les cocktails préparables avec au plus nb_manquants ingrédients manquants.
 
@@ -210,10 +210,15 @@ class CocktailDao(metaclass=Singleton):
             Nombre maximal d'ingrédients manquants autorisés.
         langue : str
             Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Pagination — nombre maximum de résultats.
-        offset : int, optional
+        decalage : int, optional
             décalage des résultats.
+
+        Returns
+        -------
+        list[Cocktail]
+            Liste des cocktails partiellement préparables avec l'inventaire.
         """
 
         # --- Choix de la colonne instructions selon la langue ---
@@ -256,13 +261,13 @@ class CocktailDao(metaclass=Singleton):
                         ORDER BY
                             (cic.total_ingredients - cmi.matching_ingredients) ASC,
                             c.nom_cocktail
-                        LIMIT %(limit)s OFFSET %(offset)s;
+                        LIMIT %(limite)s OFFSET %(decalage)s;
                         """,
                         {
                             "id_utilisateur": id_utilisateur,
                             "nb_manquants": nb_manquants,
-                            "limit": limit,
-                            "offset": offset,
+                            "limite": limite,
+                            "decalage": decalage,
                         },
                     )
                     rows = cursor.fetchall()
@@ -294,8 +299,8 @@ class CocktailDao(metaclass=Singleton):
         alcool=None,
         ingredients=None,
         langue: str = "ENG",
-        limit: int = 10,
-        offset: int = 0,
+        limite: int = 10,
+        decalage: int = 0,
     ) -> list[Cocktail]:
         """Recherche de cocktails avec filtres et pagination (VERSION OPTIMALE).
 
@@ -313,9 +318,9 @@ class CocktailDao(metaclass=Singleton):
             Liste d'ingrédients (le cocktail doit contenir TOUS ces ingrédients).
         langue : str
             Langue de l'utilisateur.
-        limit : int, optional
+        limite : int, optional
             Nombre maximal de cocktails retournés
-        offset : int, optional
+        decalage : int, optional
             Décalage du résultat pour la pagination
 
         Returns
@@ -330,7 +335,7 @@ class CocktailDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    params = {"limit": limit, "offset": offset}
+                    params = {"limite": limite, "decalage": decalage}
                     # Mapping entre la langue saisi de l'utilisateur et la bonne colonne
 
                     # On utilise une CTE pour filtrer par ingrédients si nécessaire
@@ -378,7 +383,7 @@ class CocktailDao(metaclass=Singleton):
                         params["alcool"] = alcool.lower()
 
                     # Tri et pagination
-                    query += " ORDER BY nom_cocktail LIMIT %(limit)s OFFSET %(offset)s;"
+                    query += " ORDER BY nom_cocktail LIMIT %(limite)s OFFSET %(decalage)s;"
 
                     cursor.execute(query, params)
                     rows = cursor.fetchall()
@@ -434,8 +439,8 @@ class CocktailDao(metaclass=Singleton):
                         f"""SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions
                         FROM cocktail
                         ORDER BY RANDOM()
-                        LIMIT %(limit)s;""",
-                        {"limit": nombre_limite},
+                        LIMIT %(limite)s;""",
+                        {"limite": nombre_limite},
                     )
                     rows = cursor.fetchall()
 
@@ -455,61 +460,6 @@ class CocktailDao(metaclass=Singleton):
             logging.exception("Erreur cocktails_aleatoires")
             raise
 
-    # ------------------- Méthode: lister_categories -----------------------------
-
-    @log
-    def lister_categories(self) -> list[str]:
-        """Liste toutes les catégories de cocktails disponibles.
-
-        Returns
-        -------
-        list[str]
-            Liste des catégories uniques, triées alphabétiquement.
-        """
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        SELECT DISTINCT categorie
-                        FROM cocktail
-                        WHERE categorie IS NOT NULL
-                        ORDER BY categorie;
-                        """
-                    )
-                    rows = cursor.fetchall()
-                    return [row["categorie"] for row in rows]
-        except Exception:
-            logging.exception("Erreur lister_categories")
-            raise
-
-    # ------------------- Méthode: lister_verres -----------------------------
-
-    @log
-    def lister_verres(self) -> list[str]:
-        """Liste tous les types de verres disponibles.
-
-        Returns
-        -------
-        list[str]
-            Liste des types de verres uniques, triés alphabétiquement.
-        """
-        try:
-            with DBConnection().connection as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        """
-                        SELECT DISTINCT verre
-                        FROM cocktail
-                        WHERE verre IS NOT NULL
-                        ORDER BY verre;
-                        """
-                    )
-                    rows = cursor.fetchall()
-                    return [row["verre"] for row in rows]
-        except Exception:
-            logging.exception("Erreur lister_verres")
-            raise
 
     # ------------------- Méthode: instruction_column -----------------------------
 
@@ -547,18 +497,18 @@ class CocktailDao(metaclass=Singleton):
     @log
     def trouver_par_id(self, id_cocktail: int) -> Cocktail:
         """
-            Trouver un cocktail par son ID.
+        Trouver un cocktail par son ID.
 
-            Parameters
-            ----------
-            id_cocktail : int
-                ID du cocktail recherché
+        Parameters
+        ----------
+        id_cocktail : int
+            ID du cocktail recherché
 
-            Returns
-            -------
-            Cocktail
-                Le cocktail trouvé ou None
-            """
+        Returns
+        -------
+        Cocktail
+            Le cocktail trouvé ou None
+        """
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
@@ -585,7 +535,19 @@ class CocktailDao(metaclass=Singleton):
 
     @log
     def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
-        """Récupère tous les ingrédients pour une liste de cocktails"""
+        """
+        Récupère tous les ingrédients pour une liste de cocktails
+        
+        Parameters
+        ----------
+        id_cocktails : list[int]
+            ID des cocktails recherchés
+
+        Returns
+        -------
+        dict { int : list[str] }
+            Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
+        """
         if not id_cocktails:
             return {}
         
@@ -619,7 +581,22 @@ class CocktailDao(metaclass=Singleton):
         id_utilisateur: int, 
         id_cocktails: list[int]
     ) -> dict[int, list[str]]:
-        """Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis l'inventaire (DAO)"""
+        """
+        Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis 
+        l'inventaire (DAO)
+
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur
+        id_cocktails : list[int]
+            ID des cocktails recherchés
+
+        Returns
+        -------
+        dict { int : list[str] }
+            Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
+        """
         if not id_cocktails:
             return {}
         

@@ -16,6 +16,8 @@ class Cocktail:
         indiqque si le cocktail est alcoolisé ou non ou optionnel
     instruc_cocktail : str
         instruction pour la réalisation du cocktail
+    verre : str
+        Type de verre du cocktail
     """
 
     def __init__(

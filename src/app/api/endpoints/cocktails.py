@@ -3,7 +3,7 @@ from typing import Optional, Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.core.security import get_current_user, get_current_user_optional
+from app.core.security import obtenir_utilisateur, obtenir_utilisateur_optionnel
 from business_object.utilisateur import Utilisateur
 from service.cocktail_service import CocktailService
 from service.utilisateur_service import UtilisateurService
@@ -101,7 +101,7 @@ Verres = Literal[
 def realiser_cocktail(
     id_cocktail: Optional[int] = None,
     nom_cocktail: Optional[str] = None,
-    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+    utilisateur: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
     ## 🍸 Obtenir la recette complète d'un cocktail
@@ -138,7 +138,7 @@ def realiser_cocktail(
         )
 
         if cocktail:
-            service_utilisateur.ajout_cocktail_realise(utilisateur)
+            service_utilisateur.ajout_cocktail_recherche(utilisateur)
 
             ingredients_liste = cocktail.ingredients.split("|||") if cocktail.ingredients else []
             quantites_liste = cocktail.quantites.split("|||") if cocktail.quantites else []
@@ -192,7 +192,7 @@ def rechercher_cocktails(
     alcool: Optional[Alcool] = None,
     verre: Optional[Verres] = None,
     ingredients: Optional[list[str]] = None,
-    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+    utilisateur: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
     **Rechercher des cocktails selon vos préférences**
@@ -217,7 +217,7 @@ def rechercher_cocktails(
 
         if utilisateur:
             langue = utilisateur.langue
-            service_utilisateur.ajout_cocktail_realise(utilisateur)
+            service_utilisateur.ajout_cocktail_recherche(utilisateur)
         else:
             langue = "ENG"
 
@@ -270,7 +270,7 @@ def rechercher_cocktails(
 def lister_cocktails_complets(
     limit: int = 10,
     offset: int = 0,
-    utilisateur: Utilisateur = Depends(get_current_user),
+    utilisateur: Utilisateur = Depends(obtenir_utilisateur),
 ):
     """
     **Lister les cocktails que vous pouvez réaliser complètement**
@@ -335,7 +335,7 @@ def lister_cocktails_partiels(
     nb_manquants: Number,
     limit: int = 10,
     offset: int = 0,
-    utilisateur: Utilisateur = Depends(get_current_user),
+    utilisateur: Utilisateur = Depends(obtenir_utilisateur),
 ):
     """
     **Lister les cocktails presque réalisables**
@@ -417,7 +417,7 @@ def lister_cocktails_partiels(
 )
 def cocktails_aleatoires(
     nb: Number,
-    utilisateur: Optional[Utilisateur] = Depends(get_current_user_optional),
+    utilisateur: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
     **Obtenir une sélection aléatoire de cocktails**

@@ -11,7 +11,8 @@ class UtilisateurDao(metaclass=Singleton):
 
     @log
     def creer_compte(self, utilisateur: Utilisateur) -> bool:
-        """Creation d'un Utilisateur dans la base de données
+        """
+        Creation d'un Utilisateur dans la base de données
 
         Parameters
         ----------
@@ -145,7 +146,8 @@ class UtilisateurDao(metaclass=Singleton):
         return res > 0
 
     def supprimer_inventaire(self, id_utilisateur: int) -> bool:
-        """Supprime l'inventaire de l'utilisateur.
+        """
+        Supprime l'inventaire de l'utilisateur.
 
         Parameters
         ----------
@@ -182,7 +184,8 @@ class UtilisateurDao(metaclass=Singleton):
 
     @log
     def trouver_par_id(self, id_utilisateur: int) -> Utilisateur:
-        """trouver un utilisateur grace à son id
+        """
+        trouver un utilisateur grace à son id
 
         Parameters
         ----------
@@ -225,7 +228,8 @@ class UtilisateurDao(metaclass=Singleton):
 
     @log
     def trouver_par_pseudo(self, pseudo: str) -> Utilisateur:
-        """trouver un utilisateur grace à son pseudo
+        """
+        trouver un utilisateur grace à son pseudo
 
         Parameters
         ----------
@@ -268,7 +272,8 @@ class UtilisateurDao(metaclass=Singleton):
 
     @log
     def lister_tous(self) -> list[Utilisateur]:
-        """lister tous les utilisateurs
+        """
+        lister tous les utilisateurs
 
         Parameters
         ----------
@@ -361,7 +366,7 @@ class UtilisateurDao(metaclass=Singleton):
         return res == 1
 
     @log
-    def ajout_cocktail_realise(self, utilisateur: Utilisateur) -> bool:
+    def ajout_cocktail_recherche(self, utilisateur: Utilisateur) -> bool:
         """
         Incrémente le nombre de cocktails réalisés par l'utilisateur dans la base de données
 

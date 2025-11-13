@@ -57,7 +57,18 @@ class UtilisateurService:
 
     @log
     def trouver_par_pseudo(self, id_utilisateur) -> Utilisateur:
-        """Trouver un utilisateur à partir de son pseudo"""
+        """
+        Trouver un utilisateur à partir de son pseudo
+        Parameters
+        ----------
+        id_utilisateur : int
+            Identifiant de l'utilisateur
+
+        Returns
+        -------
+        Utilisateur
+    
+        """
         return UtilisateurDao().trouver_par_pseudo(id_utilisateur)
 
     @log
@@ -148,7 +159,23 @@ class UtilisateurService:
     # ----------------------------- Fonctionnalitées supplémentaires -----------------------------------#
     @log
     def verif_mdp(self, mdp_clair: str, mdp_hash: str, sel: str = "") -> bool:
-        """Vérifie si le mot de passe en clair correspond au hash stocké"""
+        """
+        Vérifie si le mot de passe en clair correspond au hash stocké
+
+        Parameters
+        ----------
+        mdp_clair : str
+            mot de passe de l'utilisateur tel quel
+        mdp_hash : str
+            mot de passe de l'utilisateur hashé 
+        sel : str
+            sel afin de rendre le hashage efficace
+        Returns
+        -------
+        bool
+            True si le mot de passe rentré est le bon, False sinon.
+        """
+
         return hash_password(mdp_clair, sel) == mdp_hash
 
     @log
@@ -220,5 +247,5 @@ class UtilisateurService:
         return UtilisateurDao().modifier(utilisateur)
 
     @log
-    def ajout_cocktail_realise(self, utilisateur: Utilisateur):
-        return UtilisateurDao().ajout_cocktail_realise(utilisateur)
+    def ajout_cocktail_recherche(self, utilisateur: Utilisateur):
+        return UtilisateurDao().ajout_cocktail_recherche(utilisateur)

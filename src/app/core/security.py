@@ -14,23 +14,44 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 service_utilisateur = UtilisateurService()
 
 
-def create_access_token(donnee: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = donnee.copy()
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+def creation_token_d_acces(donnee: dict, temps_expiration: Optional[timedelta] = None):
+    """
+    Créer un token d'accès pour les utilisateurs avec un temps de validité limité
+
+    ### Paramètre
+    - **donnee** *dict* 
+    - **validite** *timedelta* Temps de validité du token, 10080 minutes = 1 semaine
+    
+    ### Réponse
+    token
+
+    """
+    a_encoder = donnee.copy()
+    expiration = datetime.now(timezone.utc) + (
+        temps_expiration or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    to_encode.update({"exp": expire})
-    token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    a_encoder.update({"exp": expiration})
+    token = jwt.encode(a_encoder, SECRET_KEY, algorithm=ALGORITHM)
 
     print("DEBUG token créé:", token)
     return token
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
+def obtenir_utilisateur(token: str = Depends(oauth2_scheme)) -> Utilisateur:
+    """
+    Obtiens un utilisateur via son token d'accès
+
+    ### Paramètre
+    - **token** *str* Token de l'utilisateur
+    
+    ### Réponse
+    Utilisateur 
+
+    """
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = int(payload.get("sub"))
-        utilisateur = service_utilisateur.trouver_par_id(user_id)
+        donnees_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id_utilisateur = int(donnees_token.get("sub"))
+        utilisateur = service_utilisateur.trouver_par_id(id_utilisateur)
         if not utilisateur:
             raise HTTPException(status_code=404, detail="Utilisateur introuvable")
         return utilisateur
@@ -43,12 +64,23 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> Utilisateur:
         )
 
 
-def get_current_user_optional(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:
+def obtenir_utilisateur_optionnel(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:
+    """
+    Obtiens un utilisateur via son token d'accès, permet de faire une situation où le client 
+    n'a pas la nécessité d'être connecté mais a des fonctionnalités en plus s'il l'est
+
+    ### Paramètre
+    - **token** *str* Token de l'utilisateur
+    
+    ### Réponse
+    Utilisateur | None
+
+    """
     if not token:
         return None
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = int(payload.get("sub"))
-        return service_utilisateur.trouver_par_id(user_id)
+        donnees_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id_utilisateur = int(donnees_token.get("sub"))
+        return service_utilisateur.trouver_par_id(id_utilisateur)
     except Exception:
         return None
