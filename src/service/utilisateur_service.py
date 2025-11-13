@@ -248,4 +248,17 @@ class UtilisateurService:
 
     @log
     def ajout_cocktail_recherche(self, utilisateur: Utilisateur):
+        """
+        Incrémente le nombre de cocktails réalisés par l'utilisateur dans la base de données
+
+        Parameters
+        ----------
+        utilisateur : Utilisateur
+
+        Returns
+        -------
+        bool
+            True si l'incrémentation est un succès
+            False sinon
+        """
         return UtilisateurDao().ajout_cocktail_recherche(utilisateur)
