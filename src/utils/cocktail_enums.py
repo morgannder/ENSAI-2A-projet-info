@@ -5,7 +5,7 @@ from typing import Literal
 # Type d'alcool
 Alcool = Literal["Alcoholic", "Non alcoholic", "Optional Alcohol"]
 
-# Choix du nombre d’ingrédients manquants pour la recherche partielle
+# Nombre (au choix) pour le nombre d’ingrédients manquants dans la recherche partielle
 Number = Literal["1", "2", "3", "4", "5"]
 
 # Catégories de cocktails
