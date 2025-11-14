@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -7,6 +7,7 @@ from app.core.security import obtenir_utilisateur, obtenir_utilisateur_optionnel
 from business_object.utilisateur import Utilisateur
 from service.cocktail_service import CocktailService
 from service.utilisateur_service import UtilisateurService
+from utils.cocktail_enums import Alcool, Categories, Number, Verres
 
 service_cocktail = CocktailService()
 service_utilisateur = UtilisateurService()
@@ -20,66 +21,6 @@ class CocktailFilter(BaseModel):
     alcool: Optional[str] = None
     verre: Optional[str] = None
     ingredients: Optional[list[str]] = None
-
-
-Alcool = Literal["Alcoholic", "Non alcoholic", "Optional Alcohol"]
-Number = Literal["1", "2", "3", "4", "5"]
-Categories = Literal[
-    "Beer",
-    "Cocktail",
-    "Cocoa",
-    "Coffee / Tea",
-    "Homemade Liqueur",
-    "Ordinary Drink",
-    "Other / Unknown",
-    "Punch / Party Drink",
-    "Shake",
-    "Shot",
-    "Soft Drink",
-]
-
-Verres = Literal[
-    "Balloon Glass",
-    "Beer Glass",
-    "Beer mug",
-    "Beer pilsner",
-    "Brandy snifter",
-    "Champagne flute",
-    "Champagne Flute",
-    "Cocktail glass",
-    "Cocktail Glass",
-    "Coffee mug",
-    "Coffee Mug",
-    "Collins glass",
-    "Collins Glass",
-    "Copper Mug",
-    "Cordial glass",
-    "Coupe Glass",
-    "Highball glass",
-    "Highball Glass",
-    "Hurricane glass",
-    "Irish coffee cup",
-    "Jar",
-    "Margarita glass",
-    "Margarita/Coupette glass",
-    "Martini Glass",
-    "Mason jar",
-    "Nick and Nora Glass",
-    "Old-fashioned glass",
-    "Old-Fashioned glass",
-    "Parfait glass",
-    "Pint glass",
-    "Pitcher",
-    "Pousse cafe glass",
-    "Punch bowl",
-    "Punch Bowl",
-    "Shot glass",
-    "Shot Glass",
-    "Whiskey Glass",
-    "Whiskey sour glass",
-    "White wine glass",
-    "Wine Glass",
-]
 
 
 # ------------------- Endpoint: /cocktails/details -----------------------------
