@@ -2,6 +2,9 @@ import dotenv
 from fastapi import FastAPI
 
 from app.api.api import api_router
+from utils.log_init import initialiser_logs
+
+initialiser_logs("Cocktail API")
 
 dotenv.load_dotenv()
 
