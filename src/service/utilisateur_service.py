@@ -4,6 +4,7 @@ from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
 from utils.securite import hash_password, secu_mdp
+from fastapi import HTTPException
 
 
 class UtilisateurService:
@@ -192,18 +193,27 @@ class UtilisateurService:
         -------
         str
             identique si le mdp entré est le même que l'ancien
+            erreurs_mdp si le nouveau mdp n'est aps conforme aux règles de sécurités
             success si changement réussi
             echec sinon
         """
-        secu_mdp(nouveau_mdp)
-        if self.verif_mdp(nouveau_mdp, utilisateur.mdp, sel=str(utilisateur.date_creation)):
+        try:
+            secu_mdp(nouveau_mdp)
+        except HTTPException:
+            return "erreurs_mdp"
+
+        mdp_identique = self.verif_mdp(
+            nouveau_mdp,
+            utilisateur.mdp,
+            sel=str(utilisateur.date_creation)
+        )
+
+        if mdp_identique:
             return "identique"
+
         utilisateur.mdp = hash_password(nouveau_mdp, str(utilisateur.date_creation))
 
-        if UtilisateurDao().modifier(utilisateur):
-            return "success"
-        else:
-            return "echec"
+        return "success" if UtilisateurDao().modifier(utilisateur) else "echec"
 
     @log
     def choisir_langue(self, utilisateur, langue) -> bool:

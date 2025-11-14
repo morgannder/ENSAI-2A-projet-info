@@ -76,66 +76,85 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
 
     ### Réponse
     Message de confirmation ou d'erreur
-        si réussite -> affiche les champs modifiés
+        affiche les champs modifiés avec succès ainsi que les erreurs potentielles sur les champs
+        entrés
     """
     print("DEBUG /me/update: données reçues:", donnee)
     print("DEBUG /me/update: utilisateur avant update:", utilisateur)
 
+    # Vérification qu'il y a au moins un champ à modifier
     if not any([donnee.nouveau_pseudo, donnee.nouveau_mdp, donnee.langue]):
         raise HTTPException(status_code=400, detail="Aucune donnée à mettre à jour")
 
     changements = []
-    try:
-        if donnee.nouveau_pseudo:
-            if donnee.nouveau_pseudo == utilisateur.pseudo:
-                raise HTTPException(
-                    status_code=400, detail="Le nouveau pseudo est identique à l'ancien"
-                )
-            succes = service_utilisateur.changer_pseudo(utilisateur, donnee.nouveau_pseudo)
-            if not succes:
-                raise HTTPException(status_code=400, detail="Pseudo déjà utilisé")
-            changements.append("pseudo")
+    erreurs = []
 
+    try:
+        # Verification du nouveau pseudo
+        if donnee.nouveau_pseudo:
+            if donnee.nouveau_pseudo == utilisateur.pseudo or len(donnee.nouveau_pseudo) < 3:
+                erreurs.append("Le nouveau pseudo doit être différent de l'ancien et contenir "
+                               "au moins 3 charactères")
+            else:
+                succes = service_utilisateur.changer_pseudo(utilisateur, donnee.nouveau_pseudo)
+                if succes:
+                    changements.append("pseudo")
+                else:
+                    erreurs.append("Pseudo déjà utilisé")
+
+        # Verification du nouveau mdp
         if donnee.nouveau_mdp:
             resultat = service_utilisateur.changer_mdp(utilisateur, donnee.nouveau_mdp)
             if resultat == "identique":
-                raise HTTPException(
-                    status_code=400,
-                    detail="Le nouveau mot de passe est identique à l'ancien",
-                )
+                erreurs.append("Le nouveau mot de passe est identique à l'ancien")
             elif resultat == "erreur":
-                raise HTTPException(
-                    status_code=500,
-                    detail="Erreur interne lors du changement de mot de passe",
-                )
+                erreurs.append("Erreur lors du changement de mot de passe")
+            elif resultat == "erreurs_mdp":
+                erreurs.append("Mot de passe non conforme aux règles de sécurités")
             else:
                 changements.append("mot de passe")
 
+        # Verification de la nouvelle langue
         if donnee.langue:
             if donnee.langue not in LANGUES_VALIDES:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}",
-                )
-            succes = service_utilisateur.choisir_langue(utilisateur, donnee.langue)
-            if not succes:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Erreur interne lors de la modification de la langue",
-                )
-            changements.append("langue")
+                erreurs.append(f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}")
+            else:
+                succes = service_utilisateur.choisir_langue(utilisateur, donnee.langue)
+                if succes:
+                    changements.append("langue")
+                else:
+                    erreurs.append("Erreur lors de la modification de la langue")
 
-        return {
-            "message": f"Modification réussie : {', '.join(changements)}",
-            "utilisateur": utilisateur.pseudo,
-        }
+        # Gestion du resultat final
+        if erreurs and not changements:
+            # Aucune modif reussie (que des erreurs)
+            raise HTTPException(
+                status_code=400,
+                detail={"erreurs": erreurs, "message": "Aucune modification n'a pu être effectuée"}
+            )
+        elif erreurs and changements:
+            # Modifs partielles avec certaines erreurs
+            return {
+                "message": "Modification partiellement réussie",
+                "changements_effectues": changements,
+                "erreurs": erreurs,
+                "utilisateur": utilisateur.pseudo,
+            }
+        else:
+            # Toutes les modifs ont réussi
+            return {
+                "message": f"Modification réussie : {', '.join(changements)}",
+                "utilisateur": utilisateur.pseudo,
+            }
 
     except HTTPException:
         raise
     except Exception as e:
-        print("DEBUG /register: exception", e)
+        # Erreur inattendue
+        print("DEBUG /me/update: exception inattendue", e)
         raise HTTPException(
-            status_code=500, detail="Erreur interne lors de la mise à jour du compte"
+            status_code=500,
+            detail="Erreur interne lors de la mise à jour du compte"
         )
 
 
@@ -153,12 +172,12 @@ def supprimer_mon_compte(
     Message de confirmation ou d'erreur
     """
     try:
-        # Récupérer l'ID avant suppression pour les logs
+        # On recupere l'ID avant suppression pour les logs
         id_utilisateur = utilisateur.id_utilisateur
         pseudo = utilisateur.pseudo
 
         if confirmation == "CONFIRMER":
-            # Appeler le service pour supprimer le compte
+            # appel du service pour supprimer le compte
             suppression_reussie = service_utilisateur.supprimer_utilisateur(utilisateur)
 
             if not suppression_reussie:
