@@ -14,7 +14,7 @@ class CommentaireService:
         Vérifie la validité du texte et de la note avant insertion
         Empêche un utilisateur de commenter deux fois le même cocktail
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur qui laisse le commentaire
@@ -25,7 +25,7 @@ class CommentaireService:
         note : int
             Note attribuée au cocktail, entre 1 et 5 inclus
 
-        Returns
+        Retour
         -------
         bool
             True si le commentaire a été créé avec succès, False sinon
@@ -52,14 +52,14 @@ class CommentaireService:
         """
         Supprime un commentaire existant laissé par un utilisateur
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur propriétaire du commentaire
         id_commentaire : int
             Identifiant du commentaire à supprimer
 
-        Returns
+        Retour
         -------
         bool
             True si la suppression a réussi, False sinon (ex. : commentaire inexistant ou non autorisé).
@@ -71,12 +71,12 @@ class CommentaireService:
         """
         Récupère la liste complète des commentaires associés à un cocktail
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int
             Identifiant du cocktail dont on souhaite récupérer les commentaires
 
-        Returns
+        Retour
         -------
         list[Commentaire]
             Liste des objets Commentaire correspondant au cocktail
@@ -89,14 +89,14 @@ class CommentaireService:
         """
         Récupère le commentaire laissé par un utilisateur sur un cocktail spécifique
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur
         id_cocktail : int
             Identifiant du cocktail concerné
 
-        Returns
+        Retour
         -------
         Commentaire or None
             L'objet Commentaire correspondant s'il existe, sinon None
@@ -108,12 +108,12 @@ class CommentaireService:
         """
         Récupère tous les commentaires laissés par un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur dont on souhaite obtenir les commentaires
 
-        Returns
+        Retour
         -------
         list[Commentaire]
             Liste des objets Commentaire associés à l'utilisateur.
@@ -130,12 +130,12 @@ class CommentaireService:
         """
         Calcule la note moyenne d’un cocktail à partir des commentaires existants
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int
             Identifiant du cocktail dont on souhaite la note moyenne
 
-        Returns
+        Retour
         -------
         float
             Note moyenne du cocktail

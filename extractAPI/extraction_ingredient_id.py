@@ -10,11 +10,11 @@ def extraction_ingredient_par_id():
     Extrait les ingredients via leur ID en parcourant une plage d'id (bruteforce) car les ids sont
     (a peu près) numérotés de 0 à 1000 de façon non ordonnée
 
-    Parameters
+    Paramètres
     -----------
     None
 
-    Return
+    Retour
     -----------
     None
 
@@ -72,11 +72,11 @@ def check_dispo_api():
     """
     Teste si l'API est disponible
 
-    Parameters
+    Paramètres
     -----------
     None
 
-    Return
+    Retour
     -----------
     Bool : True si l'API renvoie une réponse ce qui signifie qu'elle est disponible
 

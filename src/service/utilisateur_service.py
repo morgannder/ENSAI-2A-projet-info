@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from fastapi import HTTPException
+
 from business_object.utilisateur import Utilisateur
 from dao.utilisateur_dao import UtilisateurDao
 from utils.log_decorator import log
 from utils.securite import hash_password, secu_mdp
-from fastapi import HTTPException
 
 
 class UtilisateurService:
@@ -15,7 +16,7 @@ class UtilisateurService:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 
-        Parameters
+        Paramètres
         ----------
         pseudo : str
             Pseudo choisi pour l'utilisateur.
@@ -26,7 +27,7 @@ class UtilisateurService:
         langue : str
             Langue de l'utilisateur ("FR", "EN", 'ES").
 
-        Returns
+        Retour
         -------
         Utilisateur
             L'utilisateur créé si succès
@@ -60,12 +61,12 @@ class UtilisateurService:
     def trouver_par_pseudo(self, id_utilisateur) -> Utilisateur:
         """
         Trouver un utilisateur à partir de son pseudo
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur
 
-        Returns
+        Retour
         -------
         Utilisateur
 
@@ -77,14 +78,14 @@ class UtilisateurService:
         """
         Se connecter avec un pseudo et un mot de passe.
 
-        Parameters
+        Paramètres
         ----------
         pseudo : str
             Pseudo de l'utilisateur.
         mdp : str
             Mot de passe en clair.
 
-        Returns
+        Retour
         -------
         Utilisateur
             L'utilisateur trouvé si succès
@@ -101,13 +102,13 @@ class UtilisateurService:
         """
         Supprimer l'inventaire d'un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
             Utilisateur dont il faut supprimer l'inventaire
 
 
-        Returns
+        Retour
         -------
         bool
             True si la suppression a réussie
@@ -120,13 +121,13 @@ class UtilisateurService:
         """
         Supprimer le compte d'un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
             Utilisateur a supprimer.
 
 
-        Returns
+        Retour
         -------
         bool
             True si la suppression a réussie
@@ -139,12 +140,12 @@ class UtilisateurService:
         """
         Vérifie si le pseudo est déjà utilisé dans la base de données.
 
-        Parameters
+        Paramètres
         ----------
         pseudo : str
             Pseudo à vérifier.
 
-        Returns
+        Retour
         -------
         bool
             True si le pseudo existe déjà en BDD, False sinon.
@@ -163,7 +164,7 @@ class UtilisateurService:
         """
         Vérifie si le mot de passe en clair correspond au hash stocké
 
-        Parameters
+        Paramètres
         ----------
         mdp_clair : str
             mot de passe de l'utilisateur tel quel
@@ -171,7 +172,7 @@ class UtilisateurService:
             mot de passe de l'utilisateur hashé
         sel : str
             sel afin de rendre le hashage efficace
-        Returns
+        Retour
         -------
         bool
             True si le mot de passe rentré est le bon, False sinon.
@@ -184,12 +185,12 @@ class UtilisateurService:
         """
         Changer le mot de passe d'un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
         nouveau_mdp : str
 
-        Returns
+        Retour
         -------
         str
             identique si le mdp entré est le même que l'ancien
@@ -203,9 +204,7 @@ class UtilisateurService:
             return "erreurs_mdp"
 
         mdp_identique = self.verif_mdp(
-            nouveau_mdp,
-            utilisateur.mdp,
-            sel=str(utilisateur.date_creation)
+            nouveau_mdp, utilisateur.mdp, sel=str(utilisateur.date_creation)
         )
 
         if mdp_identique:
@@ -220,12 +219,12 @@ class UtilisateurService:
         """
         Choisir la langue des instructions pour un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
         langue : str
 
-        Returns
+        Retour
         -------
         bool
             True si succés
@@ -239,12 +238,12 @@ class UtilisateurService:
         """
         Changer le pseudo d'un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
         nouveau_pseudo : str
 
-        Returns
+        Retour
         -------
         bool
             True si succés
@@ -261,11 +260,11 @@ class UtilisateurService:
         """
         Incrémente le nombre de cocktails réalisés par l'utilisateur dans la base de données
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         bool
             True si l'incrémentation est un succès

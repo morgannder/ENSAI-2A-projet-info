@@ -16,13 +16,13 @@ class InventaireDao(metaclass=Singleton):
         """
         Ajout d'un ingrédient dans l'inventaire personnel d'un utilisateur
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             L'id associé à l'utilisateur
         ingredient : Ingredient
 
-        Returns
+        Retour
         -------
         created : bool
             True si la création est un succès
@@ -92,14 +92,14 @@ class InventaireDao(metaclass=Singleton):
         """
         Supprime l'un des ingrédients de l'inventaire de l'utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             id de l'utilisateur qui veut supprimer l'ingrédient
         id_ingredient : int
             id de l'ingredient à supprimer
 
-        Returns
+        Retour
         -------
         deleted : bool
             True si la suppression est un succès
@@ -136,12 +136,12 @@ class InventaireDao(metaclass=Singleton):
         """
         Permet de consulter l'inventaire de l'utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             L'indentifiant associé a l'utilisateur.
 
-        Returns
+        Retour
         -------
         list[Ingredient]
             Renvoie l'ensemble des ingrédient de l'inventaire.
@@ -195,12 +195,12 @@ class InventaireDao(metaclass=Singleton):
         """
         Permet de chercher un ingrédient avec son nom.
 
-        Parameters
+        Paramètres
         ----------
         ingredient : str
             nom de l'ingrédient.
 
-        Returns
+        Retour
         -------
         Ingredient
             L'ingrédient recherché
@@ -232,12 +232,12 @@ class InventaireDao(metaclass=Singleton):
         """
         Propose une liste d'ingrédients choisis aléatoirement.
 
-        Parameters
+        Paramètres
         ----------
         nb : int
             Nombre d'ingrédients à sélectionner
 
-        Returns
+        Retour
         -------
         list[Ingredient]
             Liste d'ingrédients aléatoires sélectionnés directement côté base de données.

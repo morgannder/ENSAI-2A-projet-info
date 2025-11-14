@@ -14,11 +14,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Creation d'un Utilisateur dans la base de données
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         created : bool
             True si la création est un succès
@@ -72,14 +72,14 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Se connecter avec un pseudo et un mot de passe.
 
-        Parameters
+        Paramètres
         ----------
         pseudo : str
             Pseudo de l'utilisateur.
         mdp : str
             Mot de passe de l'utilisateur
 
-        Returns
+        Retour
         -------
         Utilisateur
             Renvoie l'utilisateur qui se connecte
@@ -120,11 +120,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Supprimer le compte d'un utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         bool
             True si la suppression est un succès
@@ -149,11 +149,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Supprime l'inventaire de l'utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         deleted : bool
             True si la suppression est un succès
@@ -187,12 +187,12 @@ class UtilisateurDao(metaclass=Singleton):
         """
         trouver un utilisateur grace à son id
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             numéro id de l'utilisateur que l'on souhaite trouver
 
-        Returns
+        Retour
         -------
         utilisateur : Utilisateur
             renvoie l'utilisateur que l'on cherche par id
@@ -231,12 +231,12 @@ class UtilisateurDao(metaclass=Singleton):
         """
         trouver un utilisateur grace à son pseudo
 
-        Parameters
+        Paramètres
         ----------
         pseudo : str
             pseudo de l'utilisateur que l'on souhaite trouver
 
-        Returns
+        Retour
         -------
         utilisateur : Utilisateur
             renvoie l'utilisateur que l'on cherche
@@ -275,11 +275,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         lister tous les utilisateurs
 
-        Parameters
+        Paramètres
         ----------
         None
 
-        Returns
+        Retour
         -------
         liste_utilisateurs : list[Joueur]
             renvoie la liste de tous les utilisateurs dans la base de données
@@ -323,11 +323,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Modification d'un utilisateur dans la base de données
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         bool
             True si la modification est un succès
@@ -370,11 +370,11 @@ class UtilisateurDao(metaclass=Singleton):
         """
         Incrémente le nombre de cocktails réalisés par l'utilisateur dans la base de données
 
-        Parameters
+        Paramètres
         ----------
         utilisateur : Utilisateur
 
-        Returns
+        Retour
         -------
         bool
             True si l'incrémentation est un succès

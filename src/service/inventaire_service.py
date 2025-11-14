@@ -8,12 +8,12 @@ class InventaireService:
     def lister(self, id_utilisateur: int) -> List[Ingredient]:
         """Renvoie une liste des ingrédients de l'inventaire.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur: int
             L'id associé à l'utilisateur.
 
-        Returns
+        Retour
         -------
         List[Ingredient]
             Renvoie une liste de l'ensemble des ingrédient de l'inventaire.
@@ -34,13 +34,13 @@ class InventaireService:
     def ajouter(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
         """Ajoute un ingrédient dans l'inventaire de l'utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur: int
             L'id associé à l'utilisateur.
         ingredient: Ingredient
 
-        Returns
+        Retour
         -------
         created : bool
             True si l'ingrédient a bien été ajouté.
@@ -53,14 +53,14 @@ class InventaireService:
     def supprimer(self, id_utilisateur: int, id_ingredient: int) -> bool:
         """Permet de supprimer l'ingrédient de l'inventaire d'un utilisateur
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur: int
             L'id associé à l'utilisateur
         id_ingredient: int
             L'id associé à l'ingredient
 
-        Returns
+        Retour
         -------
         created : bool
             True si la suppression est un succès
@@ -72,12 +72,12 @@ class InventaireService:
         """
         Recherche un ingrédient grâce à son nom et renvoie un type Ingredient
 
-        Parameters
+        Paramètres
         ----------
         ingredient : str
             Nom de l'ingrédient à rechercher.
 
-        Returns
+        Retour
         -------
         ingredient : Ingredient
         """
@@ -88,12 +88,12 @@ class InventaireService:
         Retourne entre 1 et n ingrédients aléatoires pour informer
         l'utilisateur des catégories existantes.
 
-        Parameters
+        Paramètres
         ----------
         n : int
             Le nombre de suggestions voulues.
 
-        Returns
+        Retour
         -------
         List[Ingredient]
             Une liste d'ingrédients aléatoire.

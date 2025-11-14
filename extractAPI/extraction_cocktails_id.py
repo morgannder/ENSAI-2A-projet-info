@@ -10,11 +10,11 @@ def extraction_cocktail_par_id():
     Extrait les cocktails via leur ID en parcourant une plage d'id (bruteforce) car les ids sont
     (a peu près) numérotés de 11 000 à 18 000 et de 178 300 à 178 600 (donc non ordonnés)
 
-    Parameters
+    Paramètres
     -----------
     None
 
-    Return
+    Retour
     -----------
     None
 
@@ -71,11 +71,11 @@ def check_dispo_api():
     """
     Teste si l'API est disponible
 
-    Parameters
+    Paramètres
     -----------
     None
 
-    Return
+    Retour
     -----------
     Bool : True si l'API renvoie une réponse ce qui signifie qu'elle est disponible
 

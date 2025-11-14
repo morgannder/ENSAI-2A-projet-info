@@ -74,7 +74,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
     - **donnee** *dict* saisir les informations pour valider la modification du compte,
             supprimer la clé pour ne pas la modifier
 
-    ### Réponse
+    ### Retour
     Message de confirmation ou d'erreur
         affiche les champs modifiés avec succès ainsi que les erreurs potentielles sur les champs
         entrés
@@ -93,8 +93,10 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
         # Verification du nouveau pseudo
         if donnee.nouveau_pseudo:
             if donnee.nouveau_pseudo == utilisateur.pseudo or len(donnee.nouveau_pseudo) < 3:
-                erreurs.append("Le nouveau pseudo doit être différent de l'ancien et contenir "
-                               "au moins 3 charactères")
+                erreurs.append(
+                    "Le nouveau pseudo doit être différent de l'ancien et contenir "
+                    "au moins 3 charactères"
+                )
             else:
                 succes = service_utilisateur.changer_pseudo(utilisateur, donnee.nouveau_pseudo)
                 if succes:
@@ -117,7 +119,9 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
         # Verification de la nouvelle langue
         if donnee.langue:
             if donnee.langue not in LANGUES_VALIDES:
-                erreurs.append(f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}")
+                erreurs.append(
+                    f"Langue '{donnee.langue}' non valide. Langues acceptées : {', '.join(sorted(LANGUES_VALIDES))}"
+                )
             else:
                 succes = service_utilisateur.choisir_langue(utilisateur, donnee.langue)
                 if succes:
@@ -130,7 +134,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
             # Aucune modif reussie (que des erreurs)
             raise HTTPException(
                 status_code=400,
-                detail={"erreurs": erreurs, "message": "Aucune modification n'a pu être effectuée"}
+                detail={"erreurs": erreurs, "message": "Aucune modification n'a pu être effectuée"},
             )
         elif erreurs and changements:
             # Modifs partielles avec certaines erreurs
@@ -153,8 +157,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
         # Erreur inattendue
         print("DEBUG /me/update: exception inattendue", e)
         raise HTTPException(
-            status_code=500,
-            detail="Erreur interne lors de la mise à jour du compte"
+            status_code=500, detail="Erreur interne lors de la mise à jour du compte"
         )
 
 
@@ -165,10 +168,10 @@ def supprimer_mon_compte(
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 
-    ### Paramètre
+    ### Paramètres
     - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression du compte
 
-    ### Réponse
+    ### Retour
     Message de confirmation ou d'erreur
     """
     try:

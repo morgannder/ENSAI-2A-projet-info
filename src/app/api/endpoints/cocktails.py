@@ -142,7 +142,7 @@ def rechercher_cocktails(
     - Type d'alcool     *Literal* Sélectionnable ou None
     - Catégorie         *Literal* Sélectionnable ou None
     - Verre             *Literal* Sélectionnable ou None
-    - Ingrédients       (ex: `["Tequila", "Citron"]`)
+    - Ingrédients       (ex: `["Tequila", "Lemon"]`)
 
     Si vous n'êtes pas connecté, la recherche se fera sans restrictions d'âge.
     Si vous êtes mineur connecté, seuls les cocktails non alcoolisés seront affichés.
@@ -365,7 +365,7 @@ def cocktails_aleatoires(
     ### Paramètres
     - **nb** *Literal* : Nombre de cocktails à tirer aléatoirement (entre 1 et 5).
 
-    ### Réponse
+    ### Retour
     - Liste aléatoire de cocktails adaptés à l'âge de l'utilisateur si connecté.
     """
 

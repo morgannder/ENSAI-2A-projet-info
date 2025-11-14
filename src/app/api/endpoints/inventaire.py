@@ -41,10 +41,10 @@ def consulte_inventaire(utilisateur: Utilisateur = Depends(obtenir_utilisateur))
 def suggestion_ingredients(nombre: Number):
     """
     **Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.**
-    ### Paramètre
+    ### Paramètres
     - **n** *Literal* : Nombre d'ingrédients à suggérer
 
-    ### Réponse
+    ### Retour
     Liste de nom d'ingrédient
     """
     suggestions = service_inventaire.suggerer_ingredients(int(nombre))
@@ -58,10 +58,10 @@ def ajoute_ingredient(
     """
     **Ajoute un ingrédient à l'inventaire de l'utilisateur**
 
-    ### Paramètre
+    ### Paramètres
     - **demande_ingredient** *str* : ingrédient à ajouter à l'inventaire
 
-    ### Réponse
+    ### Retour
     Message de confirmation ou d'erreur
     """
     try:
@@ -84,10 +84,10 @@ def supprime_ingredient(
     """
     **Supprime un ingrédient à l'inventaire de l'utilisateur**
 
-    ### Paramètre
+    ### Paramètres
     - **demande_ingredient** *str* : ingrédient à supprimer de l'inventaire
 
-    ### Réponse
+    ### Retour
     Message de confirmation ou d'erreur
     """
     try:
@@ -107,11 +107,11 @@ def supprimer_mon_inventaire(reponse: str, utilisateur: Utilisateur = Depends(ob
     """
     **Supprime l'inventaire de l'utilisateur**
 
-    ### Paramètre
+    ### Paramètres
     - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression
             de l'inventaire
 
-    ### Réponse
+    ### Retour
     Message de confirmation ou d'erreur
     """
     try:

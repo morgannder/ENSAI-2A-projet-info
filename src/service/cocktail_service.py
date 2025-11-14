@@ -22,7 +22,7 @@ class CocktailService:
     ) -> CocktailComplet:
         """Obtenir les détails d'un cocktail par ID ou nom.
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int, optional
             Identifiant du cocktail.
@@ -58,7 +58,7 @@ class CocktailService:
         """
         Recherche les cocktails selon différents filtres.
 
-        Parameters
+        Paramètres
         ----------
         est_majeur : bool, optional
             Si majeur ou pas, filtre automatiquement les cocktails non alcoolisés.
@@ -79,7 +79,7 @@ class CocktailService:
         decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste des cocktails correspondant aux critères.
@@ -123,7 +123,7 @@ class CocktailService:
         Liste tous les cocktails que l'utilisateur peut préparer
         avec tous les ingrédients disponibles dans son inventaire.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             ID de l'utilisateur.
@@ -136,7 +136,7 @@ class CocktailService:
         decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste de tous les cocktails complets.
@@ -165,7 +165,7 @@ class CocktailService:
         Liste tous les cocktails que l'utilisateur peut préparer avec au plus
         un certain nombre d'ingrédients manquants.
 
-        Parameters
+        Paramètres
         ----------
         nb_manquants : int
             Nombre maximal d'ingrédients manquants autorisés.
@@ -180,7 +180,7 @@ class CocktailService:
         decalage : int, optional
             Décalage pour la pagination (défaut: 0).
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste des cocktails réalisables avec au plus nb_manquants ingrédients manquants.
@@ -211,7 +211,7 @@ class CocktailService:
         """
         Récupérer une liste de cocktails aléatoires.
 
-        Parameters
+        Paramètres
         ----------
         est_majeur : bool, optional
             Si majeur ou pas, filtre automatiquement les cocktails non alcoolisés.
@@ -220,7 +220,7 @@ class CocktailService:
         langue : str
            Langue de l'utilisateur.
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste de cocktails aléatoires (entre 1 et 5 cocktails).
@@ -248,12 +248,12 @@ class CocktailService:
         """
         Récupérer un cocktail par son ID.
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int
             ID du cocktail recherché.
 
-        Returns
+        Retour
         -------
         Cocktail
             Le cocktail trouvé si succès, None sinon.
@@ -278,7 +278,7 @@ class CocktailService:
         """
         Récupérer la liste complète de tous les cocktails.
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste de tous les cocktails disponibles.
@@ -292,12 +292,12 @@ class CocktailService:
         Récupère tous les ingrédients pour une liste de cocktails
         (Couche service qui appelle le DAO)
 
-        Parameters
+        Paramètres
         ----------
         id_cocktails : list[int]
             ID des cocktails recherchés
 
-        Returns
+        Retour
         -------
         dict { int : list[str] }
             Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
@@ -319,14 +319,14 @@ class CocktailService:
         Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail
         (Couche service qui appelle le DAO)
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur
         id_cocktails : list[int]
             ID des cocktails recherchés
 
-        Returns
+        Retour
         -------
         dict { int : list[str] }
             Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails

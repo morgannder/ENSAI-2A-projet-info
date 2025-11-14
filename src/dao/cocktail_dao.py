@@ -18,7 +18,7 @@ class CocktailDao(metaclass=Singleton):
     ) -> CocktailComplet:
         """Récupérer les détails complets d'un cocktail par son ID ou son nom.
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int, optional
             Identifiant du cocktail.
@@ -27,7 +27,7 @@ class CocktailDao(metaclass=Singleton):
         langue : str
             Langue des instructions.
 
-        Returns
+        Retour
         -------
         Cocktail
             Le cocktail trouvé avec toutes ses informations.
@@ -110,7 +110,7 @@ class CocktailDao(metaclass=Singleton):
     ) -> list[Cocktail]:
         """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur.
@@ -121,7 +121,7 @@ class CocktailDao(metaclass=Singleton):
         decalage : int, optional
             Décalage pour la pagination. Par défaut 0.
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste des cocktails préparables avec l'inventaire complet.
@@ -202,7 +202,7 @@ class CocktailDao(metaclass=Singleton):
     ) -> list[Cocktail]:
         """Lister tous les cocktails préparables avec au plus nb_manquants ingrédients manquants.
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur.
@@ -215,7 +215,7 @@ class CocktailDao(metaclass=Singleton):
         decalage : int, optional
             décalage des résultats.
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste des cocktails partiellement préparables avec l'inventaire.
@@ -304,7 +304,7 @@ class CocktailDao(metaclass=Singleton):
     ) -> list[Cocktail]:
         """Recherche de cocktails avec filtres et pagination (VERSION OPTIMALE).
 
-        Parameters
+        Paramètres
         ----------
         nom_cocktail : str, optional
             Filtre sur le nom du cocktail (insensible à la casse).
@@ -323,7 +323,7 @@ class CocktailDao(metaclass=Singleton):
         decalage : int, optional
             Décalage du résultat pour la pagination
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste des cocktails correspondant aux filtres appliqués.
@@ -414,14 +414,14 @@ class CocktailDao(metaclass=Singleton):
     ) -> list[Cocktail]:
         """Propose une liste de cocktails choisis aléatoirement.
 
-        Parameters
+        Paramètres
         ----------
         nombre : int, optional
             Nombre de cocktails à sélectionner (par défaut 5)
         langue : str
             Langue de l'utilisateur.
 
-        Returns
+        Retour
         -------
         list[Cocktail]
             Liste de cocktails aléatoires sélectionnés directement côté base de données.
@@ -467,12 +467,12 @@ class CocktailDao(metaclass=Singleton):
         Retourne le nom de la colonne SQL contenant les instructions
         du cocktail, en fonction de la langue préférée de l'utilisateur.
 
-        Parameters
+        Paramètres
         ----------
         langue : str
             Code de la langue (ex: "ENG", "FRA", "ESP", "GER", "ITA").
 
-        Returns
+        Retour
         -------
         str
             Nom de la colonne instructions correspondant à la langue.
@@ -498,12 +498,12 @@ class CocktailDao(metaclass=Singleton):
         """
         Trouver un cocktail par son ID.
 
-        Parameters
+        Paramètres
         ----------
         id_cocktail : int
             ID du cocktail recherché
 
-        Returns
+        Retour
         -------
         Cocktail
             Le cocktail trouvé ou None
@@ -536,12 +536,12 @@ class CocktailDao(metaclass=Singleton):
         """
         Récupère tous les ingrédients pour une liste de cocktails
 
-        Parameters
+        Paramètres
         ----------
         id_cocktails : list[int]
             ID des cocktails recherchés
 
-        Returns
+        Retour
         -------
         dict { int : list[str] }
             Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
@@ -581,14 +581,14 @@ class CocktailDao(metaclass=Singleton):
         Récupère les ingrédients possédés par l'utilisateur
         pour chaque cocktail d'une liste de cocktails
 
-        Parameters
+        Paramètres
         ----------
         id_utilisateur : int
             Identifiant de l'utilisateur
         id_cocktails : list[int]
             ID des cocktails recherchés
 
-        Returns
+        Retour
         -------
         dict { int : list[str] }
             Dictionnaire avec la liste des ingrédients nécessaire pour chaque cocktails
