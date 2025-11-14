@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -33,6 +33,7 @@ class UserCreate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 Base = Literal["Test", "Prod"]
 LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
@@ -143,25 +144,24 @@ def inscription(
 
 @router.post("/changement_base")
 def changement_base(
-    base_test:Base,
+    base_test: Base,
     utilisateur_connecte: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
 ):
     """
-    **Permet à un administrateur (ici les comptes "a" et "admin") de changer de base de données, 
-    cette fonctionnalité permet de passer d'une base à l'autre facilement sans avoir à redémarrer 
+    **Permet à un administrateur (ici les comptes "a" et "admin") de changer de base de données,
+    cette fonctionnalité permet de passer d'une base à l'autre facilement sans avoir à redémarrer
     main.py et changer le fichier config.py**
 
-    - **Base_test** *Literal* à choisir parmi Test ou Prod 
+    - **Base_test** *Literal* à choisir parmi Test ou Prod
 
     """
 
-
-    if utilisateur_connecte != None and utilisateur_connecte.pseudo in ["a", "admin"]:
+    if utilisateur_connecte is not None and utilisateur_connecte.pseudo in ["a", "admin"]:
         if base_test == "Test":
             ResetDatabase().lancer(test_dao=True)
-            return {"message" : f"Tu es sur la base test"}
+            return {"message": "Tu es sur la base test"}
         else:
             ResetDatabase().lancer(test_dao=False)
-            return {"message" : f"Tu es sur la base prod"}
+            return {"message": "Tu es sur la base prod"}
     else:
-        return {"message" : f"Tu n'as pas les permissions nécessaires"}
+        return {"message": "Tu n'as pas les permissions nécessaires"}

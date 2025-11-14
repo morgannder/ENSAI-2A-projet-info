@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class Commentaire:
     """
     Classe représentant un Commentaire de cocktail
@@ -20,6 +21,7 @@ class Commentaire:
         date de création du commentaire
 
     """
+
     def __init__(
         self,
         id_commentaire=None,
@@ -28,7 +30,7 @@ class Commentaire:
         texte="",
         note=0,
         date_creation=None,
-        pseudo_utilisateur=""
+        pseudo_utilisateur="",
     ):
         self.id_commentaire = id_commentaire
         self.id_utilisateur = id_utilisateur

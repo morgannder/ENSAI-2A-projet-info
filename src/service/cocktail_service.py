@@ -1,8 +1,9 @@
+import logging
+
 from business_object.cocktail import Cocktail
 from business_object.cocktail_complet import CocktailComplet
 from dao.cocktail_dao import CocktailDao
 from utils.log_decorator import log
-import logging
 
 
 class CocktailService:
@@ -305,7 +306,6 @@ class CocktailService:
         cocktails = CocktailDao().lister_tous()
         return cocktails if cocktails else []
 
-
     @log
     def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
         """
@@ -324,24 +324,21 @@ class CocktailService:
         """
         if not id_cocktails:
             return {}
-        
+
         try:
             return CocktailDao().obtenir_ingredients_par_cocktails(id_cocktails)
         except Exception as e:
             logging.error(f"Erreur dans get_ingredients_par_cocktails: {str(e)}")
             return {}
 
-
     @log
     def obtenir_ingredients_possedes_par_cocktails(
-        self, 
-        id_utilisateur: int, 
-        id_cocktails: list[int]
+        self, id_utilisateur: int, id_cocktails: list[int]
     ) -> dict[int, list[str]]:
         """
         Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail
         (Couche service qui appelle le DAO)
-        
+
         Parameters
         ----------
         id_utilisateur : int
@@ -356,11 +353,10 @@ class CocktailService:
         """
         if not id_cocktails:
             return {}
-        
+
         try:
             return CocktailDao().obtenir_ingredients_possedes_par_cocktails(
-                id_utilisateur=id_utilisateur,
-                id_cocktails=id_cocktails
+                id_utilisateur=id_utilisateur, id_cocktails=id_cocktails
             )
         except Exception as e:
             logging.error(f"Erreur dans obtenir_ingredients_possedes_par_cocktails: {str(e)}")

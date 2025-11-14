@@ -1,4 +1,4 @@
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -22,12 +22,8 @@ class CocktailFilter(BaseModel):
     ingredients: Optional[list[str]] = None
 
 
-Alcool = Literal[
-    "Alcoholic",
-    "Non alcoholic",
-    "Optional Alcohol"
-]
-Number = Literal["1","2","3","4","5"]
+Alcool = Literal["Alcoholic", "Non alcoholic", "Optional Alcohol"]
+Number = Literal["1", "2", "3", "4", "5"]
 Categories = Literal[
     "Beer",
     "Cocktail",
@@ -39,8 +35,8 @@ Categories = Literal[
     "Punch / Party Drink",
     "Shake",
     "Shot",
-    "Soft Drink"
-  ]
+    "Soft Drink",
+]
 
 Verres = Literal[
     "Balloon Glass",
@@ -82,8 +78,8 @@ Verres = Literal[
     "Whiskey Glass",
     "Whiskey sour glass",
     "White wine glass",
-    "Wine Glass"
-  ]
+    "Wine Glass",
+]
 
 
 # ------------------- Endpoint: /cocktails/details -----------------------------
@@ -234,7 +230,7 @@ def rechercher_cocktails(
         )
 
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
-        
+
         # Récupérer les ingrédients en une seule requête
         ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
@@ -300,7 +296,7 @@ def lister_cocktails_complets(
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
-        
+
         # Récupérer les ingrédients en une seule requête
         ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
@@ -367,14 +363,15 @@ def lister_cocktails_partiels(
                 "Nous vous suggérons de rajouter des ingrédients pour plus de choix.",
             )
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
-        
+
         # Récupérer tous les ingrédients des cocktails
         tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
-        
+
         # Récupérer les ingrédients possédés par l'utilisateur depuis l'inventaire
-        ingredients_possedes_par_cocktail = service_cocktail.obtenir_ingredients_possedes_par_cocktails(
-            id_utilisateur=utilisateur.id_utilisateur, 
-            id_cocktails=id_cocktails
+        ingredients_possedes_par_cocktail = (
+            service_cocktail.obtenir_ingredients_possedes_par_cocktails(
+                id_utilisateur=utilisateur.id_utilisateur, id_cocktails=id_cocktails
+            )
         )
 
         # Construire la réponse avec les deux listes
@@ -382,18 +379,20 @@ def lister_cocktails_partiels(
         for cocktail in cocktails:
             cocktail_dict = cocktail.__dict__
             id_cocktail = cocktail.id_cocktail
-            
+
             # Tous les ingrédients du cocktail
             tous_ingredients_cocktail = tous_ingredients.get(id_cocktail, [])
             # Ingrédients que l'utilisateur possède (depuis l'inventaire)
             ingredients_possedes = ingredients_possedes_par_cocktail.get(id_cocktail, [])
             # Ingrédients manquants
-            ingredients_manquants = [ing for ing in tous_ingredients_cocktail if ing not in ingredients_possedes]
-            
+            ingredients_manquants = [
+                ing for ing in tous_ingredients_cocktail if ing not in ingredients_possedes
+            ]
+
             # Ajouter les deux listes au résultat
             cocktail_dict["ingredients_possedes"] = ingredients_possedes
             cocktail_dict["ingredients_manquants"] = ingredients_manquants
-            
+
             resultats.append(cocktail_dict)
 
         return {
@@ -443,7 +442,7 @@ def cocktails_aleatoires(
         )
 
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
-        
+
         # Récupérer les ingrédients en une seule requête
         ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
 
@@ -460,5 +459,3 @@ def cocktails_aleatoires(
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-

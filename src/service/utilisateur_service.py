@@ -67,7 +67,7 @@ class UtilisateurService:
         Returns
         -------
         Utilisateur
-    
+
         """
         return UtilisateurDao().trouver_par_pseudo(id_utilisateur)
 
@@ -167,7 +167,7 @@ class UtilisateurService:
         mdp_clair : str
             mot de passe de l'utilisateur tel quel
         mdp_hash : str
-            mot de passe de l'utilisateur hashé 
+            mot de passe de l'utilisateur hashé
         sel : str
             sel afin de rendre le hashage efficace
         Returns

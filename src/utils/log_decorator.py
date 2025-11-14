@@ -1,6 +1,5 @@
 import logging.config
 import numbers
-
 from functools import wraps
 
 
@@ -43,10 +42,7 @@ def log(func):
         class_name = args[0].__class__.__name__ if args else ""
         method_name = func.__name__
         args_list = list(
-            [
-                str(arg) if not isinstance(arg, numbers.Number) else arg
-                for arg in args[1:]
-            ]
+            [str(arg) if not isinstance(arg, numbers.Number) else arg for arg in args[1:]]
             + list(kwargs.values())
         )
 

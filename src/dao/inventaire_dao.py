@@ -1,6 +1,6 @@
 import logging
-from typing import List, Optional
 import textwrap
+from typing import List, Optional
 
 from business_object.ingredient import Ingredient
 from dao.db_connection import DBConnection

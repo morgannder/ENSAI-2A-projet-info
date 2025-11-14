@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-
 from typing import Literal
+
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.core.security import obtenir_utilisateur
 from business_object.utilisateur import Utilisateur
 from service.inventaire_service import InventaireService
@@ -12,7 +12,8 @@ service_inventaire = InventaireService()
 service_utilisateur = UtilisateurService()
 
 
-Number = Literal["1","2","3","4","5","6","7","8","9","10"]
+Number = Literal["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+
 
 @router.get("/vue")
 def consulte_inventaire(utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
@@ -42,7 +43,7 @@ def suggestion_ingredients(nombre: Number):
     **Retourne jusqu'à n ingrédients au hasard pour aider l'utilisateur.**
     ### Paramètre
     - **n** *Literal* : Nombre d'ingrédients à suggérer
-    
+
     ### Réponse
     Liste de nom d'ingrédient
     """
@@ -59,14 +60,14 @@ def ajoute_ingredient(
 
     ### Paramètre
     - **demande_ingredient** *str* : ingrédient à ajouter à l'inventaire
-    
+
     ### Réponse
     Message de confirmation ou d'erreur
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
         if service_inventaire.ajouter(utilisateur.id_utilisateur, requete):
-            return {"Information": f"L'ingrédient a été ajouté à l'inventaire !"} 
+            return {"Information": "L'ingrédient a été ajouté à l'inventaire !"}
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
@@ -82,12 +83,12 @@ def supprime_ingredient(
 ):
     """
     **Supprime un ingrédient à l'inventaire de l'utilisateur**
-    
+
     ### Paramètre
     - **demande_ingredient** *str* : ingrédient à supprimer de l'inventaire
-    
+
     ### Réponse
-    Message de confirmation ou d'erreur    
+    Message de confirmation ou d'erreur
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
@@ -102,16 +103,14 @@ def supprime_ingredient(
 
 
 @router.delete("/supprimer_tout")
-def supprimer_mon_inventaire(
-    reponse: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
-):
+def supprimer_mon_inventaire(reponse: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
     """
     **Supprime l'inventaire de l'utilisateur**
 
     ### Paramètre
-    - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression 
+    - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression
             de l'inventaire
-    
+
     ### Réponse
     Message de confirmation ou d'erreur
     """

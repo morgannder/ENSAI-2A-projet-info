@@ -73,7 +73,7 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
     ### Paramètre
     - **donnee** *dict* saisir les informations pour valider la modification du compte,
             supprimer la clé pour ne pas la modifier
-    
+
     ### Réponse
     Message de confirmation ou d'erreur
         si réussite -> affiche les champs modifiés
@@ -140,13 +140,15 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
 
 
 @router.delete("/supprimer", tags=["Utilisateur"])
-def supprimer_mon_compte(confirmation: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
+def supprimer_mon_compte(
+    confirmation: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
+):
     """
     **Supprime le compte de l'utilisateur connecté et le déconnecte**
 
     ### Paramètre
     - **confirmation** *str* saisir 'CONFIRMER' pour valider la demande de suppression du compte
-    
+
     ### Réponse
     Message de confirmation ou d'erreur
     """

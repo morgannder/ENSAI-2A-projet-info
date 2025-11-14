@@ -1,9 +1,12 @@
 import os
 from unittest.mock import patch
+
 import pytest
+
 from business_object.commentaire import Commentaire
 from dao.commentaire_dao import CommentaireDao
 from utils.reset_database import ResetDatabase
+
 
 # ----------------------------------------------------------------------
 # Initialisation : on utilise le schéma de test et on repop la base

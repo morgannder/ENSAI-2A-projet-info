@@ -1,10 +1,10 @@
 from business_object.commentaire import Commentaire
 from dao.db_connection import DBConnection
-from utils.singleton import Singleton
 from utils.log_decorator import log
+from utils.singleton import Singleton
+
 
 class CommentaireDao(metaclass=Singleton):
-
     @log
     def creer(self, commentaire: Commentaire) -> bool:
         """
@@ -32,8 +32,8 @@ class CommentaireDao(metaclass=Singleton):
                             "id_utilisateur": commentaire.id_utilisateur,
                             "id_cocktail": commentaire.id_cocktail,
                             "texte": commentaire.texte,
-                            "note": commentaire.note
-                        }
+                            "note": commentaire.note,
+                        },
                     )
                     result = cursor.fetchone()
                     if result:
@@ -68,7 +68,7 @@ class CommentaireDao(metaclass=Singleton):
                         "JOIN utilisateur u ON c.id_utilisateur = u.id_utilisateur "
                         "WHERE c.id_cocktail = %(id_cocktail)s "
                         "ORDER BY c.date_creation DESC;",
-                        {"id_cocktail": id_cocktail}
+                        {"id_cocktail": id_cocktail},
                     )
                     results = cursor.fetchall()
                     return [
@@ -79,7 +79,7 @@ class CommentaireDao(metaclass=Singleton):
                             texte=row["texte"],
                             note=row["note"],
                             date_creation=row["date_creation"],
-                            pseudo_utilisateur=row["pseudo_utilisateur"]
+                            pseudo_utilisateur=row["pseudo_utilisateur"],
                         )
                         for row in results
                     ]
@@ -111,7 +111,6 @@ class CommentaireDao(metaclass=Singleton):
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-
                     # recherche par utilisateur + cocktail
                     if id_cocktail is not None:
                         cursor.execute(
@@ -119,10 +118,7 @@ class CommentaireDao(metaclass=Singleton):
                             SELECT * FROM commentaire
                             WHERE id_utilisateur = %(id_utilisateur)s AND id_cocktail = %(id_cocktail)s;
                             """,
-                            {
-                                "id_utilisateur": id_utilisateur,
-                                "id_cocktail": id_cocktail
-                            }
+                            {"id_utilisateur": id_utilisateur, "id_cocktail": id_cocktail},
                         )
                         result = cursor.fetchone()
                         if result:
@@ -132,7 +128,7 @@ class CommentaireDao(metaclass=Singleton):
                                 id_cocktail=result["id_cocktail"],
                                 texte=result["texte"],
                                 note=result["note"],
-                                date_creation=result["date_creation"]
+                                date_creation=result["date_creation"],
                             )
                         return None
 
@@ -143,7 +139,7 @@ class CommentaireDao(metaclass=Singleton):
                         WHERE id_utilisateur = %(id_utilisateur)s
                         ORDER BY date_creation DESC;
                         """,
-                        {"id_utilisateur": id_utilisateur}
+                        {"id_utilisateur": id_utilisateur},
                     )
                     results = cursor.fetchall()
                     if not results:
@@ -156,7 +152,7 @@ class CommentaireDao(metaclass=Singleton):
                             id_cocktail=row["id_cocktail"],
                             texte=row["texte"],
                             note=row["note"],
-                            date_creation=row["date_creation"]
+                            date_creation=row["date_creation"],
                         )
                         for row in results
                     ]
@@ -164,7 +160,6 @@ class CommentaireDao(metaclass=Singleton):
         except Exception as e:
             print(f"Erreur recherche commentaire: {e}")
             return None
-
 
     @log
     def supprimer(self, id_commentaire: int, id_utilisateur: int) -> bool:
@@ -190,10 +185,7 @@ class CommentaireDao(metaclass=Singleton):
                     cursor.execute(
                         "DELETE FROM commentaire "
                         "WHERE id_commentaire = %(id_commentaire)s AND id_utilisateur = %(id_utilisateur)s;",
-                        {
-                            "id_commentaire": id_commentaire,
-                            "id_utilisateur": id_utilisateur
-                        }
+                        {"id_commentaire": id_commentaire, "id_utilisateur": id_utilisateur},
                     )
                     return cursor.rowcount > 0
         except Exception as e:

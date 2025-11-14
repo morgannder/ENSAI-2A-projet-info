@@ -460,7 +460,6 @@ class CocktailDao(metaclass=Singleton):
             logging.exception("Erreur cocktails_aleatoires")
             raise
 
-
     # ------------------- Méthode: instruction_column -----------------------------
 
     def instruction_column(self, langue: str) -> str:
@@ -530,14 +529,13 @@ class CocktailDao(metaclass=Singleton):
         except Exception as e:
             print(f"Erreur recherche cocktail par ID: {e}")
 
-
         # ------------------- Méthode: trouver_les_ingrédients -----------------------------
 
     @log
     def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
         """
         Récupère tous les ingrédients pour une liste de cocktails
-        
+
         Parameters
         ----------
         id_cocktails : list[int]
@@ -550,39 +548,37 @@ class CocktailDao(metaclass=Singleton):
         """
         if not id_cocktails:
             return {}
-        
+
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT 
+                    cursor.execute(
+                        """
+                        SELECT
                             ci.id_cocktail,
                             STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients
                         FROM cocktail_ingredient ci
                         JOIN ingredient i ON ci.id_ingredient = i.id_ingredient
                         WHERE ci.id_cocktail = ANY(%(id_cocktails)s)
                         GROUP BY ci.id_cocktail
-                    """, {"id_cocktails": id_cocktails})
-                    
+                    """,
+                        {"id_cocktails": id_cocktails},
+                    )
+
                     rows = cursor.fetchall()
-                    
+
                     # Créer un dictionnaire {id_cocktail: [ingrédients]}
-                    return {
-                        row["id_cocktail"]: row["ingredients"].split("|||") 
-                        for row in rows
-                    }
+                    return {row["id_cocktail"]: row["ingredients"].split("|||") for row in rows}
         except Exception:
             logging.exception("Erreur get_ingredients_par_cocktails")
             return {}
 
     @log
     def obtenir_ingredients_possedes_par_cocktails(
-        self, 
-        id_utilisateur: int, 
-        id_cocktails: list[int]
+        self, id_utilisateur: int, id_cocktails: list[int]
     ) -> dict[int, list[str]]:
         """
-        Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis 
+        Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis
         l'inventaire (DAO)
 
         Parameters
@@ -599,12 +595,13 @@ class CocktailDao(metaclass=Singleton):
         """
         if not id_cocktails:
             return {}
-        
+
         try:
             with DBConnection().connection as connection:
                 with connection.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT 
+                    cursor.execute(
+                        """
+                        SELECT
                             ci.id_cocktail,
                             STRING_AGG(i.nom_ingredient, '|||' ORDER BY i.nom_ingredient) AS ingredients_possedes
                         FROM cocktail_ingredient ci
@@ -613,17 +610,15 @@ class CocktailDao(metaclass=Singleton):
                         WHERE ci.id_cocktail = ANY(%(id_cocktails)s)
                         AND inv.id_utilisateur = %(id_utilisateur)s
                         GROUP BY ci.id_cocktail
-                    """, {
-                        "id_cocktails": id_cocktails,
-                        "id_utilisateur": id_utilisateur
-                    })
-                    
+                    """,
+                        {"id_cocktails": id_cocktails, "id_utilisateur": id_utilisateur},
+                    )
+
                     rows = cursor.fetchall()
-                    
+
                     # Créer un dictionnaire {id_cocktail: [ingrédients_possedes]}
                     return {
-                        row["id_cocktail"]: row["ingredients_possedes"].split("|||") 
-                        for row in rows
+                        row["id_cocktail"]: row["ingredients_possedes"].split("|||") for row in rows
                     }
         except Exception:
             logging.exception("Erreur obtenir_ingredients_possedes_par_cocktails")

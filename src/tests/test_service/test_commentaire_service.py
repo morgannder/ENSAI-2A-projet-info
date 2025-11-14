@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock
+
 import pytest
 
-from service.commentaire_service import CommentaireService
-from dao.commentaire_dao import CommentaireDao
 from business_object.commentaire import Commentaire
+from dao.commentaire_dao import CommentaireDao
+from service.commentaire_service import CommentaireService
 
 # -----------------------------
 # Jeux de données test
@@ -16,7 +17,7 @@ COM_LISTE = [
         texte="Super rafraîchissant !",
         note=5,
         pseudo_utilisateur="Alice",
-        date_creation="2025-04-11 17:00:00"
+        date_creation="2025-04-11 17:00:00",
     ),
     Commentaire(
         id_commentaire=2,
@@ -25,9 +26,10 @@ COM_LISTE = [
         texte="Trop sucré à mon goût.",
         note=3,
         pseudo_utilisateur="Bob",
-        date_creation="2025-04-11 17:15:00"
-    )
+        date_creation="2025-04-11 17:15:00",
+    ),
 ]
+
 
 # -----------------------------
 # Tests lister
@@ -42,6 +44,7 @@ def test_lister_commentaires_ok():
     assert lst == COM_LISTE
     CommentaireDao().trouver_par_cocktail.assert_called_once_with(0)
 
+
 def test_lister_commentaires_aucun():
     """Si aucun commentaire, retourne liste vide."""
     CommentaireDao().trouver_par_cocktail = MagicMock(return_value=[])
@@ -51,6 +54,7 @@ def test_lister_commentaires_aucun():
 
     assert lst == []
     CommentaireDao().trouver_par_cocktail.assert_called_once_with(999)
+
 
 # -----------------------------
 # Tests obtenir commentaire utilisateur
@@ -65,6 +69,7 @@ def test_obtenir_commentaire_utilisateur_ok():
     assert com == COM_LISTE[0]
     CommentaireDao().trouver_par_utilisateur_et_cocktail.assert_called_once_with(3, 0)
 
+
 def test_obtenir_commentaire_utilisateur_aucun():
     """Renvoie None si pas de commentaire."""
     CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(return_value=None)
@@ -74,6 +79,7 @@ def test_obtenir_commentaire_utilisateur_aucun():
 
     assert com is None
     CommentaireDao().trouver_par_utilisateur_et_cocktail.assert_called_once_with(999, 0)
+
 
 # -----------------------------
 # Tests calculer note moyenne
@@ -88,12 +94,14 @@ def test_calculer_note_moyenne_ok():
     expected = sum(c.note for c in COM_LISTE) / len(COM_LISTE)
     assert moyenne == expected
 
+
 def test_calculer_note_moyenne_aucun_commentaire():
     """Retourne 0 si pas de commentaire."""
     CommentaireDao().trouver_par_cocktail = MagicMock(return_value=[])
     service = CommentaireService()
 
     assert service.calculer_note_moyenne(999) == 0
+
 
 # -----------------------------
 # Tests ajouter commentaire
@@ -109,6 +117,7 @@ def test_ajouter_commentaire_ok():
     assert res
     CommentaireDao().creer.assert_called_once()
 
+
 def test_ajouter_commentaire_deja_existant():
     """Erreur si l'utilisateur a déjà commenté"""
     CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(return_value=COM_LISTE[0])
@@ -117,17 +126,20 @@ def test_ajouter_commentaire_deja_existant():
     with pytest.raises(ValueError):
         service.ajouter_commentaire(3, 0, "Encore un commentaire", 4)
 
+
 def test_ajouter_commentaire_texte_vide():
     """Erreur si texte vide"""
     service = CommentaireService()
     with pytest.raises(ValueError):
         service.ajouter_commentaire(1, 0, "   ", 4)
 
+
 def test_ajouter_commentaire_note_invalide():
     """Erreur si note hors 1-5"""
     service = CommentaireService()
     with pytest.raises(ValueError):
         service.ajouter_commentaire(1, 0, "Texte", 6)
+
 
 # -----------------------------
 # Tests supprimer commentaire
@@ -142,6 +154,7 @@ def test_supprimer_commentaire_ok():
     assert res
     CommentaireDao().supprimer.assert_called_once_with(1, 3)
 
+
 def test_supprimer_commentaire_echec():
     """Suppression échouée"""
     CommentaireDao().supprimer = MagicMock(return_value=False)
@@ -155,4 +168,5 @@ def test_supprimer_commentaire_echec():
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__, "-v"])

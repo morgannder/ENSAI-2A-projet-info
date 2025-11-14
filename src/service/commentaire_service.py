@@ -2,10 +2,12 @@ from business_object.commentaire import Commentaire
 from dao.commentaire_dao import CommentaireDao
 from utils.log_decorator import log
 
-class CommentaireService:
 
+class CommentaireService:
     @log
-    def ajouter_commentaire(self, id_utilisateur: int, id_cocktail: int, texte: str, note: int) -> bool:
+    def ajouter_commentaire(
+        self, id_utilisateur: int, id_cocktail: int, texte: str, note: int
+    ) -> bool:
         """
         Ajoute un nouveau commentaire pour un cocktail donné
 
@@ -40,10 +42,7 @@ class CommentaireService:
             raise ValueError("Vous avez déjà commenté ce cocktail")
 
         commentaire = Commentaire(
-            id_utilisateur=id_utilisateur,
-            id_cocktail=id_cocktail,
-            texte=texte.strip(),
-            note=note
+            id_utilisateur=id_utilisateur, id_cocktail=id_cocktail, texte=texte.strip(), note=note
         )
 
         return CommentaireDao().creer(commentaire)
@@ -125,7 +124,6 @@ class CommentaireService:
         except Exception as e:
             print(f"Erreur récupération commentaires utilisateur: {e}")
             return []
-
 
     @log
     def calculer_note_moyenne(self, id_cocktail: int) -> float:

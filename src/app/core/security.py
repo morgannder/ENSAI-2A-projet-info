@@ -19,9 +19,9 @@ def creation_token_d_acces(donnee: dict, temps_expiration: Optional[timedelta] =
     Créer un token d'accès pour les utilisateurs avec un temps de validité limité
 
     ### Paramètre
-    - **donnee** *dict* 
+    - **donnee** *dict*
     - **validite** *timedelta* Temps de validité du token, 10080 minutes = 1 semaine
-    
+
     ### Réponse
     token
 
@@ -43,9 +43,9 @@ def obtenir_utilisateur(token: str = Depends(oauth2_scheme)) -> Utilisateur:
 
     ### Paramètre
     - **token** *str* Token de l'utilisateur
-    
+
     ### Réponse
-    Utilisateur 
+    Utilisateur
 
     """
     try:
@@ -66,12 +66,12 @@ def obtenir_utilisateur(token: str = Depends(oauth2_scheme)) -> Utilisateur:
 
 def obtenir_utilisateur_optionnel(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:
     """
-    Obtiens un utilisateur via son token d'accès, permet de faire une situation où le client 
+    Obtiens un utilisateur via son token d'accès, permet de faire une situation où le client
     n'a pas la nécessité d'être connecté mais a des fonctionnalités en plus s'il l'est
 
     ### Paramètre
     - **token** *str* Token de l'utilisateur
-    
+
     ### Réponse
     Utilisateur | None
 
