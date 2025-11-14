@@ -1,9 +1,8 @@
-import logging.config
-import numbers
+import logging
 from functools import wraps
 
 
-class LogIndetation:
+class LogIndentation:
     """Pour indenter les logs lorsque l'on rentre dans une nouvelle méthode"""
 
     current_indentation = 0
@@ -16,7 +15,8 @@ class LogIndetation:
     @classmethod
     def decrease_indentation(cls):
         """Retirer une indentation"""
-        cls.current_indentation -= 1
+        if cls.current_indentation > 0:
+            cls.current_indentation -= 1
 
     @classmethod
     def get_indentation(cls):
@@ -25,58 +25,83 @@ class LogIndetation:
 
 
 def log(func):
-    """Création d'un décorateur nommé log
-    Lorsque ce décorateur est appliqué à une méthode, cela affichera dans les logs :
-    - l'appel de cette méthode avec les valeurs de paramètres
-    - la sortie retournée par cette méthode
+    """
+    Décorateur pour logger automatiquement les appels de méthodes
+
+    Affiche dans les logs :
+    - L'appel de la méthode avec les paramètres
+    - La sortie retournée
+    - Gère l'indentation pour les appels imbriqués
     """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        logger = logging.getLogger(__name__)
+        # Utilise le logger du module appelant plutôt que __name__
+        logger = logging.getLogger(func.__module__)
 
-        LogIndetation.increase_indentation()
-        indentation = LogIndetation.get_indentation()
+        LogIndentation.increase_indentation()
+        indentation = LogIndentation.get_indentation()
 
-        # Recuperation des parametres de la methode
+        # Récupération des paramètres
         class_name = args[0].__class__.__name__ if args else ""
         method_name = func.__name__
-        args_list = list(
-            [str(arg) if not isinstance(arg, numbers.Number) else arg for arg in args[1:]]
-            + list(kwargs.values())
-        )
 
-        # pour cacher les mots de passe
-        param_names = func.__code__.co_varnames[1 : func.__code__.co_argcount]
-        for i, v in enumerate(param_names):
-            if v in ["password", "passwd", "pwd", "pass", "mot_de_passe", "mdp"]:
-                args_list[i] = "*****"
+        # Construction de la liste des arguments
+        args_repr = []
 
-        # Transforme en tuple pour avoir un affichage avec des parentheses
-        args_list = tuple(args_list)
+        # Arguments positionnels (sauf self/cls)
+        if args:
+            args_repr.extend(repr(arg) for arg in args[1:])
 
-        # Affichage dans le fichier de log
-        logger.info(f"{indentation}{class_name}.{method_name}{args_list} - DEBUT")
-        result = func(*args, **kwargs)
-        logger.info(f"{indentation}{class_name}.{method_name}{args_list} - FIN")
+        # Arguments nommés
+        args_repr.extend(f"{k}={repr(v)}" for k, v in kwargs.items())
 
-        # Reduction de l affichage de la sortie si trop longue
-        if isinstance(result, list):
-            result_str = str([str(item) for item in result[:3]])
-            result_str += " ... (" + str(len(result)) + " elements)"
-        elif isinstance(result, dict):
-            result_str = [(str(k), str(v)) for k, v in result.items()][:3]
-            result_str += " ... (" + str(len(result)) + " elements)"
-        elif isinstance(result, str) and len(result) > 50:
-            result_str = result[:50]
-            result_str += " ... (" + str(len(result)) + " caracteres)"
-        else:
-            result_str = str(result)
+        # Masquage des mots de passe
+        sensitive_keywords = ["password", "passwd", "pwd", "pass", "mot_de_passe", "mdp"]
+        for i, arg in enumerate(args_repr):
+            for sensitive in sensitive_keywords:
+                if sensitive in arg.lower():
+                    args_repr[i] = "*****"
+                    break
 
-        logger.info(f"{indentation}   └─> Sortie : {result_str}")
+        signature = ", ".join(args_repr)
 
-        LogIndetation.decrease_indentation()
+        # Log de début
+        logger.info(f"{indentation}▶ {class_name}.{method_name}({signature})")
 
-        return result
+        try:
+            result = func(*args, **kwargs)
+
+            # Formatage du résultat
+            if isinstance(result, list):
+                if len(result) > 3:
+                    result_str = f"[{', '.join(str(item) for item in result[:3])}...] ({len(result)} éléments)"
+                else:
+                    result_str = str(result)
+            elif isinstance(result, dict):
+                if len(result) > 3:
+                    items = list(result.items())[:3]
+                    result_str = f"{{{', '.join(f'{k}: {v}' for k, v in items)}...}} ({len(result)} éléments)"
+                else:
+                    result_str = str(result)
+            elif isinstance(result, str) and len(result) > 50:
+                result_str = f"'{result[:50]}...' ({len(result)} caractères)"
+            elif result is None:
+                result_str = "None"
+            else:
+                result_str = str(result)
+
+            # Log de fin avec résultat
+            logger.info(f"{indentation}✓ {class_name}.{method_name} → {result_str}")
+
+            return result
+
+        except Exception as e:
+            # Log des erreurs
+            logger.error(f"{indentation}✗ {class_name}.{method_name} → ERREUR: {str(e)}")
+            LogIndentation.decrease_indentation()
+            raise
+        finally:
+            LogIndentation.decrease_indentation()
 
     return wrapper
