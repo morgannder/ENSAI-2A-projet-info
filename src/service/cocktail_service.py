@@ -99,26 +99,6 @@ class CocktailService:
                 "Le type d'alcool doit être 'Alcoholic', 'Non alcoholic' ou 'Optional alcohol'"
             )
 
-        # Validation catégories
-        if categ:
-            categories_valides = [
-                categorie.lower() for categorie in CocktailDao().lister_categories()
-            ]
-            if categ.lower() not in categories_valides:
-                raise ValueError(
-                    f"La catégorie '{categ}' n'existe pas. "
-                    f"Utilisez GET /cocktails/categories pour voir les catégories disponibles."
-                )
-
-        # Validation du type de verre
-        if verre:
-            verres_valides = [verre.lower() for verre in CocktailDao().lister_verres()]
-            if verre.lower() not in verres_valides:
-                raise ValueError(
-                    f"Le verre '{verre}' n'existe pas. "
-                    f"Utilisez GET /cocktails/verres pour voir les verres disponibles."
-                )
-
         # Si mineur, lui interdire le filtre Alcoholic
         if est_majeur is False and alcool == "Alcoholic":
             raise ValueError(

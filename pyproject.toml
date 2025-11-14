@@ -13,6 +13,7 @@ dependencies = [
     "pyjwt>=2.10.1",
     "pylint>=4.0.2",
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
     "python-dotenv>=1.2.1",
     "python-multipart>=0.0.20",
     "pyyaml>=6.0.3",
