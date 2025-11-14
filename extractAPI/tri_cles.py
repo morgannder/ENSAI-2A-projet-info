@@ -1,32 +1,15 @@
 import json
 
-
-def ajoutcle():
-    with open(
-        "extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8"
-    ) as file:
-        data = json.load(file)
-
-        for j in range(0, 636):
-            templistingredient = []
-            templistmesure = []
-            for i in range(1, 16):
-                if data["drinks"][j][f"strIngredient{i}"]:
-                    templistingredient.append(data["drinks"][j][f"strIngredient{i}"])
-                    templistmesure.append(data["drinks"][j][f"strMeasure{i}"])
-            data["drinks"][j]["listIngredients"] = templistingredient
-            data["drinks"][j]["listMesures"] = templistmesure
-    with open("extractAPI/all_cocktails_consolidated.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
-
-# ajoutcle()
+"""
+Ce fichier sert à trier les clés dans chaque cocktail et réindicer les cocktails et ingrédients.
+Au lieu d'avoir des cocktails de 11000 à 178 000, on se retrouve avec des ids de 0 à 636
+Idem pour les ingrédients.
+On supprime également les clés inutiles qui ne vont pas être utilisées au cours du projet.
+"""
 
 
 def reindicage_cocktail():
-    with open(
-        "extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8"
-    ) as file:
+    with open("extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
         for j in range(0, 636):
@@ -35,31 +18,19 @@ def reindicage_cocktail():
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-# reindicage_cocktail()
-
-
 def reindicage_ingredient():
-    with open(
-        "extractAPI/all_ingredients_consolidated.json", "r", encoding="utf-8"
-    ) as file:
+    with open("extractAPI/all_ingredients_consolidated.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
         for j in range(0, 489):
             data["drinks"][j]["idIngredient"] = j
         del data["drinks"][j]["idIngredients"]
-    with open(
-        "extractAPI/all_ingredients_consolidated.json", "w", encoding="utf-8"
-    ) as f:
+    with open("extractAPI/all_ingredients_consolidated.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-# reindicage_ingredient()
-
-
 def suppressioncleinutiles():
-    with open(
-        "extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8"
-    ) as file:
+    with open("extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8") as file:
         data = json.load(file)
 
         for j in range(0, 636):
@@ -81,6 +52,3 @@ def suppressioncleinutiles():
 
     with open("extractAPI/all_cocktails_consolidated.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-
-
-# suppressioncleinutiles()
