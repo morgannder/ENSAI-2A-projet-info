@@ -19,6 +19,8 @@ class Commentaire:
         note du cocktail
     date_creation: str
         date de création du commentaire
+    pseudo_utilisateur : str
+        pseudo de l'utilisateur qui a posté le commentaire
 
     """
 
