@@ -290,7 +290,6 @@ class CocktailService:
     def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
         """
         Récupère tous les ingrédients pour une liste de cocktails
-        (Couche service qui appelle le DAO)
 
         Paramètres
         ----------
@@ -317,7 +316,6 @@ class CocktailService:
     ) -> dict[int, list[str]]:
         """
         Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail
-        (Couche service qui appelle le DAO)
 
         Paramètres
         ----------
