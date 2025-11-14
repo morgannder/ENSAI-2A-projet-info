@@ -578,8 +578,8 @@ class CocktailDao(metaclass=Singleton):
         self, id_utilisateur: int, id_cocktails: list[int]
     ) -> dict[int, list[str]]:
         """
-        Récupère les ingrédients possédés par l'utilisateur pour chaque cocktail depuis
-        l'inventaire (DAO)
+        Récupère les ingrédients possédés par l'utilisateur
+        pour chaque cocktail d'une liste de cocktails
 
         Parameters
         ----------

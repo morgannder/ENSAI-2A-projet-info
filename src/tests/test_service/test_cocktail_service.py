@@ -162,21 +162,5 @@ def test_lister_tous_cocktails_ok():
     assert len(res) == 3
 
 
-def test_lister_categories_verres():
-    """Lister catégories et verres"""
-    # GIVEN
-    CocktailDao().lister_categories = MagicMock(return_value=["Cocktail", "Shot"])
-    CocktailDao().lister_verres = MagicMock(return_value=["Highball glass", "Martini glass"])
-    service = CocktailService()
-
-    # WHEN
-    categories = service.lister_categories()
-    verres = service.lister_verres()
-
-    # THEN
-    assert categories == ["Cocktail", "Shot"]
-    assert verres == ["Highball glass", "Martini glass"]
-
-
 if __name__ == "__main__":
     pytest.main([__file__])

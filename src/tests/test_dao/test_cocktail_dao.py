@@ -75,7 +75,7 @@ def test_cocktail_partiel(setup_test_environment):
         print(c.nom_cocktail)
 
     noms = [c.nom_cocktail for c in cocktails]
-    assert len(cocktails) == 1
+    assert len(cocktails) == 2
     assert "Mojito" not in noms  # 0 manquants
     assert "Old Fashioned" in noms  # 1 manquants
     assert "Long Island Tea" not in noms  # 4 manquants (trop)

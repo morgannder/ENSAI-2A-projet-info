@@ -176,13 +176,17 @@ class InventaireDao(metaclass=Singleton):
                 _id = r["id_ingredient"]
                 _nom = r["nom_ingredient"]
                 _desc: Optional[str] = r["desc_ingredient"]
+                desc_finale = None
+                if _desc is not None:
+                    desc_finale = textwrap.shorten(_desc, width=150, placeholder="...")
 
-            ingredient = Ingredient(
-                id_ingredient=int(_id) if _id is not None else None,
-                nom_ingredient=_nom,
-                desc_ingredient=textwrap.shorten(_desc, width=150, placeholder="..."),
+            result.append(
+                Ingredient(
+                    id_ingredient=int(_id) if _id is not None else None,
+                    nom_ingredient=_nom,
+                    desc_ingredient=desc_finale,
+                )
             )
-            result.append(ingredient)
 
         return result
 

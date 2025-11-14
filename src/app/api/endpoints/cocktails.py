@@ -181,8 +181,8 @@ def realiser_cocktail(
     },
 )
 def rechercher_cocktails(
-    limit: int = 10,
-    offset: int = 0,
+    limite: int = 10,
+    decalage: int = 0,
     nom_cocktail: Optional[str] = None,
     categorie: Optional[Categories] = None,
     alcool: Optional[Alcool] = None,
@@ -225,8 +225,8 @@ def rechercher_cocktails(
             liste_ingredients=ingredients,
             verre=verre,
             langue=langue,
-            limit=limit,
-            offset=offset,
+            limite=limite,
+            decalage=decalage,
         )
 
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
@@ -243,7 +243,7 @@ def rechercher_cocktails(
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
             "resultats": resultats,
         }
 
@@ -264,8 +264,8 @@ def rechercher_cocktails(
     },
 )
 def lister_cocktails_complets(
-    limit: int = 10,
-    offset: int = 0,
+    limite: int = 10,
+    decalage: int = 0,
     utilisateur: Utilisateur = Depends(obtenir_utilisateur),
 ):
     """
@@ -274,8 +274,8 @@ def lister_cocktails_complets(
     Nécessite d'être connecté pour accéder à votre inventaire.
 
     ### Paramètres de requête
-    - **limit**     *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
-    - **offset**    *(int, optionnel)* : Décalage pour la pagination.
+    - **limite**     *(int, optionnel)* : Nombre maximum de cocktails à renvoyer (défaut 10).
+    - **decalage**    *(int, optionnel)* : Décalage pour la pagination.
     """
     if utilisateur:
         langue = utilisateur.langue
@@ -286,8 +286,8 @@ def lister_cocktails_complets(
             id_utilisateur=utilisateur.id_utilisateur,
             est_majeur=utilisateur.est_majeur,
             langue=langue,
-            limit=limit,
-            offset=offset,
+            limite=limite,
+            decalage=decalage,
         )
         if not cocktails:
             raise HTTPException(
@@ -309,7 +309,7 @@ def lister_cocktails_complets(
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
             "resultats": resultats,
         }
     except ValueError as e:
@@ -329,8 +329,8 @@ def lister_cocktails_complets(
 )
 def lister_cocktails_partiels(
     nb_manquants: Number,
-    limit: int = 10,
-    offset: int = 0,
+    limite: int = 10,
+    decalage: int = 0,
     utilisateur: Utilisateur = Depends(obtenir_utilisateur),
 ):
     """
@@ -340,8 +340,8 @@ def lister_cocktails_partiels(
 
     ### Paramètres de requête
     - **nb_manquants**  *Literal* : Nombre maximal d'ingrédients manquants autorisés (1-5).
-    - **limit**         *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
-    - **offset**        *(int, optionnel)* : Pagination.
+    - **limite**         *(int, optionnel)* : Nombre maximum de cocktails à renvoyer.
+    - **decalage**        *(int, optionnel)* : Pagination.
     """
     if utilisateur:
         langue = utilisateur.langue
@@ -353,8 +353,8 @@ def lister_cocktails_partiels(
             id_utilisateur=utilisateur.id_utilisateur,
             est_majeur=utilisateur.est_majeur,
             langue=langue,
-            limit=limit,
-            offset=offset,
+            limite=limite,
+            decalage=decalage,
         )
         if not cocktails:
             raise HTTPException(
@@ -396,7 +396,7 @@ def lister_cocktails_partiels(
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limit": limit, "offset": offset, "total": len(cocktails)},
+            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
             "resultats": resultats,
         }
 

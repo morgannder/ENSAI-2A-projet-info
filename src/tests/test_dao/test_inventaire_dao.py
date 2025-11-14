@@ -24,9 +24,16 @@ def setup_test_environment():
 # ----------------------------------------------------------------------
 def _find_in_inventory(items, name: str):
     """Retourne l'Ingredient ayant le nom donné (case-insensitive) dans une liste."""
+    if not name or not items:
+        return None
+
     lname = name.strip().lower()
     for it in items:
-        if (it.nom_ingredient or "").strip().lower() == lname:
+        # Vérification plus robuste pour les valeurs None
+        nom = it.nom_ingredient
+        if nom is None:
+            continue
+        if isinstance(nom, str) and nom.strip().lower() == lname:
             return it
     return None
 
