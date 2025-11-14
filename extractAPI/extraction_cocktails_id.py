@@ -50,6 +50,7 @@ def extraction_cocktail_par_id():
                     with open(fichier_cocktail, "w", encoding="utf-8") as f:
                         json.dump(cocktail, f, indent=2, ensure_ascii=False)
 
+            # Temps d'attente pour pas se faire time out par l'API, si time.sleep(0.1) -> Time-out
             time.sleep(0.2)
 
         except requests.exceptions.Timeout:
