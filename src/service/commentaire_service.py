@@ -37,12 +37,17 @@ class CommentaireService:
             raise ValueError("La note doit être entre 1 et 5")
 
         # On verifie si l'utilisateur à deja commenté
-        existant = CommentaireDao().trouver_par_utilisateur_et_cocktail(id_utilisateur, id_cocktail)
+        existant = CommentaireDao().trouver_par_utilisateur_et_cocktail(
+            id_utilisateur, id_cocktail
+        )
         if existant:
             raise ValueError("Vous avez déjà commenté ce cocktail")
 
         commentaire = Commentaire(
-            id_utilisateur=id_utilisateur, id_cocktail=id_cocktail, texte=texte.strip(), note=note
+            id_utilisateur=id_utilisateur,
+            id_cocktail=id_cocktail,
+            texte=texte.strip(),
+            note=note,
         )
 
         return CommentaireDao().creer(commentaire)
@@ -85,7 +90,9 @@ class CommentaireService:
         return CommentaireDao().trouver_par_cocktail(id_cocktail)
 
     @log
-    def obtenir_commentaire_utilisateur(self, id_utilisateur: int, id_cocktail: int) -> Commentaire:
+    def obtenir_commentaire_utilisateur(
+        self, id_utilisateur: int, id_cocktail: int
+    ) -> Commentaire:
         """
         Récupère le commentaire laissé par un utilisateur sur un cocktail spécifique
 
@@ -101,10 +108,14 @@ class CommentaireService:
         Commentaire or None
             L'objet Commentaire correspondant s'il existe, sinon None
         """
-        return CommentaireDao().trouver_par_utilisateur_et_cocktail(id_utilisateur, id_cocktail)
+        return CommentaireDao().trouver_par_utilisateur_et_cocktail(
+            id_utilisateur, id_cocktail
+        )
 
     @log
-    def obtenir_commentaires_par_utilisateur(self, id_utilisateur: int) -> list[Commentaire]:
+    def obtenir_commentaires_par_utilisateur(
+        self, id_utilisateur: int
+    ) -> list[Commentaire]:
         """
         Récupère tous les commentaires laissés par un utilisateur.
 

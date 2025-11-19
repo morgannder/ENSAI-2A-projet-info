@@ -52,7 +52,9 @@ class CocktailDao(metaclass=Singleton):
                         where_clause = "WHERE c.id_cocktail = %(id_cocktail)s"
                         params["id_cocktail"] = id_cocktail
                     else:
-                        where_clause = "WHERE LOWER(c.nom_cocktail) = LOWER(%(nom_cocktail)s)"
+                        where_clause = (
+                            "WHERE LOWER(c.nom_cocktail) = LOWER(%(nom_cocktail)s)"
+                        )
                         params["nom_cocktail"] = nom_cocktail
 
                     cursor.execute(
@@ -106,7 +108,11 @@ class CocktailDao(metaclass=Singleton):
 
     @log
     def cocktail_complet(
-        self, id_utilisateur: int, langue: str = "ENG", limite: int = 10, decalage: int = 0
+        self,
+        id_utilisateur: int,
+        langue: str = "ENG",
+        limite: int = 10,
+        decalage: int = 0,
     ) -> list[Cocktail]:
         """Lister tous les cocktails que l'utilisateur peut préparer à partir de son inventaire.
 
@@ -383,7 +389,9 @@ class CocktailDao(metaclass=Singleton):
                         params["alcool"] = alcool.lower()
 
                     # Tri et pagination
-                    query += " ORDER BY nom_cocktail LIMIT %(limite)s OFFSET %(decalage)s;"
+                    query += (
+                        " ORDER BY nom_cocktail LIMIT %(limite)s OFFSET %(decalage)s;"
+                    )
 
                     cursor.execute(query, params)
                     rows = cursor.fetchall()
@@ -527,12 +535,15 @@ class CocktailDao(metaclass=Singleton):
                         )
                     return None
         except Exception as e:
-            print(f"Erreur recherche cocktail par ID: {e}")
+            logging.exception(f"Erreur recherche cocktail par ID: {e}")
+            raise
 
         # ------------------- Méthode: trouver_les_ingrédients -----------------------------
 
     @log
-    def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
+    def obtenir_ingredients_par_cocktails(
+        self, id_cocktails: list[int]
+    ) -> dict[int, list[str]]:
         """
         Récupère tous les ingrédients pour une liste de cocktails
 
@@ -568,7 +579,10 @@ class CocktailDao(metaclass=Singleton):
                     rows = cursor.fetchall()
 
                     # Créer un dictionnaire {id_cocktail: [ingrédients]}
-                    return {row["id_cocktail"]: row["ingredients"].split("|||") for row in rows}
+                    return {
+                        row["id_cocktail"]: row["ingredients"].split("|||")
+                        for row in rows
+                    }
         except Exception:
             logging.exception("Erreur get_ingredients_par_cocktails")
             return {}
@@ -611,14 +625,18 @@ class CocktailDao(metaclass=Singleton):
                         AND inv.id_utilisateur = %(id_utilisateur)s
                         GROUP BY ci.id_cocktail
                     """,
-                        {"id_cocktails": id_cocktails, "id_utilisateur": id_utilisateur},
+                        {
+                            "id_cocktails": id_cocktails,
+                            "id_utilisateur": id_utilisateur,
+                        },
                     )
 
                     rows = cursor.fetchall()
 
                     # Créer un dictionnaire {id_cocktail: [ingrédients_possedes]}
                     return {
-                        row["id_cocktail"]: row["ingredients_possedes"].split("|||") for row in rows
+                        row["id_cocktail"]: row["ingredients_possedes"].split("|||")
+                        for row in rows
                     }
         except Exception:
             logging.exception("Erreur obtenir_ingredients_possedes_par_cocktails")

@@ -48,7 +48,9 @@ def ajouter_commentaire(
         )
         if succes:
             return {"message": "Commentaire ajouté avec succès"}
-        raise HTTPException(status_code=400, detail="Erreur lors de l'ajout du commentaire")
+        raise HTTPException(
+            status_code=400, detail="Erreur lors de l'ajout du commentaire"
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -80,7 +82,8 @@ def supprimer_mon_commentaire(
         # On utilise l'id du commentaire recuperé au dessus pour pouvoir le supprimé
         # pour l'utilisateur courant (connecté)
         succes = commentaire_service.supprimer_commentaire(
-            id_utilisateur=utilisateur.id_utilisateur, id_commentaire=commentaire.id_commentaire
+            id_utilisateur=utilisateur.id_utilisateur,
+            id_commentaire=commentaire.id_commentaire,
         )
 
         if succes:
@@ -173,7 +176,8 @@ def lister_mes_commentaires(utilisateur: Utilisateur = Depends(obtenir_utilisate
 
         if not mes_commentaires:
             raise HTTPException(
-                status_code=404, detail="Vous n'avez posté aucun commentaire pour le moment"
+                status_code=404,
+                detail="Vous n'avez posté aucun commentaire pour le moment",
             )
 
         # Formatage de la réponse
@@ -189,7 +193,9 @@ def lister_mes_commentaires(utilisateur: Utilisateur = Depends(obtenir_utilisate
             commentaire_data = {
                 "cocktail": {
                     "id_cocktail": cocktail.id_cocktail if cocktail else None,
-                    "nom_cocktail": cocktail.nom_cocktail if cocktail else "Cocktail inconnu",
+                    "nom_cocktail": cocktail.nom_cocktail
+                    if cocktail
+                    else "Cocktail inconnu",
                 },
                 "date_commentaire": commentaire.date_creation.strftime("%d/%m/%Y"),
                 "note": commentaire.note,

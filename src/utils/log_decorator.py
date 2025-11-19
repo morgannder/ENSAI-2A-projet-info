@@ -57,7 +57,14 @@ def log(func):
         args_repr.extend(f"{k}={repr(v)}" for k, v in kwargs.items())
 
         # Masquage des mots de passe
-        sensitive_keywords = ["password", "passwd", "pwd", "pass", "mot_de_passe", "mdp"]
+        sensitive_keywords = [
+            "password",
+            "passwd",
+            "pwd",
+            "pass",
+            "mot_de_passe",
+            "mdp",
+        ]
         for i, arg in enumerate(args_repr):
             for sensitive in sensitive_keywords:
                 if sensitive in arg.lower():
@@ -98,7 +105,9 @@ def log(func):
 
         except Exception as e:
             # Log des erreurs
-            logger.error(f"{indentation}✗ {class_name}.{method_name} → ERREUR: {str(e)}")
+            logger.error(
+                f"{indentation}✗ {class_name}.{method_name} → ERREUR: {str(e)}"
+            )
             LogIndentation.decrease_indentation()
             raise
         finally:

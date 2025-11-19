@@ -77,8 +77,12 @@ def realiser_cocktail(
         if cocktail:
             service_utilisateur.ajout_cocktail_recherche(utilisateur)
 
-            ingredients_liste = cocktail.ingredients.split("|||") if cocktail.ingredients else []
-            quantites_liste = cocktail.quantites.split("|||") if cocktail.quantites else []
+            ingredients_liste = (
+                cocktail.ingredients.split("|||") if cocktail.ingredients else []
+            )
+            quantites_liste = (
+                cocktail.quantites.split("|||") if cocktail.quantites else []
+            )
 
             ingredients_detailles = [
                 {"ingredient": ing, "quantite": qty}
@@ -173,18 +177,26 @@ def rechercher_cocktails(
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
 
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(
+            id_cocktails
+        )
 
         # Construire la réponse avec les ingrédients
         resultats = []
         for cocktail in cocktails:
             cocktail_dict = cocktail.__dict__
             # Ajouter les ingrédients au résultat
-            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(cocktail.id_cocktail, [])
+            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(
+                cocktail.id_cocktail, []
+            )
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
+            "pagination": {
+                "limite": limite,
+                "decalage": decalage,
+                "total": len(cocktails),
+            },
             "resultats": resultats,
         }
 
@@ -239,18 +251,26 @@ def lister_cocktails_complets(
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
 
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(
+            id_cocktails
+        )
 
         # Construire la réponse avec les ingrédients
         resultats = []
         for cocktail in cocktails:
             cocktail_dict = cocktail.__dict__
             # Ajouter les ingrédients au résultat
-            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(cocktail.id_cocktail, [])
+            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(
+                cocktail.id_cocktail, []
+            )
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
+            "pagination": {
+                "limite": limite,
+                "decalage": decalage,
+                "total": len(cocktails),
+            },
             "resultats": resultats,
         }
     except ValueError as e:
@@ -306,7 +326,9 @@ def lister_cocktails_partiels(
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
 
         # Récupérer tous les ingrédients des cocktails
-        tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
+        tous_ingredients = service_cocktail.obtenir_ingredients_par_cocktails(
+            id_cocktails
+        )
 
         # Récupérer les ingrédients possédés par l'utilisateur depuis l'inventaire
         ingredients_possedes_par_cocktail = (
@@ -324,10 +346,14 @@ def lister_cocktails_partiels(
             # Tous les ingrédients du cocktail
             tous_ingredients_cocktail = tous_ingredients.get(id_cocktail, [])
             # Ingrédients que l'utilisateur possède (depuis l'inventaire)
-            ingredients_possedes = ingredients_possedes_par_cocktail.get(id_cocktail, [])
+            ingredients_possedes = ingredients_possedes_par_cocktail.get(
+                id_cocktail, []
+            )
             # Ingrédients manquants
             ingredients_manquants = [
-                ing for ing in tous_ingredients_cocktail if ing not in ingredients_possedes
+                ing
+                for ing in tous_ingredients_cocktail
+                if ing not in ingredients_possedes
             ]
 
             # Ajouter les deux listes au résultat
@@ -337,7 +363,11 @@ def lister_cocktails_partiels(
             resultats.append(cocktail_dict)
 
         return {
-            "pagination": {"limite": limite, "decalage": decalage, "total": len(cocktails)},
+            "pagination": {
+                "limite": limite,
+                "decalage": decalage,
+                "total": len(cocktails),
+            },
             "resultats": resultats,
         }
 
@@ -385,14 +415,18 @@ def cocktails_aleatoires(
         id_cocktails = [cocktail.id_cocktail for cocktail in cocktails]
 
         # Récupérer les ingrédients en une seule requête
-        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(id_cocktails)
+        ingredients_par_cocktail = service_cocktail.obtenir_ingredients_par_cocktails(
+            id_cocktails
+        )
 
         # Construire la réponse avec les ingrédients
         resultats = []
         for cocktail in cocktails:
             cocktail_dict = cocktail.__dict__
             # Ajouter les ingrédients au résultat
-            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(cocktail.id_cocktail, [])
+            cocktail_dict["ingredients"] = ingredients_par_cocktail.get(
+                cocktail.id_cocktail, []
+            )
             resultats.append(cocktail_dict)
 
         return {

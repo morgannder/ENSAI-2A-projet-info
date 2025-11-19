@@ -7,6 +7,7 @@ REGEX_MDP = re.compile(
     r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[¤~²°£µ§;`!@#$%^&*(),.?\":{}|<>]).{8,}$"
 )
 
+
 def hash_password(password, sel=""):
     """Hachage du mot de passe"""
     password_bytes = password.encode("utf-8") + sel.encode("utf-8")
@@ -28,5 +29,5 @@ def secu_mdp(mdp: str):
                 "au moins une minuscule, "
                 "au moins un chiffre, "
                 "et au moins un caractère    spécial."
-            )
+            ),
         )

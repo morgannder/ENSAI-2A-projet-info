@@ -28,7 +28,9 @@ class ResetDatabase(metaclass=Singleton):
 
         schema = os.environ["POSTGRES_SCHEMA"]
 
-        create_schema = f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
+        create_schema = (
+            f"DROP SCHEMA IF EXISTS {schema} CASCADE; CREATE SCHEMA {schema};"
+        )
 
         init_db = open("data/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
@@ -53,4 +55,3 @@ class ResetDatabase(metaclass=Singleton):
 
 if __name__ == "__main__":
     ResetDatabase().lancer()
-    # ResetDatabase().lancer(True)

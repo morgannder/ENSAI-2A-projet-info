@@ -12,7 +12,9 @@ class UtilisateurService:
     """Classe contenant les méthodes de service pour les Utilisateurs"""
 
     @log
-    def creer_utilisateur(self, pseudo, mdp, age, langue, cocktails_recherches) -> Utilisateur:
+    def creer_utilisateur(
+        self, pseudo, mdp, age, langue, cocktails_recherches
+    ) -> Utilisateur:
         """
         Créer un utilisateur et l'ajouter dans la base de données.
 

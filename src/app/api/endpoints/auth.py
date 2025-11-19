@@ -42,7 +42,9 @@ LANGUES_VALIDES = {"string", "FRA", "ESP", "ITA", "ENG", "GER"}
 @router.post("/token", response_model=Token, include_in_schema=False)
 def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
     print("DEBUG /token: username =", form_donnee.username)
-    utilisateur = service_utilisateur.se_connecter(form_donnee.username, form_donnee.password)
+    utilisateur = service_utilisateur.se_connecter(
+        form_donnee.username, form_donnee.password
+    )
 
     if not utilisateur:
         print("DEBUG échec connexion: identifiants incorrects")
@@ -50,7 +52,9 @@ def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
 
     print("DEBUG utilisateur connecté:", utilisateur)
     print("DEBUG /token: pseudo =", form_donnee.username, "mdp =", form_donnee.password)
-    access_token = creation_token_d_acces(donnee={"sub": str(utilisateur.id_utilisateur)})
+    access_token = creation_token_d_acces(
+        donnee={"sub": str(utilisateur.id_utilisateur)}
+    )
 
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -58,7 +62,9 @@ def token(form_donnee: OAuth2PasswordRequestForm = Depends()):
 @router.post("/inscription")
 def inscription(
     donnee: UserCreate,
-    utilisateur_connecte: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
+    utilisateur_connecte: Optional[Utilisateur] = Depends(
+        obtenir_utilisateur_optionnel
+    ),
 ):
     """
     **Créer un nouveau compte utilisateur**
@@ -120,7 +126,9 @@ def inscription(
         if not utilisateur:
             print(utilisateur)
             print("DEBUG /register: pseudo déjà utilisé ou erreur création")
-            raise HTTPException(status_code=400, detail="Pseudo déjà utilisé ou erreur création")
+            raise HTTPException(
+                status_code=400, detail="Pseudo déjà utilisé ou erreur création"
+            )
 
         # Génération du token JWT pour l'utilisateur créé
         token = creation_token_d_acces(donnee={"sub": str(utilisateur.id_utilisateur)})
@@ -145,7 +153,9 @@ def inscription(
 @router.post("/changement_base")
 def changement_base(
     base_test: Base,
-    utilisateur_connecte: Optional[Utilisateur] = Depends(obtenir_utilisateur_optionnel),
+    utilisateur_connecte: Optional[Utilisateur] = Depends(
+        obtenir_utilisateur_optionnel
+    ),
 ):
     """
     **Permet à un administrateur (ici les comptes "a" et "admin") de changer de base de données,
@@ -156,7 +166,10 @@ def changement_base(
 
     """
 
-    if utilisateur_connecte is not None and utilisateur_connecte.pseudo in ["a", "admin"]:
+    if utilisateur_connecte is not None and utilisateur_connecte.pseudo in [
+        "a",
+        "admin",
+    ]:
         if base_test == "Test":
             ResetDatabase().lancer(test_dao=True)
             return {"message": "Tu es sur la base test"}

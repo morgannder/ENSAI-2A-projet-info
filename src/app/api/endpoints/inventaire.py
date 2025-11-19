@@ -92,7 +92,9 @@ def supprime_ingredient(
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
-        return service_inventaire.supprimer(utilisateur.id_utilisateur, requete.id_ingredient)
+        return service_inventaire.supprimer(
+            utilisateur.id_utilisateur, requete.id_ingredient
+        )
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
@@ -103,7 +105,9 @@ def supprime_ingredient(
 
 
 @router.delete("/supprimer_tout")
-def supprimer_mon_inventaire(reponse: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
+def supprimer_mon_inventaire(
+    reponse: str, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
+):
     """
     **Supprime l'inventaire de l'utilisateur**
 
@@ -121,7 +125,8 @@ def supprimer_mon_inventaire(reponse: str, utilisateur: Utilisateur = Depends(ob
 
             if not suppression_reussie:
                 raise HTTPException(
-                    status_code=500, detail="Erreur lors de la suppression de l'inventaire"
+                    status_code=500,
+                    detail="Erreur lors de la suppression de l'inventaire",
                 )
 
             return {

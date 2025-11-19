@@ -118,7 +118,10 @@ class CommentaireDao(metaclass=Singleton):
                             SELECT * FROM commentaire
                             WHERE id_utilisateur = %(id_utilisateur)s AND id_cocktail = %(id_cocktail)s;
                             """,
-                            {"id_utilisateur": id_utilisateur, "id_cocktail": id_cocktail},
+                            {
+                                "id_utilisateur": id_utilisateur,
+                                "id_cocktail": id_cocktail,
+                            },
                         )
                         result = cursor.fetchone()
                         if result:
@@ -185,7 +188,10 @@ class CommentaireDao(metaclass=Singleton):
                     cursor.execute(
                         "DELETE FROM commentaire "
                         "WHERE id_commentaire = %(id_commentaire)s AND id_utilisateur = %(id_utilisateur)s;",
-                        {"id_commentaire": id_commentaire, "id_utilisateur": id_utilisateur},
+                        {
+                            "id_commentaire": id_commentaire,
+                            "id_utilisateur": id_utilisateur,
+                        },
                     )
                     return cursor.rowcount > 0
         except Exception as e:

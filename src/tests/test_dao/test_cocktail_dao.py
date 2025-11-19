@@ -96,7 +96,9 @@ def test_rechercher_multi_filtres(setup_test_environment):
     verre = "Cocktail glass"
 
     # WHEN
-    cocktails = CocktailDao().rechercher_cocktails(nom_cocktail, categorie, verre, alcool)
+    cocktails = CocktailDao().rechercher_cocktails(
+        nom_cocktail, categorie, verre, alcool
+    )
 
     # THEN
     assert len(cocktails) == 1  # on s'attend à un seul cocktail correspondant
@@ -152,7 +154,9 @@ def test_realiser_cocktail_par_id_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchone.return_value = mock_row
 
         result = dao.realiser_cocktail(id_cocktail=1)
@@ -182,7 +186,9 @@ def test_realiser_cocktail_par_nom_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchone.return_value = mock_row
 
         result = dao.realiser_cocktail(nom_cocktail="Margarita")
@@ -197,7 +203,9 @@ def test_realiser_cocktail_no_params_raises_error(setup_test_environment):
     dao = CocktailDao()
 
     # WHEN & THEN
-    with pytest.raises(ValueError, match="Vous devez fournir soit un ID, soit un nom de cocktail"):
+    with pytest.raises(
+        ValueError, match="Vous devez fournir soit un ID, soit un nom de cocktail"
+    ):
         dao.realiser_cocktail()
 
 
@@ -209,7 +217,9 @@ def test_realiser_cocktail_not_found(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchone.return_value = None
 
         result = dao.realiser_cocktail(id_cocktail=999)
@@ -253,10 +263,14 @@ def test_cocktail_complet_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
-        result = dao.cocktail_complet(id_utilisateur=1, langue="FRA", limite=5, decalage=0)
+        result = dao.cocktail_complet(
+            id_utilisateur=1, langue="FRA", limite=5, decalage=0
+        )
 
     # THEN
     assert len(result) == 1
@@ -272,7 +286,9 @@ def test_cocktail_complet_empty_result(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = []
 
         result = dao.cocktail_complet(id_utilisateur=1)
@@ -295,7 +311,9 @@ def test_cocktail_complet_pagination():
         # THEN
         assert result == []  # Car fetchall retourne une liste vide
 
-        mock_cursor = mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+        mock_cursor = (
+            mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+        )
         assert mock_cursor.execute.called
 
 
@@ -321,7 +339,9 @@ def test_cocktail_partiel_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.cocktail_partiel(id_utilisateur=1, nb_manquants=2, langue="ENG")
@@ -353,7 +373,9 @@ def test_rechercher_cocktails_sans_filtres(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.rechercher_cocktails()
@@ -384,7 +406,9 @@ def test_cocktails_aleatoires_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.cocktails_aleatoires(nombre=3, langue="FRA")
@@ -438,7 +462,9 @@ def test_trouver_par_id_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchone.return_value = mock_row
 
         result = dao.trouver_par_id(1)
@@ -456,7 +482,9 @@ def test_trouver_par_id_not_found(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchone.return_value = None
 
         result = dao.trouver_par_id(999)
@@ -480,7 +508,9 @@ def test_obtenir_ingredients_par_cocktails_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.obtenir_ingredients_par_cocktails([1, 2])
@@ -528,7 +558,9 @@ def test_obtenir_ingredients_possedes_success(setup_test_environment):
     # WHEN
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
+            mock_cursor
+        )
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.obtenir_ingredients_possedes_par_cocktails(1, [1, 2])
@@ -573,9 +605,7 @@ def test_methods_use_correct_instruction_column(setup_test_environment):
 
         with patch.object(DBConnection, "connection") as mock_conn:
             mock_cursor = Mock()
-            mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-                mock_cursor
-            )
+            mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = mock_cursor
             mock_cursor.fetchall.return_value = []
 
             # Appeler différentes méthodes avec langue FRA
@@ -586,6 +616,102 @@ def test_methods_use_correct_instruction_column(setup_test_environment):
 
             # Vérifier que instruction_column a été appelé pour chaque méthode
             assert mock_method.call_count == 4
+
+
+# ==================== Tests d'erreurs de base de données ====================
+
+
+def test_db_error_cocktail_complet(setup_test_environment):
+    """Test gestion d'erreur DB dans cocktail_complet"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        with pytest.raises(Exception):
+            dao.cocktail_complet(id_utilisateur=1)
+
+
+def test_db_error_cocktail_partiel(setup_test_environment):
+    """Test gestion d'erreur DB dans cocktail_partiel"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        with pytest.raises(Exception):
+            dao.cocktail_partiel(id_utilisateur=1, nb_manquants=2)
+
+
+def test_db_error_rechercher_cocktails(setup_test_environment):
+    """Test gestion d'erreur DB dans rechercher_cocktails"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        with pytest.raises(Exception):
+            dao.rechercher_cocktails()
+
+
+def test_db_error_cocktails_aleatoires(setup_test_environment):
+    """Test gestion d'erreur DB dans cocktails_aleatoires"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        with pytest.raises(Exception):
+            dao.cocktails_aleatoires(3)
+
+
+def test_db_error_trouver_par_id(setup_test_environment):
+    """Test gestion d'erreur DB dans trouver_par_id"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        with pytest.raises(Exception):
+            dao.trouver_par_id(1)
+
+
+def test_db_error_obtenir_ingredients_par_cocktails(setup_test_environment):
+    """Test gestion d'erreur DB dans obtenir_ingredients_par_cocktails"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        # Cette méthode devrait retourner un dict vide en cas d'erreur
+        result = dao.obtenir_ingredients_par_cocktails([1, 2])
+        assert result == {}
+
+
+def test_db_error_obtenir_ingredients_possedes_par_cocktails(setup_test_environment):
+    """Test gestion d'erreur DB dans obtenir_ingredients_possedes_par_cocktails"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
+
+        # Cette méthode devrait retourner un dict vide en cas d'erreur
+        result = dao.obtenir_ingredients_possedes_par_cocktails(1, [1, 2])
+        assert result == {}
 
 
 if __name__ == "__main__":

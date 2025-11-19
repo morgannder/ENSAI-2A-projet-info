@@ -64,7 +64,9 @@ def obtenir_utilisateur(token: str = Depends(oauth2_scheme)) -> Utilisateur:
         )
 
 
-def obtenir_utilisateur_optionnel(token: str = Depends(oauth2_scheme)) -> Utilisateur | None:
+def obtenir_utilisateur_optionnel(
+    token: str = Depends(oauth2_scheme),
+) -> Utilisateur | None:
     """
     Obtiens un utilisateur via son token d'accès, permet de faire une situation où le client
     n'a pas la nécessité d'être connecté mais a des fonctionnalités en plus s'il l'est

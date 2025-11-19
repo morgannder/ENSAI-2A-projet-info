@@ -28,7 +28,9 @@ class InventaireService:
             raise TypeError("L'id rentré n'est pas valide")
         inventaire = InventaireDao().consulter_inventaire(id_utilisateur)
         if inventaire == []:
-            raise ValueError("Votre inventaire est vide, allez le remplir au plus vite !!")
+            raise ValueError(
+                "Votre inventaire est vide, allez le remplir au plus vite !!"
+            )
         return inventaire
 
     def ajouter(self, id_utilisateur: int, ingredient: Ingredient) -> bool:
@@ -99,7 +101,9 @@ class InventaireService:
             Une liste d'ingrédients aléatoire.
         """
         if not isinstance(n, int):
-            raise ValueError(f"Le paramètre 'n' doit être un entier, reçu : {type(n).__name__}")
+            raise ValueError(
+                f"Le paramètre 'n' doit être un entier, reçu : {type(n).__name__}"
+            )
         if n < 1:
             n = 1
         elif n > 10:

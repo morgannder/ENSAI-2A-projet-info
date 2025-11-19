@@ -42,7 +42,13 @@ liste_utilisateurs = [
 def test_creer_ok():
     """Création de Utilisateur réussie"""
     # GIVEN
-    pseudo, mdp, age, langue, cocktails_recherches = "test", "Mdp1234!", 15, "English", 0
+    pseudo, mdp, age, langue, cocktails_recherches = (
+        "test",
+        "Mdp1234!",
+        15,
+        "English",
+        0,
+    )
     UtilisateurDao().creer_compte = MagicMock(return_value=True)
 
     # WHEN
@@ -59,7 +65,13 @@ def test_creer_ok():
 def test_creer_echec():
     """Création de Utilisateur échouée"""
     # GIVEN
-    pseudo, mdp, age, langue, cocktails_recherches = "test", "Mdp1234!", 15, "English", 0
+    pseudo, mdp, age, langue, cocktails_recherches = (
+        "test",
+        "Mdp1234!",
+        15,
+        "English",
+        0,
+    )
     UtilisateurDao().creer_compte = MagicMock(return_value=False)
 
     # WHEN

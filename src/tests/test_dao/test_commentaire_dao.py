@@ -116,7 +116,9 @@ def test_supprimer_commentaire_inexistant():
         (1, "y", False),
     ],
 )
-def test_supprimer_commentaire_entrees_invalides(id_commentaire, id_utilisateur, expected):
+def test_supprimer_commentaire_entrees_invalides(
+    id_commentaire, id_utilisateur, expected
+):
     assert CommentaireDao().supprimer(id_commentaire, id_utilisateur) is expected
 
 

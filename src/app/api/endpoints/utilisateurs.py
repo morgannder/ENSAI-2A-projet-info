@@ -66,7 +66,9 @@ def mes_informations(utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
 
 
 @router.put("/mettre_a_jour", tags=["Utilisateur"])
-def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obtenir_utilisateur)):
+def modifie_compte(
+    donnee: UserUpdate, utilisateur: Utilisateur = Depends(obtenir_utilisateur)
+):
     """
     **Modifie certaines informations du compte**
 
@@ -92,13 +94,18 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
     try:
         # Verification du nouveau pseudo
         if donnee.nouveau_pseudo:
-            if donnee.nouveau_pseudo == utilisateur.pseudo or len(donnee.nouveau_pseudo) < 3:
+            if (
+                donnee.nouveau_pseudo == utilisateur.pseudo
+                or len(donnee.nouveau_pseudo) < 3
+            ):
                 erreurs.append(
                     "Le nouveau pseudo doit être différent de l'ancien et contenir "
                     "au moins 3 charactères"
                 )
             else:
-                succes = service_utilisateur.changer_pseudo(utilisateur, donnee.nouveau_pseudo)
+                succes = service_utilisateur.changer_pseudo(
+                    utilisateur, donnee.nouveau_pseudo
+                )
                 if succes:
                     changements.append("pseudo")
                 else:
@@ -134,7 +141,10 @@ def modifie_compte(donnee: UserUpdate, utilisateur: Utilisateur = Depends(obteni
             # Aucune modif reussie (que des erreurs)
             raise HTTPException(
                 status_code=400,
-                detail={"erreurs": erreurs, "message": "Aucune modification n'a pu être effectuée"},
+                detail={
+                    "erreurs": erreurs,
+                    "message": "Aucune modification n'a pu être effectuée",
+                },
             )
         elif erreurs and changements:
             # Modifs partielles avec certaines erreurs

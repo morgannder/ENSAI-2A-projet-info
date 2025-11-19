@@ -9,7 +9,9 @@ initialiser_logs("Cocktail API")
 dotenv.load_dotenv()
 
 app = FastAPI(
-    title="Cocktail API", description="API de gestion de cocktails et d'inventaire", version="1.0.0"
+    title="Cocktail API",
+    description="API de gestion de cocktails et d'inventaire",
+    version="1.0.0",
 )
 
 # Inclusion des routes

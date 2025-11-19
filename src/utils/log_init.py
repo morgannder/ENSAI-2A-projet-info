@@ -29,7 +29,6 @@ def initialiser_logs(nom_application="Application", config_path="logging_config.
         logging.info("-" * 50)
 
     except FileNotFoundError:
-        # Fallback vers une configuration basique
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)-8s - %(message)s",
@@ -38,6 +37,5 @@ def initialiser_logs(nom_application="Application", config_path="logging_config.
         logging.warning(f"Fichier de configuration {config_path} non trouvé")
 
 
-# Initialisation pour les scripts standalone
 if __name__ == "__main__":
     initialiser_logs("Système de logs")

@@ -46,7 +46,9 @@ def test_ajouter_ingredient_inventaire_cree_nouveau():
     # GIVEN
     id_user = 1  # utilisateur existant dans la base test
     nom_test = "ZZZ_Test_Gin_12345"
-    ing = Ingredient(id_ingredient=None, nom_ingredient=nom_test, desc_ingredient="desc")
+    ing = Ingredient(
+        id_ingredient=None, nom_ingredient=nom_test, desc_ingredient="desc"
+    )
 
     # WHEN
     ok = InventaireDao().ajouter_ingredient_inventaire(id_user, ing)
@@ -78,7 +80,9 @@ def test_ajouter_ingredient_inventaire_existant_par_nom():
     match = _find_in_inventory(inv, nom_test)
     assert match is not None
     # Vérifie qu'il n'y a qu'une seule entrée pour ce nom (pas de doublon)
-    assert sum(1 for x in inv if (x.nom_ingredient or "").lower() == nom_test.lower()) == 1
+    assert (
+        sum(1 for x in inv if (x.nom_ingredient or "").lower() == nom_test.lower()) == 1
+    )
 
 
 def test_ajouter_ingredient_inventaire_avec_id_deja_renseigne():
@@ -88,13 +92,17 @@ def test_ajouter_ingredient_inventaire_avec_id_deja_renseigne():
     nom_test = "ZZZ_Test_Vodka_12345"
 
     # On crée d'abord l'ingrédient via une première insertion (pour récupérer son id)
-    ing_base = Ingredient(id_ingredient=None, nom_ingredient=nom_test, desc_ingredient="d")
+    ing_base = Ingredient(
+        id_ingredient=None, nom_ingredient=nom_test, desc_ingredient="d"
+    )
     assert InventaireDao().ajouter_ingredient_inventaire(id_user, ing_base) is False
     assert ing_base.id_ingredient is None
 
     # On réutilise le même id pour un nouvel ajout
     ing2 = Ingredient(
-        id_ingredient=ing_base.id_ingredient, nom_ingredient=nom_test, desc_ingredient="d2"
+        id_ingredient=ing_base.id_ingredient,
+        nom_ingredient=nom_test,
+        desc_ingredient="d2",
     )
 
     # WHEN
@@ -107,10 +115,22 @@ def test_ajouter_ingredient_inventaire_avec_id_deja_renseigne():
 @pytest.mark.parametrize(
     "user_id, ing, expected",
     [
-        (0, Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None), False),
-        (-1, Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None), False),
+        (
+            0,
+            Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None),
+            False,
+        ),
+        (
+            -1,
+            Ingredient(id_ingredient=None, nom_ingredient="x", desc_ingredient=None),
+            False,
+        ),
         (1, None, False),
-        (1, Ingredient(id_ingredient=None, nom_ingredient="   ", desc_ingredient=None), False),
+        (
+            1,
+            Ingredient(id_ingredient=None, nom_ingredient="   ", desc_ingredient=None),
+            False,
+        ),
     ],
 )
 def test_ajouter_ingredient_inventaire_entrees_invalides(user_id, ing, expected):
@@ -125,7 +145,9 @@ def test_ajouter_ingredient_inventaire_exception_gracefully():
     On vérifie au moins qu'une entrée invalide renvoie False (déjà couvert ci-dessus).
     """
     assert (
-        InventaireDao().ajouter_ingredient_inventaire("not_an_int", Ingredient(None, "x", None))
+        InventaireDao().ajouter_ingredient_inventaire(
+            "not_an_int", Ingredient(None, "x", None)
+        )
         is False
     )
 
@@ -155,7 +177,9 @@ def test_supprimer_ingredient_succes():
 def test_supprimer_ingredient_aucune_ligne():
     """Suppression d'un lien inexistant -> False."""
     id_user = 4
-    res = InventaireDao().supprimer_ingredient(id_user, 999999)  # id ingredient très improbable
+    res = InventaireDao().supprimer_ingredient(
+        id_user, 999999
+    )  # id ingredient très improbable
     assert res is False
 
 
@@ -185,7 +209,8 @@ def test_consulter_inventaire_ok():
     nom_b = "ZZZ_Test_List_B_12345"
     for n in (nom_a, nom_b):
         InventaireDao().ajouter_ingredient_inventaire(
-            id_user, Ingredient(id_ingredient=None, nom_ingredient=n, desc_ingredient=None)
+            id_user,
+            Ingredient(id_ingredient=None, nom_ingredient=n, desc_ingredient=None),
         )
 
     # WHEN

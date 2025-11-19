@@ -88,7 +88,9 @@ def test_lister_cocktails_partiels_ok():
     service = CocktailService()
 
     # WHEN
-    res = service.lister_cocktails_partiels(nb_manquants=1, id_utilisateur=1, est_majeur=True)
+    res = service.lister_cocktails_partiels(
+        nb_manquants=1, id_utilisateur=1, est_majeur=True
+    )
 
     # THEN
     assert len(res) == 3
@@ -101,7 +103,9 @@ def test_lister_cocktails_partiels_nb_manquants_invalide():
 
     # WHEN / THEN
     with pytest.raises(ValueError):
-        service.lister_cocktails_partiels(nb_manquants=6, id_utilisateur=1, est_majeur=True)
+        service.lister_cocktails_partiels(
+            nb_manquants=6, id_utilisateur=1, est_majeur=True
+        )
 
 
 def test_cocktails_aleatoires_ok():
@@ -220,7 +224,9 @@ def test_lister_cocktails_partiels_sans_utilisateur():
 
     # WHEN / THEN
     with pytest.raises(ValueError) as exc_info:
-        service.lister_cocktails_partiels(nb_manquants=1, id_utilisateur=None, est_majeur=True)
+        service.lister_cocktails_partiels(
+            nb_manquants=1, id_utilisateur=None, est_majeur=True
+        )
     assert "connexion est requise" in str(exc_info.value)
 
 
@@ -231,7 +237,9 @@ def test_lister_cocktails_partiels_nb_manquants_negatif():
 
     # WHEN / THEN
     with pytest.raises(ValueError) as exc_info:
-        service.lister_cocktails_partiels(nb_manquants=-1, id_utilisateur=1, est_majeur=True)
+        service.lister_cocktails_partiels(
+            nb_manquants=-1, id_utilisateur=1, est_majeur=True
+        )
     assert "doit être compris entre 0 et 5" in str(exc_info.value)
 
 
@@ -324,7 +332,9 @@ def test_obtenir_ingredients_par_cocktails_ok():
     """Test obtenir_ingredients_par_cocktails"""
     # GIVEN
     ingredients_attendus = {1: ["Rhum", "Menthe"], 2: ["Vodka", "Jus d'orange"]}
-    CocktailDao().obtenir_ingredients_par_cocktails = MagicMock(return_value=ingredients_attendus)
+    CocktailDao().obtenir_ingredients_par_cocktails = MagicMock(
+        return_value=ingredients_attendus
+    )
     service = CocktailService()
 
     # WHEN
@@ -357,7 +367,9 @@ def test_obtenir_ingredients_possedes_par_cocktails_ok():
     service = CocktailService()
 
     # WHEN
-    res = service.obtenir_ingredients_possedes_par_cocktails(id_utilisateur=1, id_cocktails=[1, 2])
+    res = service.obtenir_ingredients_possedes_par_cocktails(
+        id_utilisateur=1, id_cocktails=[1, 2]
+    )
 
     # THEN
     assert res == ingredients_attendus
@@ -372,7 +384,9 @@ def test_obtenir_ingredients_possedes_par_cocktails_liste_vide():
     service = CocktailService()
 
     # WHEN
-    res = service.obtenir_ingredients_possedes_par_cocktails(id_utilisateur=1, id_cocktails=[])
+    res = service.obtenir_ingredients_possedes_par_cocktails(
+        id_utilisateur=1, id_cocktails=[]
+    )
 
     # THEN
     assert res == {}

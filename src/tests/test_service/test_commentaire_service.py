@@ -61,7 +61,9 @@ def test_lister_commentaires_aucun():
 # -----------------------------
 def test_obtenir_commentaire_utilisateur_ok():
     """Renvoie un commentaire existant."""
-    CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(return_value=COM_LISTE[0])
+    CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(
+        return_value=COM_LISTE[0]
+    )
     service = CommentaireService()
 
     com = service.obtenir_commentaire_utilisateur(3, 0)
@@ -120,7 +122,9 @@ def test_ajouter_commentaire_ok():
 
 def test_ajouter_commentaire_deja_existant():
     """Erreur si l'utilisateur a déjà commenté"""
-    CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(return_value=COM_LISTE[0])
+    CommentaireDao().trouver_par_utilisateur_et_cocktail = MagicMock(
+        return_value=COM_LISTE[0]
+    )
     service = CommentaireService()
 
     with pytest.raises(ValueError):

@@ -420,7 +420,9 @@ def test_suppression_complete_utilisateur():
     assert creation_ok
 
     # WHEN - Suppression de l'inventaire d'abord, puis de l'utilisateur
-    suppression_inventaire = UtilisateurDao().supprimer_inventaire(utilisateur.id_utilisateur)
+    suppression_inventaire = UtilisateurDao().supprimer_inventaire(
+        utilisateur.id_utilisateur
+    )
     suppression_utilisateur = UtilisateurDao().supprimer_utilisateur(utilisateur)
 
     # THEN

@@ -106,7 +106,14 @@ class CocktailService:
             )
 
         cocktails = CocktailDao().rechercher_cocktails(
-            nom_cocktail, categ, verre, alcool, liste_ingredients, langue, limite, decalage
+            nom_cocktail,
+            categ,
+            verre,
+            alcool,
+            liste_ingredients,
+            langue,
+            limite,
+            decalage,
         )
 
         # Filtrer si mineur
@@ -149,7 +156,9 @@ class CocktailService:
         if not id_utilisateur:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
-        cocktails = CocktailDao().cocktail_complet(id_utilisateur, langue, limite, decalage)
+        cocktails = CocktailDao().cocktail_complet(
+            id_utilisateur, langue, limite, decalage
+        )
 
         # Filtrer si mineur
         if est_majeur is False:
@@ -159,7 +168,13 @@ class CocktailService:
 
     @log
     def lister_cocktails_partiels(
-        self, nb_manquants, id_utilisateur, est_majeur, langue=None, limite=10, decalage=0
+        self,
+        nb_manquants,
+        id_utilisateur,
+        est_majeur,
+        langue=None,
+        limite=10,
+        decalage=0,
     ) -> list[Cocktail]:
         """
         Liste tous les cocktails que l'utilisateur peut préparer avec au plus
@@ -191,7 +206,9 @@ class CocktailService:
             Si nb_manquants est négatif, si l'ID utilisateur est manquant ou invalide.
         """
         if nb_manquants < 0 or nb_manquants > 5:
-            raise ValueError("Le nombre d'ingrédients manquants doit être compris entre 0 et 5")
+            raise ValueError(
+                "Le nombre d'ingrédients manquants doit être compris entre 0 et 5"
+            )
 
         if not id_utilisateur:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
@@ -207,7 +224,9 @@ class CocktailService:
         return cocktails if cocktails else []
 
     @log
-    def cocktails_aleatoires(self, est_majeur=None, nb=5, langue=None) -> list[Cocktail]:
+    def cocktails_aleatoires(
+        self, est_majeur=None, nb=5, langue=None
+    ) -> list[Cocktail]:
         """
         Récupérer une liste de cocktails aléatoires.
 
@@ -287,7 +306,9 @@ class CocktailService:
         return cocktails if cocktails else []
 
     @log
-    def obtenir_ingredients_par_cocktails(self, id_cocktails: list[int]) -> dict[int, list[str]]:
+    def obtenir_ingredients_par_cocktails(
+        self, id_cocktails: list[int]
+    ) -> dict[int, list[str]]:
         """
         Récupère tous les ingrédients pour une liste de cocktails
 
@@ -337,5 +358,7 @@ class CocktailService:
                 id_utilisateur=id_utilisateur, id_cocktails=id_cocktails
             )
         except Exception as e:
-            logging.error(f"Erreur dans obtenir_ingredients_possedes_par_cocktails: {str(e)}")
+            logging.error(
+                f"Erreur dans obtenir_ingredients_possedes_par_cocktails: {str(e)}"
+            )
             return {}
