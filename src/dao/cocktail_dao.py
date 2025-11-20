@@ -109,8 +109,8 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktail_complet(
         self,
-        est_majeur,
         id_utilisateur: int,
+        est_majeur: bool = True,
         langue: str = "ENG",
         limite: int = 10,
         decalage: int = 0,
@@ -119,6 +119,8 @@ class CocktailDao(metaclass=Singleton):
 
         Paramètres
         ----------
+        est_majeur : bool
+            age de l'utilisateur >=18
         id_utilisateur : int
             Identifiant de l'utilisateur.
         langue : str
@@ -170,7 +172,7 @@ class CocktailDao(metaclass=Singleton):
                     """
 
                     # --- GESTION DE LA MAJORITÉ ---
-                    if not est_majeur:
+                    if est_majeur is False:
                         query += " AND LOWER(c.alcool) = 'non alcoholic'"
 
                     query += """
@@ -210,9 +212,9 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktail_partiel(
         self,
-        est_majeur,
         id_utilisateur: int,
         nb_manquants: int,
+        est_majeur: bool = True, 
         langue: str = "ENG",
         limite: int = 10,
         decalage: int = 0,
@@ -225,6 +227,8 @@ class CocktailDao(metaclass=Singleton):
             Identifiant de l'utilisateur.
         nb_manquants : int
             Nombre maximal d'ingrédients manquants autorisés.
+        est_majeur : bool
+            age de l'utilisateur >=18
         langue : str
             Langue de l'utilisateur.
         limite : int, optional
@@ -277,7 +281,7 @@ class CocktailDao(metaclass=Singleton):
                     """
 
                     # --- GESTION DE LA MAJORITÉ ---
-                    if not est_majeur:
+                    if est_majeur is False:
                         query += " AND LOWER(c.alcool) = 'non alcoholic'"
 
                     query += """
@@ -319,7 +323,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def rechercher_cocktails(
         self,
-        est_majeur,
+        est_majeur: bool = True, 
         nom_cocktail=None,
         categorie=None,
         verre=None,
@@ -333,6 +337,8 @@ class CocktailDao(metaclass=Singleton):
 
         Paramètres
         ----------
+        est_majeur : bool
+            age de l'utilisateur >=18
         nom_cocktail : str, optional
             Filtre sur le nom du cocktail (insensible à la casse).
         categorie : str, optional
@@ -393,7 +399,7 @@ class CocktailDao(metaclass=Singleton):
                         FROM cocktail c WHERE 1=1
                         """
 
-                    if not est_majeur:
+                    if est_majeur is False:
                         query += " AND LOWER(c.alcool) = 'non alcoholic'"
 
                     elif alcool is not None:
@@ -442,7 +448,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktails_aleatoires(
         self,
-        est_majeur,
+        est_majeur: bool = True, 
         nombre: int = 5,
         langue: str = "ENG",
     ) -> list[Cocktail]:
@@ -480,7 +486,7 @@ class CocktailDao(metaclass=Singleton):
                     params = {"limite": nombre_limite}
 
                     # --- GESTION DE LA MAJORITÉ ---
-                    if not est_majeur:
+                    if est_majeur is False:
                         query += " AND LOWER(alcool) = 'non alcoholic'"
 
                     query += " ORDER BY RANDOM() LIMIT %(limite)s;"
