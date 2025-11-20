@@ -92,9 +92,12 @@ def supprime_ingredient(
     """
     try:
         requete = service_inventaire.recherche_ingredient(demande_ingredient)
-        return service_inventaire.supprimer(
-            utilisateur.id_utilisateur, requete.id_ingredient
-        )
+        if service_inventaire.supprimer(
+            utilisateur.id_utilisateur, requete.id_ingredient):
+            return {"Information": "L'ingrédient a été supprimé de l'inventaire !"}
+        elif not service_inventaire.supprimer(
+            utilisateur.id_utilisateur, requete.id_ingredient):
+            return {"Information": "Vous ne possédez pas cet ingrédient dans votre inventaire !"}
 
     except Exception as e:
         print("DEBUG /inventaire/vue: exception", e)
