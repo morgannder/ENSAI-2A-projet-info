@@ -1,45 +1,46 @@
-# ENSAI 2A Projet Info - Groupe 10
+# ENSAI 2A Information Project - Group 10
 
-Tuteur : Elwenn Joubrel
+Tutor: Elwenn Joubrel
 
-Membres : Isabelle KANTOUSSAN, Sérine OUARAS, Morgann DERICK, Antoine FOUCART
+Members: Isabelle KANTOUSSAN, Sérine OUARAS, Morgann DERICK, Antoine FOUCART
 
-À Portée De Verre : gestion de bar personnel et suggestion de cocktails
-
-
-# Présentation et description du Projet
-
-Ce projet propose une application pratique et ludique pour la préparation de cocktails.
-
-Les utilisateurs peuvent découvrir les recettes qu'ils peuvent réaliser avec les ingrédients dont ils disposent, ou celles pour lesquelles il ne manque que quelques éléments.
-
-Le projet repose sur une API REST utilisant les données de [TheCocktailDB](https://www.thecocktaildb.com/), fournissant plusieurs informations de centaines de cocktails.
-
-Les utilisateurs peuvent rechercher des recettes, filtrer les résultats et, s’ils sont authentifiés, gérer leur stock d’ingrédients pour obtenir :
-- les cocktails réalisables immédiatement
-- les cocktails proches, nécessitant peu d’ingrédients supplémentaires
-
-De plus, ils peuvent laisser des commentaires sur les cocktails souhaités et consulter les avis d’autres utilisateurs.
+À Portée De Verre: personal bar management and cocktail suggestion tool
 
 
+# Project Overview and Description
 
-## Outils utilisés
+This project provides a practical and entertaining application for cocktail preparation.
+
+Users can explore recipes they can make with the ingredients they already have, or recipes for which they only need a few additional elements.
+
+The project is based on a REST API using data from [TheCocktailDB](https://www.thecocktaildb.com/), providing information on hundreds of cocktails.
+
+Users can search for recipes, filter results, and—if authenticated—manage their ingredient inventory to obtain:
+- cocktails they can make immediately
+- cocktails that are close to being achievable, requiring only a few extra ingredients
+
+Additionally, they can leave comments on cocktails and view reviews from other users.
+
+
+## Tools Used
 
 - [Visual Studio Code](https://code.visualstudio.com/)
 - [Python 3.13](https://www.python.org/)
 - [Git](https://git-scm.com/)
-- Une base de données [PostgreSQL](https://www.postgresql.org/)
-- [FastAPI](https://fastapi.tiangolo.com/) (Pour notre webservice)
+- A [PostgreSQL](https://www.postgresql.org/) database
+- [FastAPI](https://fastapi.tiangolo.com/) (for our web service)
 
 
-### Connexion DB & Webservice
-- [ ] Ouvrir VS_Code avec port 5432 ouvert (via network access)
-- [ ] Installer les packages nécessaires via l'environnement virtuelle :
+### DB Connection & Webservice Setup
+
+- [ ] Open VS Code with port 5432 accessible (via network access)
+- [ ] Install the required packages using the virtual environment:
+
 ```bash
 pip install -r requirements.txt
 pip list
 ```
-- [ ] Créer et remplir un fichier .env de la sorte avec les données fournies par POSTGRES:
+- [ ] Create and fill a .env file like the following, using the PostgreSQL credentials provided:
 
         POSTGRES_HOST=
         POSTGRES_PORT=
@@ -55,38 +56,38 @@ pip list
 
 
 
-## Descriptions de l'arborescence du projet
+## Project Directory Structure
 
-###  Structure des dossiers
+###  Folder Structure
 
-| Dossier | Description |
+| Folder | Description |
 |---------|-------------|
-| **`data/`** | Base de données et fichiers de données persistantes |
-| **`doc/`** | Fichiers liés à la gestion du groupe (suivis aux fils des semaines) ainsi qu'aux détails superficielles de notre application (diagrammes, idées de fonctionnalités) |
-| **`extractAPI/`** | Scripts d'extraction et d'import de données |
-| **`logs/`** | Contient les logs des activités de l'utilisateur |
+| **`data/`** | Database and persistent data files |
+| **`doc/`** | Files related to group management (weekly progress) and non-essential application details (diagrams, feature ideas) |
+| **`extractAPI/`** | Scripts for data extraction and import |
+| **`logs/`** | Contains logs of user activity |
 
 
-### Code Source - `src/`
+### Source Code - `src/`
 
-| Dossier | Description |
+| Folder | Description |
 |---------|-------------|
-| **`src/app/`** | Application principale FastAPI qui regroupe tous les endpoints et fonctions internes|
-| **`src/app/api/endpoints/`** | Routes et contrôleurs de l'API REST |
-| **`src/app/core/`** | Configurations et services essentiels au bon foncitonnement de l'application|
-| **`src/app/business_object/`** | Objets métier et entités du domaine (Utilisateur/Inventaire/Cocktail) |
+| **`src/app/`** | Main FastAPI application containing all endpoints and internal functions|
+| **`src/app/api/endpoints/`** | Routes and controllers for the REST API |
+| **`src/app/core/`** | Core configurations and essential services for the application|
+| **`src/app/business_object/`** | Business objects and domain entities (User / Inventory / Cocktail) |
 | **`src/app/dao/`** | Data Access Objects (DAO) |
-| **`src/app/service/`** | Services et logique applicative |
-| **`src/app/tests/`** | Tests unitaires et d'intégration (services et DAO)|
-| **`src/app/utils/`** | Fonctions annexes et utilities |
+| **`src/app/service/`** | Services and application logic |
+| **`src/app/tests/`** | Unit and integration tests (services & DAO)|
+| **`src/app/utils/`** | Utility and helper functions |
 
 
 
 
 
 
-## Lancement du webservice
+## Running the Webservice
 
-L'application principal se lance via le main
+The main application is launched via:
 
 - [ ] `python main.py`
