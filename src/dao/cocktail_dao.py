@@ -109,6 +109,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktail_complet(
         self,
+        est_majeur,
         id_utilisateur: int,
         langue: str = "ENG",
         limite: int = 10,
@@ -144,8 +145,7 @@ class CocktailDao(metaclass=Singleton):
                     # 2) cocktail_ingredient_count : nombre d'ingrédients requis par cocktail
                     # 3) cocktail_matching_ingredients : nombre d'ingrédients disponibles pour chaque cocktail dans l'inventaire
                     # On sélectionne les cocktails dont total_ingredients == matching_ingredients
-                    cursor.execute(
-                        f"""
+                    query = f"""
                         WITH user_ingredients AS (
                             SELECT id_ingredient
                             FROM inventaire_ingredient
@@ -167,9 +167,19 @@ class CocktailDao(metaclass=Singleton):
                         JOIN cocktail_ingredient_count cic ON c.id_cocktail = cic.id_cocktail
                         JOIN cocktail_matching_ingredients cmi ON c.id_cocktail = cmi.id_cocktail
                         WHERE cic.total_ingredients = cmi.matching_ingredients
+                    """
+
+                    # --- GESTION DE LA MAJORITÉ ---
+                    if not est_majeur:
+                        query += " AND LOWER(c.alcool) = 'non alcoholic'"
+
+                    query += """
                         ORDER BY c.nom_cocktail
                         LIMIT %(limite)s OFFSET %(decalage)s;
-                        """,
+                    """
+
+                    cursor.execute(
+                        query,
                         {
                             "id_utilisateur": id_utilisateur,
                             "limite": limite,
@@ -200,6 +210,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktail_partiel(
         self,
+        est_majeur,
         id_utilisateur: int,
         nb_manquants: int,
         langue: str = "ENG",
@@ -242,8 +253,7 @@ class CocktailDao(metaclass=Singleton):
                     # ex: Mojito 5 ingrédients, utilisateur n'a que "eau" -> avec INNER JOIN il disparaît, LEFT JOIN permet de le garder
                     # 3) Sélection finale : cocktails avec <= nb_manquants ingrédients manquants, triés par nombre d'ingrédients manquants puis par nom, avec pagination LIMIT/OFFSET
 
-                    cursor.execute(
-                        f"""
+                    query = f"""
                         WITH cocktail_ingredient_count AS (
                             SELECT id_cocktail, COUNT(*) AS total_ingredients
                             FROM cocktail_ingredient
@@ -264,11 +274,21 @@ class CocktailDao(metaclass=Singleton):
                         JOIN cocktail_matching_ingredients cmi ON c.id_cocktail = cmi.id_cocktail
                         WHERE (cic.total_ingredients - cmi.matching_ingredients) <= %(nb_manquants)s
                         AND (cic.total_ingredients - cmi.matching_ingredients) >= 1
+                    """
+
+                    # --- GESTION DE LA MAJORITÉ ---
+                    if not est_majeur:
+                        query += " AND LOWER(c.alcool) = 'non alcoholic'"
+
+                    query += """
                         ORDER BY
                             (cic.total_ingredients - cmi.matching_ingredients) ASC,
                             c.nom_cocktail
                         LIMIT %(limite)s OFFSET %(decalage)s;
-                        """,
+                    """
+
+                    cursor.execute(
+                        query,
                         {
                             "id_utilisateur": id_utilisateur,
                             "nb_manquants": nb_manquants,
@@ -299,6 +319,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def rechercher_cocktails(
         self,
+        est_majeur,
         nom_cocktail=None,
         categorie=None,
         verre=None,
@@ -372,6 +393,13 @@ class CocktailDao(metaclass=Singleton):
                         FROM cocktail c WHERE 1=1
                         """
 
+                    if not est_majeur:
+                        query += " AND LOWER(c.alcool) = 'non alcoholic'"
+
+                    elif alcool is not None:
+                        query += " AND LOWER(c.alcool) = LOWER(%(alcool)s)"
+                        params["alcool"] = alcool.lower()
+
                     if nom_cocktail is not None:
                         query += " AND nom_cocktail ILIKE %(nom_cocktail)s"
                         params["nom_cocktail"] = f"%{nom_cocktail}%"
@@ -384,9 +412,6 @@ class CocktailDao(metaclass=Singleton):
                         query += " AND LOWER(verre) = LOWER(%(verre)s)"
                         params["verre"] = verre.lower()
 
-                    if alcool is not None:
-                        query += " AND LOWER(alcool)= LOWER( %(alcool)s)"
-                        params["alcool"] = alcool.lower()
 
                     # Tri et pagination
                     query += (
@@ -417,6 +442,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktails_aleatoires(
         self,
+        est_majeur,
         nombre: int = 5,
         langue: str = "ENG",
     ) -> list[Cocktail]:
@@ -424,6 +450,8 @@ class CocktailDao(metaclass=Singleton):
 
         Paramètres
         ----------
+        est_majeur : bool
+            age de l'utilisateur >=18
         nombre : int, optional
             Nombre de cocktails à sélectionner (par défaut 5)
         langue : str
@@ -443,13 +471,21 @@ class CocktailDao(metaclass=Singleton):
                 with connection.cursor() as cursor:
                     nombre_limite = min(max(1, nombre), 5)
 
-                    cursor.execute(
-                        f"""SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions
+                    query = f"""
+                        SELECT id_cocktail, nom_cocktail, categorie, alcool, image_url, verre, {col_instructions} AS instructions
                         FROM cocktail
-                        ORDER BY RANDOM()
-                        LIMIT %(limite)s;""",
-                        {"limite": nombre_limite},
-                    )
+                        WHERE 1=1
+                    """
+
+                    params = {"limite": nombre_limite}
+
+                    # --- GESTION DE LA MAJORITÉ ---
+                    if not est_majeur:
+                        query += " AND LOWER(alcool) = 'non alcoholic'"
+
+                    query += " ORDER BY RANDOM() LIMIT %(limite)s;"
+
+                    cursor.execute(query, params)
                     rows = cursor.fetchall()
 
                     return [

@@ -106,6 +106,7 @@ class CocktailService:
             )
 
         cocktails = CocktailDao().rechercher_cocktails(
+            est_majeur,
             nom_cocktail,
             categ,
             verre,
@@ -116,9 +117,6 @@ class CocktailService:
             decalage,
         )
 
-        # Filtrer si mineur
-        if est_majeur is False:
-            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
@@ -157,12 +155,9 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_complet(
-            id_utilisateur, langue, limite, decalage
+            est_majeur, id_utilisateur, langue, limite, decalage
         )
 
-        # Filtrer si mineur
-        if est_majeur is False:
-            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
@@ -214,12 +209,9 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_partiel(
-            id_utilisateur, nb_manquants, langue, limite, decalage
+            est_majeur,id_utilisateur, nb_manquants, langue, limite, decalage
         )
 
-        # Filtrer si mineur
-        if est_majeur is False:
-            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
@@ -254,11 +246,8 @@ class CocktailService:
 
         # Dans tous les cas on ne renverra pas plus de 5
         nb_limite = min(nb, 5)
-        cocktails = CocktailDao().cocktails_aleatoires(nb_limite, langue)
+        cocktails = CocktailDao().cocktails_aleatoires(est_majeur,nb_limite, langue)
 
-        # Filtrer si mineur
-        if est_majeur is False:
-            cocktails = self._filter_cocktails_pour_mineurs(cocktails)
 
         return cocktails if cocktails else []
 
