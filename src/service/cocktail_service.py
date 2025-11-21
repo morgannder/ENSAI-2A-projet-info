@@ -117,7 +117,6 @@ class CocktailService:
             decalage,
         )
 
-
         return cocktails if cocktails else []
 
     @log
@@ -157,7 +156,6 @@ class CocktailService:
         cocktails = CocktailDao().cocktail_complet(
             est_majeur, id_utilisateur, langue, limite, decalage
         )
-
 
         return cocktails if cocktails else []
 
@@ -209,9 +207,8 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_partiel(
-            est_majeur,id_utilisateur, nb_manquants, langue, limite, decalage
+            est_majeur, id_utilisateur, nb_manquants, langue, limite, decalage
         )
-
 
         return cocktails if cocktails else []
 
@@ -246,8 +243,7 @@ class CocktailService:
 
         # Dans tous les cas on ne renverra pas plus de 5
         nb_limite = min(nb, 5)
-        cocktails = CocktailDao().cocktails_aleatoires(est_majeur,nb_limite, langue)
-
+        cocktails = CocktailDao().cocktails_aleatoires(est_majeur, nb_limite, langue)
 
         return cocktails if cocktails else []
 

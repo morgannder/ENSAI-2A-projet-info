@@ -214,7 +214,7 @@ class CocktailDao(metaclass=Singleton):
         self,
         id_utilisateur: int,
         nb_manquants: int,
-        est_majeur: bool = True, 
+        est_majeur: bool = True,
         langue: str = "ENG",
         limite: int = 10,
         decalage: int = 0,
@@ -323,7 +323,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def rechercher_cocktails(
         self,
-        est_majeur: bool = True, 
+        est_majeur: bool = True,
         nom_cocktail=None,
         categorie=None,
         verre=None,
@@ -418,7 +418,6 @@ class CocktailDao(metaclass=Singleton):
                         query += " AND LOWER(verre) = LOWER(%(verre)s)"
                         params["verre"] = verre.lower()
 
-
                     # Tri et pagination
                     query += (
                         " ORDER BY nom_cocktail LIMIT %(limite)s OFFSET %(decalage)s;"
@@ -448,7 +447,7 @@ class CocktailDao(metaclass=Singleton):
     @log
     def cocktails_aleatoires(
         self,
-        est_majeur: bool = True, 
+        est_majeur: bool = True,
         nombre: int = 5,
         langue: str = "ENG",
     ) -> list[Cocktail]:

@@ -26,7 +26,7 @@ def test_cocktail_complet_ok(setup_test_environment):
 
     # Given
     id_utilisateur = 3
-    est_majeur=True
+    est_majeur = True
 
     # WHEN
     cocktails = CocktailDao().cocktail_complet(est_majeur, id_utilisateur)
@@ -49,7 +49,7 @@ def test_cocktail_complet_ko(setup_test_environment):
 
     # Given
     id_utilisateur = 6
-    est_majeur=True
+    est_majeur = True
     # WHEN
     cocktails = CocktailDao().cocktail_complet(est_majeur, id_utilisateur)
 
@@ -67,7 +67,7 @@ def test_cocktail_partiel(setup_test_environment):
     # Given
     id_utilisateur = 3
     nb_manquants = 2
-    est_majeur=True
+    est_majeur = True
 
     # WHEN
     cocktails = CocktailDao().cocktail_partiel(est_majeur, id_utilisateur, nb_manquants)
@@ -100,7 +100,7 @@ def test_rechercher_multi_filtres(setup_test_environment):
 
     # WHEN
     cocktails = CocktailDao().rechercher_cocktails(
-        est_majeur,nom_cocktail, categorie, verre, alcool
+        est_majeur, nom_cocktail, categorie, verre, alcool
     )
 
     # THEN
@@ -117,7 +117,7 @@ def test_cocktails_aleatoires(setup_test_environment):
 
     # GIVEN
     nb = 2
-    est_majeur=True
+    est_majeur = True
 
     # WHEN
     cocktails = CocktailDao().cocktails_aleatoires(est_majeur, nb)
@@ -273,7 +273,7 @@ def test_cocktail_complet_success(setup_test_environment):
         mock_cursor.fetchall.return_value = mock_rows
 
         result = dao.cocktail_complet(
-            est_majeur=True,id_utilisateur=1, langue="FRA", limite=5, decalage=0
+            est_majeur=True, id_utilisateur=1, langue="FRA", limite=5, decalage=0
         )
 
     # THEN
@@ -295,7 +295,7 @@ def test_cocktail_complet_sortie_vide(setup_test_environment):
         )
         mock_cursor.fetchall.return_value = []
 
-        result = dao.cocktail_complet(est_majeur=True,id_utilisateur=1)
+        result = dao.cocktail_complet(est_majeur=True, id_utilisateur=1)
 
     # THEN
     assert result == []
@@ -310,7 +310,9 @@ def test_cocktail_complet_pagination():
         mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
 
         # WHEN
-        result = dao.cocktail_complet(est_majeur=True,id_utilisateur=3, limite=5, decalage=10)
+        result = dao.cocktail_complet(
+            est_majeur=True, id_utilisateur=3, limite=5, decalage=10
+        )
 
         # THEN
         assert result == []  # Car fetchall retourne une liste vide
@@ -348,7 +350,9 @@ def test_cocktail_partiel_succes(setup_test_environment):
         )
         mock_cursor.fetchall.return_value = mock_rows
 
-        result = dao.cocktail_partiel(est_majeur=True,id_utilisateur=1, nb_manquants=2, langue="ENG")
+        result = dao.cocktail_partiel(
+            est_majeur=True, id_utilisateur=1, nb_manquants=2, langue="ENG"
+        )
 
     # THEN
     assert len(result) == 1
@@ -415,7 +419,7 @@ def test_cocktails_aleatoires_succes(setup_test_environment):
         )
         mock_cursor.fetchall.return_value = mock_rows
 
-        result = dao.cocktails_aleatoires(est_majeur=True,nombre=3, langue="FRA")
+        result = dao.cocktails_aleatoires(est_majeur=True, nombre=3, langue="FRA")
 
     # THEN
     assert len(result) == 1
@@ -596,8 +600,6 @@ def test_singleton_pattern(setup_test_environment):
 
     # THEN
     assert dao1 is dao2
-
-
 
 
 # ==================== Tests d'erreurs de base de données ====================
