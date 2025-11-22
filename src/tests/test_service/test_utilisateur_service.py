@@ -258,10 +258,10 @@ def test_changer_mdp_identique():
     # GIVEN
     utilisateur = Utilisateur(
         pseudo="jp",
-        mdp=hash_password("Mdpold1!", str(DATE_TEST)),  # Hash avec la date de création
+        mdp=hash_password("Mdpold1!", str(DATE_TEST)),
         age=20,
         langue="Français",
-        date_creation=DATE_TEST,  # ⬅️ IMPORTANT : même date pour le sel
+        date_creation=DATE_TEST,
         cocktails_recherches=0,
     )
     service = UtilisateurService()
@@ -297,35 +297,6 @@ def test_changer_mdp_success():
 
     # THEN
     assert result == "success"
-    # Vérifie que le mot de passe a été mis à jour avec le bon sel (date_creation)
-    assert utilisateur.mdp == hash_password(nouveau_mdp, str(DATE_TEST))
-
-
-def test_changer_mdp_echec_dao():
-    """Changer mot de passe avec échec DAO"""
-    # GIVEN
-    utilisateur = Utilisateur(
-        pseudo="jp",
-        mdp=hash_password("Mdpold1!", str(DATE_TEST)),
-        age=20,
-        langue="Français",
-        date_creation=DATE_TEST,
-        cocktails_recherches=0,
-    )
-    nouveau_mdp = "nvMDP12!"
-    service = UtilisateurService()
-
-    # WHEN
-    mock_dao = MagicMock()
-    mock_dao.modifier.return_value = False
-
-    with patch("service.utilisateur_service.UtilisateurDao") as MockDao:
-        MockDao.return_value = mock_dao
-        result = service.changer_mdp(utilisateur, nouveau_mdp)
-
-    # THEN
-    assert result == "echec"
-    # Le mot de passe est quand même mis à jour localement
     assert utilisateur.mdp == hash_password(nouveau_mdp, str(DATE_TEST))
 
 

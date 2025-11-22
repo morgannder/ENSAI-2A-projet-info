@@ -50,11 +50,10 @@ def test_creer_commentaire_note_invalide():
 # ----------------------------------------------------------------------
 def test_trouver_par_cocktail_existant():
     """Récupération de commentaires pour un cocktail existant."""
-    id_cocktail = 0  # Mojito dans la base test
+    id_cocktail = 0
     commentaires = CommentaireDao().trouver_par_cocktail(id_cocktail)
     assert isinstance(commentaires, list)
     assert len(commentaires) > 0
-    # Vérifie que les objets sont bien de type Commentaire
     assert all(isinstance(c, Commentaire) for c in commentaires)
 
 
@@ -86,7 +85,6 @@ def test_trouver_par_utilisateur_et_cocktail_inexistant():
 # ----------------------------------------------------------------------
 def test_supprimer_commentaire_existant():
     """Suppression d'un commentaire existant -> True"""
-    # Créer un commentaire pour tester la suppression
     com = Commentaire(id_utilisateur=1, id_cocktail=2, texte="À supprimer", note=3)
     CommentaireDao().creer(com)
     assert com.id_commentaire is not None
@@ -94,7 +92,6 @@ def test_supprimer_commentaire_existant():
     ok = CommentaireDao().supprimer(com.id_commentaire, com.id_utilisateur)
     assert ok is True
 
-    # Vérifie qu'il n'existe plus
     com_check = CommentaireDao().trouver_par_utilisateur_et_cocktail(
         com.id_utilisateur, com.id_cocktail
     )

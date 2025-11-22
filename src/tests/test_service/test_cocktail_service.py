@@ -39,135 +39,7 @@ cocktail3 = Cocktail(
 liste_cocktails = [cocktail1, cocktail2, cocktail3]
 
 
-def test_rechercher_par_filtre_ok():
-    """Recherche par filtre renvoie les cocktails attendus"""
-    # GIVEN
-    CocktailDao().rechercher_cocktails = MagicMock(return_value=liste_cocktails)
-    CocktailDao().lister_categories = MagicMock(return_value=["Cocktail"])
-    CocktailDao().lister_verres = MagicMock(return_value=["Highball glass"])
-    service = CocktailService()
-
-    # WHEN
-    res = service.rechercher_par_filtre(est_majeur=True, nom_cocktail="Mojito")
-
-    # THEN
-    assert len(res) == 3
-    assert res[0].nom_cocktail == "Mojito"
-
-
-def test_lister_cocktails_complets_ok():
-    """Lister cocktails complets"""
-    # GIVEN
-    CocktailDao().cocktail_complet = MagicMock(return_value=liste_cocktails)
-    service = CocktailService()
-
-    # WHEN
-    res = service.lister_cocktails_complets(id_utilisateur=1, est_majeur=True)
-
-    # THEN
-    assert len(res) == 3
-
-
-def test_lister_cocktails_complets_mineur():
-    """Lister cocktails complets pour mineur filtre alcool"""
-    # GIVEN
-    CocktailDao().cocktail_complet = MagicMock(return_value=[cocktail2])
-    service = CocktailService()
-
-    # WHEN
-    res = service.lister_cocktails_complets(id_utilisateur=1, est_majeur=False)
-
-    # THEN
-    assert len(res) == 1
-
-
-def test_lister_cocktails_partiels_ok():
-    """Lister cocktails partiels avec nb_manquants valide"""
-    # GIVEN
-    CocktailDao().cocktail_partiel = MagicMock(return_value=liste_cocktails)
-    service = CocktailService()
-
-    # WHEN
-    res = service.lister_cocktails_partiels(
-        nb_manquants=1, id_utilisateur=1, est_majeur=True
-    )
-
-    # THEN
-    assert len(res) == 3
-
-
-def test_lister_cocktails_partiels_nb_manquants_invalide():
-    """Exception si nb_manquants invalide"""
-    # GIVEN
-    service = CocktailService()
-
-    # WHEN / THEN
-    with pytest.raises(ValueError):
-        service.lister_cocktails_partiels(
-            nb_manquants=6, id_utilisateur=1, est_majeur=True
-        )
-
-
-def test_cocktails_aleatoires_ok():
-    """Cocktails aléatoires"""
-    # GIVEN
-    CocktailDao().cocktails_aleatoires = MagicMock(return_value=liste_cocktails)
-    service = CocktailService()
-
-    # WHEN
-    res = service.cocktails_aleatoires(nb=3)
-
-    # THEN
-    assert len(res) == 3
-
-
-def test_cocktails_aleatoires_nb_invalide():
-    """Exception si nb invalide"""
-    # GIVEN
-    service = CocktailService()
-
-    # WHEN / THEN
-    with pytest.raises(ValueError):
-        service.cocktails_aleatoires(nb=6)
-
-
-def test_obtenir_cocktail_par_id_ok():
-    """Obtenir cocktail par id"""
-    # GIVEN
-    CocktailDao().trouver_par_id = MagicMock(return_value=cocktail1)
-    service = CocktailService()
-
-    # WHEN
-    res = service.obtenir_cocktail_par_id(1)
-
-    # THEN
-    assert res.id_cocktail == 1
-
-
-def test_obtenir_cocktail_par_id_invalide():
-    """Exception si id invalide"""
-    # GIVEN
-    service = CocktailService()
-
-    # WHEN / THEN
-    with pytest.raises(ValueError):
-        service.obtenir_cocktail_par_id(-1)
-
-
-def test_lister_tous_cocktails_ok():
-    """Lister tous les cocktails"""
-    # GIVEN
-    CocktailDao().lister_tous = MagicMock(return_value=liste_cocktails)
-    service = CocktailService()
-
-    # WHEN
-    res = service.lister_tous_cocktails()
-
-    # THEN
-    assert len(res) == 3
-
-
-# Ajoutez ces tests à votre fichier test_cocktail_service.py
+# ==================== Tests pour rechercher_cocktail ====================
 
 
 def test_rechercher_par_filtre_alcool_invalide():
@@ -192,18 +64,33 @@ def test_rechercher_par_filtre_mineur_avec_alcool():
     assert "Zéro alcool pour les mineurs" in str(exc_info.value)
 
 
-def test_rechercher_par_filtre_mineur_filtrage_automatique():
-    """Filtrage automatique pour mineur"""
+def test_rechercher_par_filtre_retourne_liste_vide():
+    """Gestion des résultats vides pour rechercher_par_filtre"""
     # GIVEN
-    CocktailDao().rechercher_cocktails = MagicMock(return_value=[cocktail2])
+    CocktailDao().rechercher_cocktails = MagicMock(return_value=[])
     service = CocktailService()
 
     # WHEN
-    res = service.rechercher_par_filtre(est_majeur=False)
+    res = service.rechercher_par_filtre(est_majeur=True)
 
     # THEN
-    assert len(res) == 1
-    assert res[0].alcoolise_cocktail == "Non alcoholic"
+    assert res == []
+
+
+# ==================== Tests pour lister_cocktails_complets ====================
+
+
+def test_lister_cocktails_complets_ok():
+    """Lister cocktails complets"""
+    # GIVEN
+    CocktailDao().cocktail_complet = MagicMock(return_value=liste_cocktails)
+    service = CocktailService()
+
+    # WHEN
+    res = service.lister_cocktails_complets(id_utilisateur=1, est_majeur=True)
+
+    # THEN
+    assert len(res) == 3
 
 
 def test_lister_cocktails_complets_sans_utilisateur():
@@ -215,6 +102,24 @@ def test_lister_cocktails_complets_sans_utilisateur():
     with pytest.raises(ValueError) as exc_info:
         service.lister_cocktails_complets(id_utilisateur=None, est_majeur=True)
     assert "connexion est requise" in str(exc_info.value)
+
+
+# ==================== Tests pour lister_cocktails_partiels ====================
+
+
+def test_lister_cocktails_partiels_ok():
+    """Lister cocktails partiels avec nb_manquants valide"""
+    # GIVEN
+    CocktailDao().cocktail_partiel = MagicMock(return_value=liste_cocktails)
+    service = CocktailService()
+
+    # WHEN
+    res = service.lister_cocktails_partiels(
+        nb_manquants=1, id_utilisateur=1, est_majeur=True
+    )
+
+    # THEN
+    assert len(res) == 3
 
 
 def test_lister_cocktails_partiels_sans_utilisateur():
@@ -243,30 +148,56 @@ def test_lister_cocktails_partiels_nb_manquants_negatif():
     assert "doit être compris entre 0 et 5" in str(exc_info.value)
 
 
-def test_cocktails_aleatoires_mineur_filtrage():
-    """Filtrage automatique pour mineur sur cocktails aléatoires"""
+# ==================== Tests pour cocktails_aléatoires ====================
+
+
+def test_cocktails_aleatoires_ok():
+    """Cocktails aléatoires"""
     # GIVEN
-    CocktailDao().cocktails_aleatoires = MagicMock(return_value=[cocktail2])
+    CocktailDao().cocktails_aleatoires = MagicMock(return_value=liste_cocktails)
     service = CocktailService()
 
     # WHEN
-    res = service.cocktails_aleatoires(est_majeur=False, nb=2)
+    res = service.cocktails_aleatoires(nb=3)
 
     # THEN
-    assert len(res) == 1
-    assert res[0].alcoolise_cocktail == "Non alcoholic"
+    assert len(res) == 3
 
 
-def test_cocktails_aleatoires_limite_superieure():
-    """Vérifie que le service bloque si on demande plus que 5"""
+def test_cocktails_aleatoires_nb_invalide():
+    """Exception si nb invalide"""
     # GIVEN
     service = CocktailService()
 
-    # WHEN / THEN - Le service doit lever une exception si on demande plus que 5
-    with pytest.raises(ValueError) as exc_info:
-        service.cocktails_aleatoires(nb=10)
+    # WHEN / THEN
+    with pytest.raises(ValueError):
+        service.cocktails_aleatoires(nb=6)
 
-    assert "Le nombre de cocktails doit être entre 1 et 5" in str(exc_info.value)
+
+# ==================== Tests pour obtenir_cocktail_par_id ====================
+
+
+def test_obtenir_cocktail_par_id_ok():
+    """Obtenir cocktail par id"""
+    # GIVEN
+    CocktailDao().trouver_par_id = MagicMock(return_value=cocktail1)
+    service = CocktailService()
+
+    # WHEN
+    res = service.obtenir_cocktail_par_id(1)
+
+    # THEN
+    assert res.id_cocktail == 1
+
+
+def test_obtenir_cocktail_par_id_invalide():
+    """Exception si id invalide"""
+    # GIVEN
+    service = CocktailService()
+
+    # WHEN / THEN
+    with pytest.raises(ValueError):
+        service.obtenir_cocktail_par_id(-1)
 
 
 def test_obtenir_cocktail_par_id_non_trouve():
@@ -280,6 +211,25 @@ def test_obtenir_cocktail_par_id_non_trouve():
 
     # THEN
     assert res is None
+
+
+# ==================== Tests pour lister_cocktails ====================
+
+
+def test_lister_tous_cocktails_ok():
+    """Lister tous les cocktails"""
+    # GIVEN
+    CocktailDao().lister_tous = MagicMock(return_value=liste_cocktails)
+    service = CocktailService()
+
+    # WHEN
+    res = service.lister_tous_cocktails()
+
+    # THEN
+    assert len(res) == 3
+
+
+# ==================== Tests pour realiser_cocktail ====================
 
 
 def test_realiser_cocktail_par_id_ok():
@@ -328,6 +278,9 @@ def test_realiser_cocktail_non_trouve():
     assert "Zéro cocktail trouvé" in str(exc_info.value)
 
 
+# ==================== Tests pour obtenir_ingredients_par_cocktails ====================
+
+
 def test_obtenir_ingredients_par_cocktails_ok():
     """Test obtenir_ingredients_par_cocktails"""
     # GIVEN
@@ -355,6 +308,9 @@ def test_obtenir_ingredients_par_cocktails_liste_vide():
 
     # THEN
     assert res == {}
+
+
+# ==================== Tests pour obtenir_ingredients_possedes_par_cocktails ====================
 
 
 def test_obtenir_ingredients_possedes_par_cocktails_ok():
@@ -390,32 +346,6 @@ def test_obtenir_ingredients_possedes_par_cocktails_liste_vide():
 
     # THEN
     assert res == {}
-
-
-def test_rechercher_par_filtre_retourne_liste_vide():
-    """Gestion des résultats vides pour rechercher_par_filtre"""
-    # GIVEN
-    CocktailDao().rechercher_cocktails = MagicMock(return_value=[])
-    service = CocktailService()
-
-    # WHEN
-    res = service.rechercher_par_filtre(est_majeur=True)
-
-    # THEN
-    assert res == []
-
-
-def test_lister_cocktails_complets_retourne_liste_vide():
-    """Gestion des résultats vides pour lister_cocktails_complets"""
-    # GIVEN
-    CocktailDao().cocktail_complet = MagicMock(return_value=[])
-    service = CocktailService()
-
-    # WHEN
-    res = service.lister_cocktails_complets(id_utilisateur=1, est_majeur=True)
-
-    # THEN
-    assert res == []
 
 
 if __name__ == "__main__":

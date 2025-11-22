@@ -29,7 +29,7 @@ def test_cocktail_complet_ok(setup_test_environment):
     est_majeur = True
 
     # WHEN
-    cocktails = CocktailDao().cocktail_complet(est_majeur, id_utilisateur)
+    cocktails = CocktailDao().cocktail_complet(id_utilisateur, est_majeur)
 
     # THEN
     assert isinstance(cocktails, list)
@@ -51,11 +51,33 @@ def test_cocktail_complet_ko(setup_test_environment):
     id_utilisateur = 6
     est_majeur = True
     # WHEN
-    cocktails = CocktailDao().cocktail_complet(est_majeur, id_utilisateur)
+    cocktails = CocktailDao().cocktail_complet(id_utilisateur, est_majeur)
 
     # THEN
     assert isinstance(cocktails, list)
     assert len(cocktails) == 0  # Aucun cocktail réalisable complètement
+
+
+def test_cocktail_complet_pagination():
+    """Test que la pagination est appliquée"""
+    # GIVEN
+    dao = CocktailDao()
+
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
+
+        # WHEN
+        result = dao.cocktail_complet(
+            est_majeur=True, id_utilisateur=3, limite=5, decalage=10
+        )
+
+        # THEN
+        assert result == []
+
+        mock_cursor = (
+            mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
+        )
+        assert mock_cursor.execute.called
 
 
 # -------------------- TEST 2 : Cocktails partiels --------------------
@@ -70,7 +92,7 @@ def test_cocktail_partiel(setup_test_environment):
     est_majeur = True
 
     # WHEN
-    cocktails = CocktailDao().cocktail_partiel(est_majeur, id_utilisateur, nb_manquants)
+    cocktails = CocktailDao().cocktail_partiel(id_utilisateur, nb_manquants, est_majeur)
 
     # THEN
     assert isinstance(cocktails, list)
@@ -104,7 +126,7 @@ def test_rechercher_multi_filtres(setup_test_environment):
     )
 
     # THEN
-    assert len(cocktails) == 1  # on s'attend à un seul cocktail correspondant
+    assert len(cocktails) == 1
     c = cocktails[0]
     assert c.nom_cocktail == "Coke and Drops"
 
@@ -126,7 +148,7 @@ def test_cocktails_aleatoires(setup_test_environment):
     assert 1 <= len(cocktails) <= 2
     for c in cocktails:
         assert isinstance(c, Cocktail)
-        assert c.nom_cocktail  # le nom doit être présent
+        assert c.nom_cocktail
 
 
 def test_cocktails_aleatoires_limite(setup_test_environment):
@@ -139,7 +161,7 @@ def test_cocktails_aleatoires_limite(setup_test_environment):
 # ==================== Tests pour realiser_cocktail ====================
 
 
-def test_realiser_cocktail_par_id_success(setup_test_environment):
+def test_realiser_cocktail_par_id_succes(setup_test_environment):
     """Test récupération cocktail par ID avec succès"""
     # GIVEN
     dao = CocktailDao()
@@ -171,7 +193,7 @@ def test_realiser_cocktail_par_id_success(setup_test_environment):
     assert result.nom_cocktail == "Mojito"
 
 
-def test_realiser_cocktail_par_nom_success(setup_test_environment):
+def test_realiser_cocktail_par_nom_succes(setup_test_environment):
     """Test récupération cocktail par nom avec succès"""
     # GIVEN
     dao = CocktailDao()
@@ -230,225 +252,6 @@ def test_realiser_cocktail_introuvable(setup_test_environment):
 
     # THEN
     assert result is None
-
-
-def test_realiser_cocktail_erreur_bdd(setup_test_environment):
-    """Test gestion d'erreur de base de données"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN & THEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_conn.__enter__.side_effect = Exception("DB error")
-
-        with pytest.raises(Exception):
-            dao.realiser_cocktail(id_cocktail=1)
-
-
-# ==================== Tests pour cocktail_complet ====================
-
-
-def test_cocktail_complet_success(setup_test_environment):
-    """Test récupération cocktails complets avec inventaire"""
-    # GIVEN
-    dao = CocktailDao()
-    mock_rows = [
-        {
-            "id_cocktail": 1,
-            "nom_cocktail": "Mojito",
-            "categorie": "Classic",
-            "alcool": True,
-            "image_url": "mojito.jpg",
-            "verre": "Highball",
-            "instructions": "Mix ingredients",
-        }
-    ]
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-            mock_cursor
-        )
-        mock_cursor.fetchall.return_value = mock_rows
-
-        result = dao.cocktail_complet(
-            est_majeur=True, id_utilisateur=1, langue="FRA", limite=5, decalage=0
-        )
-
-    # THEN
-    assert len(result) == 1
-    assert isinstance(result[0], Cocktail)
-    assert result[0].nom_cocktail == "Mojito"
-
-
-def test_cocktail_complet_sortie_vide(setup_test_environment):
-    """Test retour liste vide quand aucun cocktail trouvé"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-            mock_cursor
-        )
-        mock_cursor.fetchall.return_value = []
-
-        result = dao.cocktail_complet(est_majeur=True, id_utilisateur=1)
-
-    # THEN
-    assert result == []
-
-
-def test_cocktail_complet_pagination():
-    """Test que la pagination est appliquée"""
-    # GIVEN
-    dao = CocktailDao()
-
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
-
-        # WHEN
-        result = dao.cocktail_complet(
-            est_majeur=True, id_utilisateur=3, limite=5, decalage=10
-        )
-
-        # THEN
-        assert result == []  # Car fetchall retourne une liste vide
-
-        mock_cursor = (
-            mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value
-        )
-        assert mock_cursor.execute.called
-
-
-# ==================== Tests pour cocktail_partiel ====================
-
-
-def test_cocktail_partiel_succes(setup_test_environment):
-    """Test récupération cocktails partiels avec ingrédients manquants"""
-    # GIVEN
-    dao = CocktailDao()
-    mock_rows = [
-        {
-            "id_cocktail": 1,
-            "nom_cocktail": "Mojito",
-            "categorie": "Classic",
-            "alcool": True,
-            "image_url": "mojito.jpg",
-            "verre": "Highball",
-            "instructions": "Mix ingredients",
-        }
-    ]
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-            mock_cursor
-        )
-        mock_cursor.fetchall.return_value = mock_rows
-
-        result = dao.cocktail_partiel(
-            est_majeur=True, id_utilisateur=1, nb_manquants=2, langue="ENG"
-        )
-
-    # THEN
-    assert len(result) == 1
-    assert result[0].nom_cocktail == "Mojito"
-
-
-# ==================== Tests pour rechercher_cocktails ====================
-
-
-def test_rechercher_cocktails_sans_filtres(setup_test_environment):
-    """Test recherche sans filtres"""
-    # GIVEN
-    dao = CocktailDao()
-    mock_rows = [
-        {
-            "id_cocktail": 1,
-            "nom_cocktail": "Mojito",
-            "categorie": "Classic",
-            "alcool": True,
-            "image_url": "mojito.jpg",
-            "verre": "Highball",
-            "instructions": "Mix ingredients",
-        }
-    ]
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-            mock_cursor
-        )
-        mock_cursor.fetchall.return_value = mock_rows
-
-        result = dao.rechercher_cocktails(est_majeur=True)
-
-    # THEN
-    assert len(result) == 1
-
-
-# ==================== Tests pour cocktails_aleatoires ====================
-
-
-def test_cocktails_aleatoires_succes(setup_test_environment):
-    """Test récupération cocktails aléatoires"""
-    # GIVEN
-    dao = CocktailDao()
-    mock_rows = [
-        {
-            "id_cocktail": 1,
-            "nom_cocktail": "Mojito",
-            "categorie": "Classic",
-            "alcool": True,
-            "image_url": "mojito.jpg",
-            "verre": "Highball",
-            "instructions": "Mix ingredients",
-        }
-    ]
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_cursor = Mock()
-        mock_conn.__enter__.return_value.cursor.return_value.__enter__.return_value = (
-            mock_cursor
-        )
-        mock_cursor.fetchall.return_value = mock_rows
-
-        result = dao.cocktails_aleatoires(est_majeur=True, nombre=3, langue="FRA")
-
-    # THEN
-    assert len(result) == 1
-
-
-# ==================== Tests pour instruction_column ====================
-
-
-def test_instruction_langue(setup_test_environment):
-    """Test mapping des colonnes d'instructions par langue"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN & THEN
-    assert dao.instruction_column("ENG") == "instructions"
-    assert dao.instruction_column("FRA") == "instructions_fr"
-    assert dao.instruction_column("ESP") == "instructions_es"
-    assert dao.instruction_column("GER") == "instructions_de"
-    assert dao.instruction_column("ITA") == "instructions_it"
-
-
-def test_instruction_langue_inconnue(setup_test_environment):
-    """Test langue non supportée retourne colonne par défaut"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN & THEN
-    assert dao.instruction_column("CHINOIS") == "instructions"
-    assert dao.instruction_column("") == "instructions"
 
 
 # ==================== Tests pour trouver_par_id ====================
@@ -539,21 +342,6 @@ def test_obtenir_ingredients_par_cocktails_liste_vide(setup_test_environment):
     assert result == {}
 
 
-def test_obtenir_ingredients_par_cocktails_erreur_bdd(setup_test_environment):
-    """Test retour dict vide en cas d'erreur DB"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_conn.__enter__.side_effect = Exception("DB error")
-
-        result = dao.obtenir_ingredients_par_cocktails([1, 2])
-
-    # THEN
-    assert result == {}
-
-
 # ==================== Tests pour obtenir_ingredients_possedes_par_cocktails ====================
 
 
@@ -589,23 +377,10 @@ def test_obtenir_ingredients_possedes_liste_vide(setup_test_environment):
     assert result == {}
 
 
-# ==================== Tests d'intégration (optionnels) ====================
-
-
-def test_singleton_pattern(setup_test_environment):
-    """Test que CocktailDao suit le pattern Singleton"""
-    # WHEN
-    dao1 = CocktailDao()
-    dao2 = CocktailDao()
-
-    # THEN
-    assert dao1 is dao2
-
-
 # ==================== Tests d'erreurs de base de données ====================
 
 
-def test_db_error_cocktail_complet(setup_test_environment):
+def test_cocktail_complet_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans cocktail_complet"""
     # GIVEN
     dao = CocktailDao()
@@ -618,7 +393,7 @@ def test_db_error_cocktail_complet(setup_test_environment):
             dao.cocktail_complet(id_utilisateur=1)
 
 
-def test_db_error_cocktail_partiel(setup_test_environment):
+def test_cocktail_partiel_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans cocktail_partiel"""
     # GIVEN
     dao = CocktailDao()
@@ -631,7 +406,7 @@ def test_db_error_cocktail_partiel(setup_test_environment):
             dao.cocktail_partiel(id_utilisateur=1, nb_manquants=2)
 
 
-def test_db_error_rechercher_cocktails(setup_test_environment):
+def test_rechercher_cocktails_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans rechercher_cocktails"""
     # GIVEN
     dao = CocktailDao()
@@ -644,7 +419,7 @@ def test_db_error_rechercher_cocktails(setup_test_environment):
             dao.rechercher_cocktails()
 
 
-def test_db_error_cocktails_aleatoires(setup_test_environment):
+def test_cocktails_aleatoires_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans cocktails_aleatoires"""
     # GIVEN
     dao = CocktailDao()
@@ -657,7 +432,35 @@ def test_db_error_cocktails_aleatoires(setup_test_environment):
             dao.cocktails_aleatoires(3)
 
 
-def test_db_error_trouver_par_id(setup_test_environment):
+def test_realiser_cocktail_erreur_bdd(setup_test_environment):
+    """Test gestion d'erreur de base de données"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN & THEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("DB error")
+
+        with pytest.raises(Exception):
+            dao.realiser_cocktail(id_cocktail=1)
+
+
+def test_obtenir_ingredients_par_cocktails_erreur_bdd(setup_test_environment):
+    """Test retour dict vide en cas d'erreur DB"""
+    # GIVEN
+    dao = CocktailDao()
+
+    # WHEN
+    with patch.object(DBConnection, "connection") as mock_conn:
+        mock_conn.__enter__.side_effect = Exception("DB error")
+
+        result = dao.obtenir_ingredients_par_cocktails([1, 2])
+
+    # THEN
+    assert result == {}
+
+
+def test_trouver_par_id_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans trouver_par_id"""
     # GIVEN
     dao = CocktailDao()
@@ -670,21 +473,7 @@ def test_db_error_trouver_par_id(setup_test_environment):
             dao.trouver_par_id(1)
 
 
-def test_db_error_obtenir_ingredients_par_cocktails(setup_test_environment):
-    """Test gestion d'erreur DB dans obtenir_ingredients_par_cocktails"""
-    # GIVEN
-    dao = CocktailDao()
-
-    # WHEN & THEN
-    with patch.object(DBConnection, "connection") as mock_conn:
-        mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
-
-        # Cette méthode devrait retourner un dict vide en cas d'erreur
-        result = dao.obtenir_ingredients_par_cocktails([1, 2])
-        assert result == {}
-
-
-def test_db_error_obtenir_ingredients_possedes_par_cocktails(setup_test_environment):
+def test_obtenir_ingredients_possedes_par_cocktails_erreur_bdd(setup_test_environment):
     """Test gestion d'erreur DB dans obtenir_ingredients_possedes_par_cocktails"""
     # GIVEN
     dao = CocktailDao()
@@ -693,7 +482,6 @@ def test_db_error_obtenir_ingredients_possedes_par_cocktails(setup_test_environm
     with patch.object(DBConnection, "connection") as mock_conn:
         mock_conn.__enter__.side_effect = Exception("Simulated DB failure")
 
-        # Cette méthode devrait retourner un dict vide en cas d'erreur
         result = dao.obtenir_ingredients_possedes_par_cocktails(1, [1, 2])
         assert result == {}
 

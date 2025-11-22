@@ -154,7 +154,7 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_complet(
-            est_majeur, id_utilisateur, langue, limite, decalage
+            id_utilisateur, est_majeur, langue, limite, decalage
         )
 
         return cocktails if cocktails else []
@@ -207,7 +207,7 @@ class CocktailService:
             raise ValueError("La connexion est requise pour accéder à l'inventaire")
 
         cocktails = CocktailDao().cocktail_partiel(
-            est_majeur, id_utilisateur, nb_manquants, langue, limite, decalage
+            id_utilisateur, nb_manquants, est_majeur, langue, limite, decalage
         )
 
         return cocktails if cocktails else []

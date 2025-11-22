@@ -169,7 +169,6 @@ def test_supprimer_ingredient_succes():
 
     # THEN
     assert res is True
-    # Et l'élément ne doit plus apparaître dans l'inventaire
     inv = InventaireDao().consulter_inventaire(id_user)
     assert _find_in_inventory(inv, nom_test) is None
 
@@ -177,9 +176,7 @@ def test_supprimer_ingredient_succes():
 def test_supprimer_ingredient_aucune_ligne():
     """Suppression d'un lien inexistant -> False."""
     id_user = 4
-    res = InventaireDao().supprimer_ingredient(
-        id_user, 999999
-    )  # id ingredient très improbable
+    res = InventaireDao().supprimer_ingredient(id_user, 999999)
     assert res is False
 
 
@@ -287,7 +284,7 @@ def test_ingredients_aleatoires(setup_test_environment):
     assert 1 <= len(ingredients) <= 3
     for ing in ingredients:
         assert isinstance(ing, Ingredient)
-        assert ing.nom_ingredient  # le nom doit être présent
+        assert ing.nom_ingredient
 
 
 def test_ingredients_aleatoires_limite(setup_test_environment):
