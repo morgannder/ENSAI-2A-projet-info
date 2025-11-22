@@ -1,10 +1,10 @@
 import json
 
-# Charger le fichier JSON
+
 with open("extractAPI/all_cocktails_consolidated.json", "r", encoding="utf-8") as f:
     data = json.load(f)
 
-# Générer les instructions INSERT
+
 insert_lines = []
 for drink in data["drinks"]:
     # Échapper les caractères spéciaux pour SQL
@@ -33,7 +33,6 @@ for drink in data["drinks"]:
     instructions_it = escape_text(drink.get("strInstructionsIT"))
     thumb = escape_text(drink["strDrinkThumb"])
 
-    # Gérer les valeurs NULL pour les instructions manquantes
     instructions_es = f"'{instructions_es}'" if instructions_es != "NULL" else "NULL"
     instructions_de = f"'{instructions_de}'" if instructions_de != "NULL" else "NULL"
     instructions_fr = f"'{instructions_fr}'" if instructions_fr != "NULL" else "NULL"
@@ -42,10 +41,10 @@ for drink in data["drinks"]:
     insert_line = f"({id_drink}, '{name}', '{category}', '{alcoholic}', '{glass}', '{instructions}', {instructions_es}, {instructions_de}, {instructions_fr}, {instructions_it}, '{thumb}')"
     insert_lines.append(insert_line)
 
-# Créer le contenu SQL avec une seule instruction INSERT
+
 sql_content = "INSERT INTO cocktail(id_cocktail, nom, categorie, alcoolise, verre, instructions, instructions_es, instructions_de, instructions_fr, instructions_it, image_url) VALUES\n"
 
-# Ajouter toutes les valeurs, 8 par ligne comme dans votre exemple
+
 for i in range(0, len(insert_lines), 8):
     chunk = insert_lines[i : i + 8]
     sql_content += ",\n".join(chunk)
@@ -54,7 +53,7 @@ for i in range(0, len(insert_lines), 8):
     else:
         sql_content += ";"
 
-# Écrire dans un fichier
+
 with open("insert_cocktails.sql", "w", encoding="utf-8") as f:
     f.write(sql_content)
 
